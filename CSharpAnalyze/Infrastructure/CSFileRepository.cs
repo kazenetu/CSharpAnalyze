@@ -24,7 +24,7 @@ namespace CSharpAnalyze.Infrastructure
       var csFilePaths = Directory.GetFiles(rootPath, "*.cs", SearchOption.AllDirectories);
 
       // 対象ファイルリストを作成
-      var targetFilePaths = csFilePaths.Where(filePath => !exclusionKeywords.Any(keyword => filePath.Contains(keyword))).ToList();
+      var targetFilePaths = csFilePaths.Where(filePath => !exclusionKeywords.Any(keyword => filePath.Contains(keyword, System.StringComparison.CurrentCulture))).ToList();
 
       // ファイル単位でソース解析
       foreach (var filePath in targetFilePaths)

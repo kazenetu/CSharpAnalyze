@@ -18,7 +18,7 @@ namespace ConsoleApp
       if (argManager.GetRequiredArgCount() <= 0)
       {
         // パラメータが不正の場合はヘルプモード
-        isShowHelp = true;
+        //isShowHelp = true;
       }
       if (argManager.ExistsOptionArg(new List<string>() { "--help", "-h" }))
       {
@@ -43,7 +43,11 @@ namespace ConsoleApp
         return 0;
       }
 
-      var srcPath = Path.GetFullPath(argManager.GetRequiredArg(0));
+      var srcPath = Path.GetFullPath("../../../../TargetSource"); 
+      if (argManager.GetRequiredArgCount() > 0)
+      {
+        srcPath = Path.GetFullPath(argManager.GetRequiredArg(0)); ;
+      }
       var destPath = argManager.GetOptionArg(new List<string>() { "--out", " -o" });
       if (string.IsNullOrEmpty(destPath))
       {

@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace CSharpAnalyze.Domain.Model.Analyze
 {
   /// <summary>
-  /// ISemanticModelAnalyzeItemインスタンス作成クラス
+  /// IAnalyzeItemインスタンス作成クラス
   /// </summary>
   public static class ItemFactory
   {
@@ -15,7 +15,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze
     /// </summary>
     /// <param name="node">対象Node</param>
     /// <param name="target">対象ソースのsemanticModel</param>
-    /// <returns>ISemanticModelAnalyzeItemインスタンス</returns>
+    /// <returns>IAnalyzeItemインスタンス</returns>
     public static IAnalyzeItem Create(SyntaxNode node, SemanticModel semanticModel)
     {
       IAnalyzeItem result = null;

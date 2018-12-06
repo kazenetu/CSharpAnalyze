@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.136
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpAnalyze", "CSharpAnalyze\CSharpAnalyze.csproj", "{6C346800-8974-4E7D-8438-CBC819F25480}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp", "ConsoleApp\ConsoleApp.csproj", "{8DBD2D86-0D1B-4D59-8D29-25816B970766}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpAnalyze", "CSharpAnalyze\CSharpAnalyze.csproj", "{6C346800-8974-4E7D-8438-CBC819F25480}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

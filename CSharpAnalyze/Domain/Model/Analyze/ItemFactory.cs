@@ -11,7 +11,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze
   {
 
     /// <summary>
-    /// エントリメソッド
+    /// IAnalyzeItemインスタンス作成
     /// </summary>
     /// <param name="node">対象Node</param>
     /// <param name="target">対象ソースのsemanticModel</param>
@@ -24,68 +24,20 @@ namespace CSharpAnalyze.Domain.Model.Analyze
       switch (node)
       {
         case ClassDeclarationSyntax classDeclarationSyntax:
-          result = Create(classDeclarationSyntax, semanticModel);
+          result = new ItemClass(classDeclarationSyntax, semanticModel);
           break;
         case PropertyDeclarationSyntax propertyDeclarationSyntax:
-          result = Create(propertyDeclarationSyntax, semanticModel);
+          result = new ItemProperty(propertyDeclarationSyntax, semanticModel);
           break;
         case FieldDeclarationSyntax fieldDeclarationSyntax:
-          result = Create(fieldDeclarationSyntax, semanticModel);
+          result = new ItemField(fieldDeclarationSyntax, semanticModel);
           break;
         case MethodDeclarationSyntax methodDeclarationSyntax:
-          result = Create(methodDeclarationSyntax, semanticModel);
+          result = new ItemMethod(methodDeclarationSyntax, semanticModel);
           break;
       }
 
       return result;
     }
-
-    #region クラスアイテム
-
-    /// <summary>
-    /// クラスアイテム作成:class
-    /// </summary>
-    /// <param name="node">対象Node</param>
-    /// <param name="target">対象ソースのsemanticModel</param>
-    /// <returns>ISemanticModelAnalyzeItemインスタンス</returns>
-    private static IAnalyzeItem Create(ClassDeclarationSyntax node, SemanticModel semanticModel)
-    {
-      return new ItemClass(node, semanticModel);
-    }
-
-    /// <summary>
-    /// クラスアイテム作成:property
-    /// </summary>
-    /// <param name="node">対象Node</param>
-    /// <param name="target">対象ソースのsemanticModel</param>
-    /// <returns>ISemanticModelAnalyzeItemインスタンス</returns>
-    private static IAnalyzeItem Create(PropertyDeclarationSyntax node, SemanticModel semanticModel)
-    {
-      return new ItemProperty(node, semanticModel);
-    }
-
-    /// <summary>
-    /// クラスアイテム作成:field
-    /// </summary>
-    /// <param name="node">対象Node</param>
-    /// <param name="target">対象ソースのsemanticModel</param>
-    /// <returns>ISemanticModelAnalyzeItemインスタンス</returns>
-    private static IAnalyzeItem Create(FieldDeclarationSyntax node, SemanticModel semanticModel)
-    {
-      return new ItemField(node, semanticModel);
-    }
-
-    /// <summary>
-    /// クラスアイテム作成:Method
-    /// </summary>
-    /// <param name="node">対象Node</param>
-    /// <param name="target">対象ソースのsemanticModel</param>
-    /// <returns>ISemanticModelAnalyzeItemインスタンス</returns>
-    private static IAnalyzeItem Create(MethodDeclarationSyntax node, SemanticModel semanticModel)
-    {
-      return new ItemMethod(node, semanticModel);
-    }
-
-    #endregion
   }
 }

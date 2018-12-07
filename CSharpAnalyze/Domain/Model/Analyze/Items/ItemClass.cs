@@ -67,6 +67,17 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
           SuperClass.Add(new Expression(name, type));
         }
       }
+
+      // メンバ
+      foreach (var childSyntax in node.ChildNodes())
+      {
+        var memberResult = ItemFactory.Create(childSyntax, semanticModel);
+        if (memberResult != null)
+        {
+          Members.Add(memberResult);
+        }
+      }
+
     }
 
     #region 基本インターフェース実装：メソッド

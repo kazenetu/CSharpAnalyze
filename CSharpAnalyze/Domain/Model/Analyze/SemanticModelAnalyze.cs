@@ -31,7 +31,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze
       var rootNode = target.SyntaxTree.GetRoot().ChildNodes().Where(syntax => syntax.IsKind(SyntaxKind.NamespaceDeclaration)).First();
       foreach (var item in (rootNode as NamespaceDeclarationSyntax).Members)
       {
-        var memberResult = GetMember(item, target);
+        var memberResult = ItemFactory.Create(item, target);
         if (memberResult != null)
         {
           analyzeResult.Members.Add(memberResult);
@@ -43,31 +43,6 @@ namespace CSharpAnalyze.Domain.Model.Analyze
 
       // イベント発行：解析完了
       EventContainer.Raise(new Analyzed($"[{rootNode.SyntaxTree.FilePath}]", analyzeResult));
-    }
-
-    private IAnalyzeItem GetMember(SyntaxNode node, SemanticModel target)
-    {
-      IAnalyzeItem result = null;
-      var nodeType = node.Kind();
-      switch (nodeType)
-      {
-        case SyntaxKind.ClassDeclaration:
-          result = ItemFactory.Create(node, target);
-
-          foreach (var childSyntax in node.ChildNodes())
-          {
-            var memberResult = GetMember(childSyntax, target);
-            if (memberResult != null)
-            {
-              result.Members.Add(memberResult);
-            }
-          }
-          break;
-        default:
-          result = ItemFactory.Create(node, target);
-          break;
-      }
-      return result;
     }
   }
 }

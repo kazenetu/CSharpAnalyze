@@ -83,7 +83,7 @@ namespace ConsoleApp
       try
       {
         var csAnalyze = new AnalyzeApplication();
-        csAnalyze.GetAnalyzeResult(srcPath);
+        csAnalyze.Analyze(srcPath);
 
         Console.WriteLine("---Convert End---");
       }

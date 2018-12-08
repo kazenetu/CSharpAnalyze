@@ -38,10 +38,9 @@ namespace CSharpAnalyze.Domain.Service
 
     #region パブリックメソッド
     /// <summary>
-    /// 解析結果を返す
+    /// 解析を実施する
     /// </summary>
-    /// <returns>解析結果モデルリスト</returns>
-    public List<SemanticModelAnalyze> GetAnalyzeResult()
+    public void Analyze()
     {
       var result = new List<SemanticModelAnalyze>();
 
@@ -63,8 +62,6 @@ namespace CSharpAnalyze.Domain.Service
           result.Add(new SemanticModelAnalyze(model));
         }
       }
-
-      return result;
     }
     #endregion
 

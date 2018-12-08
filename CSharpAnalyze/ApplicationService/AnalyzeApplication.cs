@@ -14,7 +14,7 @@ namespace CSharpAnalyze.ApplicationService
   /// <remarks>リクエストとレスポンスの変換アダプタなどを行う</remarks>
   public class AnalyzeApplication
   {
-    public List<SemanticModelAnalyze> GetAnalyzeResult(string rootPath)
+    public void Analyze(string rootPath)
     {
       var fileRepository = new CSFileRepository();
       var analizeService = new AnalyzeService(rootPath, fileRepository);
@@ -26,7 +26,8 @@ namespace CSharpAnalyze.ApplicationService
         Console.WriteLine(ev.AnalyzeResult.ToString());
       });
 
-      return analizeService.GetAnalyzeResult();
+      // 対象フォルダの解析を行う
+      analizeService.Analyze();
     }
 
   }

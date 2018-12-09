@@ -42,8 +42,6 @@ namespace CSharpAnalyze.Domain.Service
     /// </summary>
     public void Analyze()
     {
-      var result = new List<SemanticModelAnalyze>();
-
       // セマンティックモデルのリストを作成する
       var models = CreateModels();
       if (!models.Any())
@@ -59,7 +57,7 @@ namespace CSharpAnalyze.Domain.Service
             model.SyntaxTree.FilePath.Contains("SearchResponse", System.StringComparison.CurrentCulture) ||
             model.SyntaxTree.FilePath.Contains("SearchRequest", System.StringComparison.CurrentCulture))
         {
-          result.Add(new SemanticModelAnalyze(model));
+          FileRoot.Create(model);
         }
       }
     }

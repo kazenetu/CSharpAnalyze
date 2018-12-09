@@ -61,9 +61,6 @@ namespace CSharpAnalyze.Domain.Model.Analyze
 
       // 外部参照イベント登録解除
       EventContainer.Unregister<OtherFileReferenced>(this);
-
-      // HACK イベント発行：解析完了
-      EventContainer.Raise(new Analyzed($"[{rootNode.SyntaxTree.FilePath}]", Members.First()));
     }
 
     /// <summary>
@@ -93,7 +90,14 @@ namespace CSharpAnalyze.Domain.Model.Analyze
     /// <remarks>Analyzedイベントで結果を返す</remarks>
     public static IFileRoot Create(SemanticModel target)
     {
-      return new FileRoot(target);
+      // ファイル情報取得
+      var instance = new FileRoot(target);
+
+      // イベント発行：解析完了
+      EventContainer.Raise(new Analyzed(instance));
+
+      // ファイル情報を返す
+      return instance;
     }
   }
 }

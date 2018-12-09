@@ -1,4 +1,5 @@
-﻿using CSharpAnalyze.Domain.Model.Analyze.Items;
+﻿using CSharpAnalyze.Domain.Model.Analyze;
+using CSharpAnalyze.Domain.Model.Analyze.Items;
 
 namespace CSharpAnalyze.Domain.Event.Analyze
 {
@@ -8,7 +9,8 @@ namespace CSharpAnalyze.Domain.Event.Analyze
   public class Analyzed : IEvent
   {
     public string FilePath { get; }
-    public IAnalyzeItem AnalyzeResult { get; }
+    public IAnalyzeItem AnalyzeResult { get; } = null;
+    public IFileRoot FileRoot { get; } = null;
 
     /// <summary>
     /// コンストラクタ
@@ -19,6 +21,16 @@ namespace CSharpAnalyze.Domain.Event.Analyze
     {
       FilePath = filepath;
       AnalyzeResult = analyzeResult;
+    }
+
+    /// <summary>
+    /// コンストラクタ
+    /// </summary>
+    /// <param name="fileRoot">解析結果のファイル情報</param>
+    public Analyzed(IFileRoot fileRoot)
+    {
+      FilePath = fileRoot.FilePath;
+      FileRoot = fileRoot;
     }
   }
 }

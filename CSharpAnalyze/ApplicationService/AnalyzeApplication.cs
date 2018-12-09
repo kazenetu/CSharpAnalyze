@@ -21,7 +21,8 @@ namespace CSharpAnalyze.ApplicationService
       EventContainer.Register<Analyzed>(this,(ev) =>
       {
         Console.WriteLine($"[{ev.FilePath}]");
-        Console.WriteLine(ev.AnalyzeResult.ToString());
+        Console.WriteLine(ev.AnalyzeResult?.ToString());
+        Console.WriteLine(ev.FileRoot?.ToString());
       });
 
       // 対象フォルダの解析を行う

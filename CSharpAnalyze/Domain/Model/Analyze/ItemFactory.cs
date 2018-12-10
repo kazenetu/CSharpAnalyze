@@ -35,6 +35,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze
         case MethodDeclarationSyntax methodDeclarationSyntax:
           result = new ItemMethod(methodDeclarationSyntax, semanticModel);
           break;
+        case ConstructorConstraintSyntax constructorConstraintSyntax:
+          // TODO コンストラクタクラス生成
+          break;
       }
 
       return result;

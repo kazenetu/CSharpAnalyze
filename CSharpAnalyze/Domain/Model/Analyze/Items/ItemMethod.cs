@@ -82,6 +82,16 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         Args.Add((param.Name, arg));
       }
 
+      // メンバ
+      foreach (var childSyntax in node.Body.ChildNodes())
+      {
+        var memberResult = ItemFactory.Create(childSyntax, semanticModel);
+        if (memberResult != null)
+        {
+          Members.Add(memberResult);
+        }
+      }
+
     }
 
     #region 基本インターフェース実装：メソッド

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace CSharpAnalyze.Domain.Model.Analyze.Items
@@ -7,6 +8,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
   /// アイテム：ファイルルート
   /// </summary>
   /// <remarks>ファイルルートクラスに昇格予定</remarks>
+  [Obsolete]
   public class ItemRoot : AbstractItem
   {
     /// <summary>

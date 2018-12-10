@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace CSharpAnalyze.Domain.Model.Analyze.Items
 {
@@ -50,6 +51,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
   /// </summary>
   public enum ItemTypes
   {
+    [Obsolete]
     Root,
     Class,
     Field,

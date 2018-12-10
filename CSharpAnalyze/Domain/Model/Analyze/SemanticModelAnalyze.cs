@@ -4,6 +4,7 @@ using CSharpAnalyze.Domain.Model.Analyze.Items;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Linq;
 
 namespace CSharpAnalyze.Domain.Model.Analyze
@@ -12,6 +13,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze
   /// セマンティックモデル解析クラス(実装中)
   /// </summary>
   /// <remarks>廃止予定</remarks>
+  [Obsolete]
   public class SemanticModelAnalyze
   {
     public SemanticModelAnalyze(SemanticModel target)

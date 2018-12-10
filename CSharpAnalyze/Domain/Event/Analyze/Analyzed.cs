@@ -1,5 +1,6 @@
 ﻿using CSharpAnalyze.Domain.Model.Analyze;
 using CSharpAnalyze.Domain.Model.Analyze.Items;
+using System;
 
 namespace CSharpAnalyze.Domain.Event.Analyze
 {
@@ -17,6 +18,7 @@ namespace CSharpAnalyze.Domain.Event.Analyze
     /// </summary>
     /// <param name="filepath">ファイルパス</param>
     /// <param name="analyzeResult">解析結果</param>
+    [Obsolete]
     public Analyzed(string filepath, IAnalyzeItem analyzeResult)
     {
       FilePath = filepath;

@@ -63,18 +63,6 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// <returns>型名・存在しない場合はstring.Empty</returns>
     protected string GetSymbolTypeName(ISymbol target)
     {
-      var methodSymbol = target as IMethodSymbol;
-      if (methodSymbol != null)
-      {
-        return methodSymbol.MethodKind.ToString();
-      }
-
-      var localSymboll = target as ILocalSymbol;
-      if (localSymboll != null)
-      {
-        return localSymboll.Kind.ToString();
-      }
-
       var symbol = target as INamedTypeSymbol;
       if (symbol == null)
       {

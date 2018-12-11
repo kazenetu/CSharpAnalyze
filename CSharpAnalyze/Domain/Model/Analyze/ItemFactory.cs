@@ -38,9 +38,6 @@ namespace CSharpAnalyze.Domain.Model.Analyze
         case ConstructorConstraintSyntax constructorConstraintSyntax:
           // TODO コンストラクタクラス生成
           break;
-        case LocalDeclarationStatementSyntax localDeclarationStatementSyntax:
-          result = new ItemStatementLocalDeclaration(localDeclarationStatementSyntax, semanticModel);
-          break;
       }
 
       return result;

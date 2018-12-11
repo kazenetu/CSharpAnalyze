@@ -16,18 +16,6 @@ namespace CSharpAnalyze.Domain.Event.Analyze
     /// <summary>
     /// コンストラクタ
     /// </summary>
-    /// <param name="filepath">ファイルパス</param>
-    /// <param name="analyzeResult">解析結果</param>
-    [Obsolete]
-    public Analyzed(string filepath, IAnalyzeItem analyzeResult)
-    {
-      FilePath = filepath;
-      AnalyzeResult = analyzeResult;
-    }
-
-    /// <summary>
-    /// コンストラクタ
-    /// </summary>
     /// <param name="fileRoot">解析結果のファイル情報</param>
     public Analyzed(IFileRoot fileRoot)
     {

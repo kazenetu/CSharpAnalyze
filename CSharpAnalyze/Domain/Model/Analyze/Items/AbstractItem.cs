@@ -57,6 +57,15 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     #endregion
 
     /// <summary>
+    /// コンストラクタ
+    /// </summary>
+    /// <param name="parent">親IAnalyzeItem</param>
+    protected AbstractItem(IAnalyzeItem parent)
+    {
+      Parent = parent;
+    }
+
+    /// <summary>
     /// シンボルインターフェースの型の名前を返す
     /// </summary>
     /// <param name="target">対象シンボルインターフェース</param>

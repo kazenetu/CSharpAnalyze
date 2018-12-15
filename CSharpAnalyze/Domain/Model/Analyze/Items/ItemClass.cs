@@ -72,7 +72,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       // メンバ
       foreach (var childSyntax in node.ChildNodes())
       {
-        var memberResult = ItemFactory.Create(childSyntax, semanticModel);
+        var memberResult = ItemFactory.Create(childSyntax, semanticModel, this);
         if (memberResult != null)
         {
           Members.Add(memberResult);

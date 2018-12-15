@@ -23,7 +23,8 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// </summary>
     /// <param name="node">対象Node</param>
     /// <param name="target">対象ソースのsemanticModel</param>
-    public ItemClass(ClassDeclarationSyntax node, SemanticModel semanticModel)
+    /// <param name="parent">親IAnalyzeItem</param>
+    public ItemClass(ClassDeclarationSyntax node, SemanticModel semanticModel, IAnalyzeItem parent) : base(parent)
     {
       ItemType = ItemTypes.Class;
 

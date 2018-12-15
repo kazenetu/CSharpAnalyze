@@ -15,8 +15,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze
     /// </summary>
     /// <param name="node">対象Node</param>
     /// <param name="target">対象ソースのsemanticModel</param>
+    /// <param name="parent">親IAnalyzeItemインスタンス(デフォルトはnull)</param>
     /// <returns>IAnalyzeItemインスタンス</returns>
-    public static IAnalyzeItem Create(SyntaxNode node, SemanticModel semanticModel)
+    public static IAnalyzeItem Create(SyntaxNode node, SemanticModel semanticModel, IAnalyzeItem parent = null)
     {
       IAnalyzeItem result = null;
 
@@ -24,22 +25,22 @@ namespace CSharpAnalyze.Domain.Model.Analyze
       switch (node)
       {
         case ClassDeclarationSyntax classDeclarationSyntax:
-          result = new ItemClass(classDeclarationSyntax, semanticModel);
+          result = new ItemClass(classDeclarationSyntax, semanticModel, parent);
           break;
         case PropertyDeclarationSyntax propertyDeclarationSyntax:
-          result = new ItemProperty(propertyDeclarationSyntax, semanticModel);
+          result = new ItemProperty(propertyDeclarationSyntax, semanticModel, parent);
           break;
         case FieldDeclarationSyntax fieldDeclarationSyntax:
-          result = new ItemField(fieldDeclarationSyntax, semanticModel);
+          result = new ItemField(fieldDeclarationSyntax, semanticModel, parent);
           break;
         case MethodDeclarationSyntax methodDeclarationSyntax:
-          result = new ItemMethod(methodDeclarationSyntax, semanticModel);
+          result = new ItemMethod(methodDeclarationSyntax, semanticModel, parent);
           break;
         case ConstructorConstraintSyntax constructorConstraintSyntax:
           // TODO コンストラクタクラス生成
           break;
         case LocalDeclarationStatementSyntax localDeclarationStatementSyntax:
-          result = new ItemStatementLocalDeclaration(localDeclarationStatementSyntax, semanticModel);
+          result = new ItemStatementLocalDeclaration(localDeclarationStatementSyntax, semanticModel, parent);
           break;
       }
 

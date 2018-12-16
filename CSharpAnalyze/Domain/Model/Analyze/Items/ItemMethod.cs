@@ -29,23 +29,11 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// <param name="node">対象Node</param>
     /// <param name="target">対象ソースのsemanticModel</param>
     /// <param name="parent">親IAnalyzeItem</param>
-    public ItemMethod(MethodDeclarationSyntax node, SemanticModel semanticModel, IAnalyzeItem parent) : base(parent)
+    public ItemMethod(MethodDeclarationSyntax node, SemanticModel semanticModel, IAnalyzeItem parent) : base(parent, node, semanticModel)
     {
       ItemType = ItemTypes.Method;
 
       var declaredSymbol = semanticModel.GetDeclaredSymbol(node);
-
-      // 名前設定
-      Name = declaredSymbol.Name;
-
-      // 識別子リスト設定
-      Modifiers.AddRange(node.Modifiers.Select(item => item.Text));
-
-      // コメント設定
-      var targerComments = node.GetLeadingTrivia().ToString().Split(Environment.NewLine).
-                            Select(item => item.TrimStart().Replace(Environment.NewLine, string.Empty, StringComparison.CurrentCulture)).
-                            Where(item => !string.IsNullOrEmpty(item));
-      Comments.AddRange(targerComments);
 
       // メソッドの型設定
       var parts = declaredSymbol.ReturnType.ToDisplayParts(SymbolDisplayFormat.MinimallyQualifiedFormat);

@@ -24,23 +24,11 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// <param name="node">対象Node</param>
     /// <param name="target">対象ソースのsemanticModel</param>
     /// <param name="parent">親IAnalyzeItem</param>
-    public ItemClass(ClassDeclarationSyntax node, SemanticModel semanticModel, IAnalyzeItem parent) : base(parent)
+    public ItemClass(ClassDeclarationSyntax node, SemanticModel semanticModel, IAnalyzeItem parent) : base(parent, node, semanticModel)
     {
       ItemType = ItemTypes.Class;
 
       var declaredClass = semanticModel.GetDeclaredSymbol(node);
-
-      // 名前設定
-      Name = declaredClass.Name;
-
-      // 識別子リスト設定
-      Modifiers.AddRange(node.Modifiers.Select(item => item.Text));
-
-      // コメント設定
-      var targerComments = node.GetLeadingTrivia().ToString().Split(Environment.NewLine).
-                            Select(item => item.TrimStart().Replace(Environment.NewLine, string.Empty, StringComparison.CurrentCulture)).
-                            Where(item => !string.IsNullOrEmpty(item));
-      Comments.AddRange(targerComments);
 
       // スーパークラス設定
       if (node.BaseList != null)

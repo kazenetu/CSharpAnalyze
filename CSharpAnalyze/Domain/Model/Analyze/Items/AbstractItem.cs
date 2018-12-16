@@ -1,6 +1,8 @@
 ﻿using CSharpAnalyze.Domain.Event;
 using CSharpAnalyze.Domain.Event.Analyze;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -60,8 +62,37 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// コンストラクタ
     /// </summary>
     /// <param name="parent">親IAnalyzeItem</param>
+    /// <param name="node">対象Node</param>
+    /// <param name="target">対象ソースのsemanticModel</param>
+    protected AbstractItem(IAnalyzeItem parent,SyntaxNode node, SemanticModel semanticModel)
+    {
+      // 親インスタンスを設定
+      Parent = parent;
+
+      // 名前設定
+      Name = node.DescendantTokens().Where(token=>token.IsKind(SyntaxKind.IdentifierToken)).Select(token=>token.ValueText).FirstOrDefault();
+
+      // 識別子リスト設定
+      var modifiersObject = node.GetType().GetProperty("Modifiers")?.GetValue(node);
+      if(modifiersObject is SyntaxTokenList modifiers)
+      {
+        Modifiers.AddRange(modifiers.Select(item => item.Text));
+      }
+
+      // コメント設定
+      var targerComments = node.GetLeadingTrivia().ToString().Split(Environment.NewLine).
+                            Select(item => item.TrimStart().Replace(Environment.NewLine, string.Empty, StringComparison.CurrentCulture)).
+                            Where(item => !string.IsNullOrEmpty(item));
+      Comments.AddRange(targerComments);
+    }
+
+    /// <summary>
+    /// コンストラクタ
+    /// </summary>
+    /// <param name="parent">親IAnalyzeItem</param>
     protected AbstractItem(IAnalyzeItem parent)
     {
+      // 親インスタンスを設定
       Parent = parent;
     }
 

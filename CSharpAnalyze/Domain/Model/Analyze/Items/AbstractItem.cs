@@ -11,7 +11,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
   /// <summary>
   /// Item系クラスのスーパークラス
   /// </summary>
-  public abstract class AbstractItem: IAnalyzeItem
+  internal abstract class AbstractItem: IAnalyzeItem
   {
     #region 基本インターフェース実装：プロパティ
 

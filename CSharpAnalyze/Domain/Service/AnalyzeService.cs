@@ -11,7 +11,7 @@ namespace CSharpAnalyze.Domain.Service
   /// <summary>
   /// C#解析サービス
   /// </summary>
-  public class AnalyzeService
+  internal class AnalyzeService
   {
     /// <summary>
     /// ファイルアクセスリポジトリ

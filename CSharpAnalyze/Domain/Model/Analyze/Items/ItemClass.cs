@@ -11,7 +11,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
   /// <summary>
   /// アイテム：クラス
   /// </summary>
-  public class ItemClass : AbstractItem
+  internal class ItemClass : AbstractItem
   {
     /// <summary>
     /// スーパークラスリスト

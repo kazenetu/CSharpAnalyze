@@ -10,7 +10,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
   /// <summary>
   /// アイテム：プロパティ
   /// </summary>
-  public class ItemProperty : AbstractItem
+  internal class ItemProperty : AbstractItem
   {
     /// <summary>
     /// プロパティの型リスト

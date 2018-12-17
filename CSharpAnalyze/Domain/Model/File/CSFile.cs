@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace CSharpAnalyze.Domain.Model.File
 {
-  public class CSFile
+  internal class CSFile
   {
     /// <summary>
     /// コンストラクタ

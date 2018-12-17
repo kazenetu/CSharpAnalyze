@@ -7,7 +7,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze
   /// <summary>
   /// IAnalyzeItemインスタンス作成クラス
   /// </summary>
-  public static class ItemFactory
+  internal static class ItemFactory
   {
 
     /// <summary>

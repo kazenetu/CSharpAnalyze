@@ -10,7 +10,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
   /// <summary>
   /// アイテム：フィールド
   /// </summary>
-  public class ItemField : AbstractItem
+  internal class ItemField : AbstractItem
   {
     /// <summary>
     /// フィールドの型リスト

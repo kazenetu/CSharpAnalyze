@@ -11,7 +11,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
   /// <summary>
   /// アイテム：メソッド
   /// </summary>
-  public class ItemMethod : AbstractItem
+  internal class ItemMethod : AbstractItem
   {
     /// <summary>
     /// メソッドの型リスト

@@ -11,7 +11,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
   /// <summary>
   /// アイテム：ローカル変数
   /// </summary>
-  public class ItemStatementLocalDeclaration : AbstractItem
+  internal class ItemStatementLocalDeclaration : AbstractItem
   {
     /// <summary>
     /// 型リスト

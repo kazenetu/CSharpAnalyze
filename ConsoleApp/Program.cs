@@ -1,5 +1,7 @@
 ﻿using Common;
 using CSharpAnalyze.ApplicationService;
+using CSharpAnalyze.Domain.Event;
+using CSharpAnalyze.Domain.Event.Analyze;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -83,6 +85,16 @@ namespace ConsoleApp
       try
       {
         var csAnalyze = new AnalyzeApplication();
+
+        // HACK Domainイベントハンドラ設定
+        EventContainer.Register<Analyzed>(csAnalyze, (ev) =>
+        {
+          Console.WriteLine($"[{ev.FilePath}]");
+          Console.WriteLine(ev.AnalyzeResult?.ToString());
+          Console.WriteLine(ev.FileRoot?.ToString());
+        });
+
+
         csAnalyze.Analyze(srcPath);
 
         Console.WriteLine("---Convert End---");

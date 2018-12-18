@@ -17,14 +17,6 @@ namespace CSharpAnalyze.ApplicationService
       var fileRepository = new CSFileRepository();
       var analizeService = new AnalyzeService(rootPath, fileRepository);
 
-      // HACK Domainイベントハンドラ設定
-      EventContainer.Register<Analyzed>(this,(ev) =>
-      {
-        Console.WriteLine($"[{ev.FilePath}]");
-        Console.WriteLine(ev.AnalyzeResult?.ToString());
-        Console.WriteLine(ev.FileRoot?.ToString());
-      });
-
       // 対象フォルダの解析を行う
       analizeService.Analyze();
     }

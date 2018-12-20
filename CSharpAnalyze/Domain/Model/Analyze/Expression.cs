@@ -1,11 +1,12 @@
-﻿using System;
+﻿using CSharpAnalyze.Domain.PublicInterfaces;
+using System;
 
 namespace CSharpAnalyze.Domain.Model.Analyze
 {
   /// <summary>
   /// Expression ValueObject
   /// </summary>
-  public class Expression: IEquatable<Expression>
+  internal class Expression: IExpression
   {
     /// <summary>
     /// 名前
@@ -33,7 +34,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze
     /// </summary>
     /// <param name="other">比較対象</param>
     /// <returns>比較結果</returns>
-    public bool Equals(Expression other)
+    public bool Equals(IExpression other)
     {
       if (ReferenceEquals(null, other)) return false;
       if (ReferenceEquals(this, other)) return true;
@@ -49,7 +50,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze
       if (ReferenceEquals(null, obj)) return false;
       if (ReferenceEquals(this, obj)) return true;
       if (obj.GetType() != this.GetType()) return false;
-      return Equals((Expression)obj);
+      return Equals((IExpression)obj);
     }
 
     /// <summary>

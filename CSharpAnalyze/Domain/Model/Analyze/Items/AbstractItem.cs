@@ -70,7 +70,10 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       Parent = parent;
 
       // 名前設定
-      Name = node.DescendantTokens().Where(token=>token.IsKind(SyntaxKind.IdentifierToken)).Select(token=>token.ValueText).FirstOrDefault();
+      Name = node.DescendantTokens().
+          Where(token => token.IsKind(SyntaxKind.IdentifierToken)).
+          Select(token => semanticModel.GetDeclaredSymbol(token.Parent)).
+          Where(symbol => symbol != null).FirstOrDefault()?.Name;
 
       // 識別子リスト設定
       var modifiersObject = node.GetType().GetProperty("Modifiers")?.GetValue(node);

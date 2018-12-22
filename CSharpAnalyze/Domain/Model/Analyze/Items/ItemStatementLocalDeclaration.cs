@@ -23,6 +23,11 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     public List<Expression> DefaultValues { get; } = new List<Expression>();
 
     /// <summary>
+    /// 型推論か否か
+    /// </summary>
+    public bool IsVar { get; }
+
+    /// <summary>
     /// リテラルトークンリスト
     /// </summary>
     private readonly List<SyntaxKind> LiteralTokens = new List<SyntaxKind>() { SyntaxKind.StringLiteralToken, SyntaxKind.NumericLiteralToken, SyntaxKind.CharacterLiteralToken };
@@ -38,6 +43,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       ItemType = ItemTypes.MethodStatement;
 
       var declaredSymbol = semanticModel.GetDeclaredSymbol(node.Declaration.Variables.First());
+
+      // 型推論
+      IsVar = node.Declaration.Type.IsVar;
 
       // 型設定
       var parts = ((ILocalSymbol)declaredSymbol).Type.ToDisplayParts(SymbolDisplayFormat.MinimallyQualifiedFormat);
@@ -128,7 +136,14 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       result.Append(indexSpace);
 
       // プロパティの型
-      Types.ForEach(type => result.Append(type.Name));
+      if (IsVar)
+      {
+        result.Append("var");
+      }
+      else
+      {
+        Types.ForEach(type => result.Append(type.Name));
+      }
 
       // プロパティ名
       result.Append($" {Name}");

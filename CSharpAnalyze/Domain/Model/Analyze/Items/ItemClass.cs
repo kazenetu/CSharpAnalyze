@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using CSharpAnalyze.Domain.PublicInterfaces;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -16,7 +17,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// <summary>
     /// スーパークラスリスト
     /// </summary>
-    public List<Expression> SuperClass { get; } = new List<Expression>();
+    public List<IExpression> SuperClass { get; } = new List<IExpression>();
 
     /// <summary>
     /// コンストラクタ

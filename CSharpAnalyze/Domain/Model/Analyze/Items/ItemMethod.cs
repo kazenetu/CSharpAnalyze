@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using CSharpAnalyze.Domain.PublicInterfaces;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -15,12 +16,12 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// <summary>
     /// メソッドの型リスト
     /// </summary>
-    public List<Expression> MethodTypes { get; } = new List<Expression>();
+    public List<IExpression> MethodTypes { get; } = new List<IExpression>();
 
     /// <summary>
     /// パラメーターリスト
     /// </summary>
-    public List<(string name, List<Expression> expressions)> Args { get; } = new List<(string name, List<Expression> expressions)>();
+    public List<(string name, List<IExpression> expressions)> Args { get; } = new List<(string name, List<IExpression> expressions)>();
 
     /// <summary>
     /// コンストラクタ
@@ -52,7 +53,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       // パラメーター取得
       foreach(var param in declaredSymbol.Parameters)
       {
-        var arg = new List<Expression>();
+        var arg = new List<IExpression>();
 
         var argParts = param.Type.ToDisplayParts(SymbolDisplayFormat.MinimallyQualifiedFormat);
         foreach (var part in argParts)

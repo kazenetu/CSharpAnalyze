@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using CSharpAnalyze.Domain.PublicInterfaces;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -15,12 +16,12 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// <summary>
     /// 型リスト
     /// </summary>
-    public List<Expression> Types { get; } = new List<Expression>();
+    public List<IExpression> Types { get; } = new List<IExpression>();
 
     /// <summary>
     /// デフォルト設定リスト
     /// </summary>
-    public List<Expression> DefaultValues { get; } = new List<Expression>();
+    public List<IExpression> DefaultValues { get; } = new List<IExpression>();
 
     /// <summary>
     /// 型推論か否か

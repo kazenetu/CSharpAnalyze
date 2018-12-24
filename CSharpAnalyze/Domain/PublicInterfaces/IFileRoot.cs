@@ -1,7 +1,6 @@
-﻿using CSharpAnalyze.Domain.PublicInterfaces;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace CSharpAnalyze.Domain.Model.Analyze
+namespace CSharpAnalyze.Domain.PublicInterfaces
 {
   /// <summary>
   /// ファイルルート インターフェース

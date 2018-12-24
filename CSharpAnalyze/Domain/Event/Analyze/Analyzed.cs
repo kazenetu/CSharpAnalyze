@@ -1,6 +1,5 @@
 ﻿using CSharpAnalyze.Domain.Model.Analyze;
-using CSharpAnalyze.Domain.Model.Analyze.Items;
-using System;
+using CSharpAnalyze.Domain.PublicInterfaces;
 
 namespace CSharpAnalyze.Domain.Event.Analyze
 {

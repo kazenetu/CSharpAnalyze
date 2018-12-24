@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace CSharpAnalyze.Domain.Model.Analyze.Items
+namespace CSharpAnalyze.Domain.PublicInterfaces
 {
   /// <summary>
   /// C#ファイル解析結果 詳細情報

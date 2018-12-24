@@ -1,5 +1,6 @@
 ﻿using CSharpAnalyze.Domain.Event;
 using CSharpAnalyze.Domain.Event.Analyze;
+using CSharpAnalyze.Domain.PublicInterfaces;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;

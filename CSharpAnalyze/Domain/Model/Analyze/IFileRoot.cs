@@ -1,4 +1,4 @@
-﻿using CSharpAnalyze.Domain.Model.Analyze.Items;
+﻿using CSharpAnalyze.Domain.PublicInterfaces;
 using System.Collections.Generic;
 
 namespace CSharpAnalyze.Domain.Model.Analyze

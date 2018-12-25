@@ -1,4 +1,5 @@
 ﻿using CSharpAnalyze.Domain.Model.Analyze.Items;
+using CSharpAnalyze.Domain.PublicInterfaces;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -41,6 +42,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze
           break;
         case LocalDeclarationStatementSyntax localDeclarationStatementSyntax:
           result = new ItemStatementLocalDeclaration(localDeclarationStatementSyntax, semanticModel, parent);
+          break;
+        case ExpressionStatementSyntax expressionStatementSyntax:
+          result = new ItemStatementExpression(expressionStatementSyntax, semanticModel, parent);
           break;
       }
 

@@ -46,6 +46,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze
         case IInstanceReferenceOperation param:
           instance = new InstanceReference(param);
           break;
+        case IArgumentOperation param:
+          instance = new Argument(param);
+          break;
         default:
           Console.Write($" [{operation.Kind} is none] ");
           break;

@@ -91,16 +91,6 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     }
 
     /// <summary>
-    /// コンストラクタ
-    /// </summary>
-    /// <param name="parent">親IAnalyzeItem</param>
-    protected AbstractItem(IAnalyzeItem parent)
-    {
-      // 親インスタンスを設定
-      Parent = parent;
-    }
-
-    /// <summary>
     /// シンボルインターフェースの型の名前を返す
     /// </summary>
     /// <param name="target">対象シンボルインターフェース</param>

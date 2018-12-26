@@ -63,33 +63,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         return;
       }
       var propertyInitializer = semanticModel.GetOperation(node.Initializer.Value);
-      if (propertyInitializer.ConstantValue.HasValue)
-      {
-        // 値型
-        var targetValue = propertyInitializer.ConstantValue;
-        var name = targetValue.Value.ToString();
-        if (targetValue.Value is string)
-        {
-          name = $"\"{name}\"";
-        }
-        DefaultValues.Add(new Expression(name, targetValue.Value.GetType().Name));
-      }
-      else
-      {
-        // クラスインスタンスなど
-        var tokens = propertyInitializer.Syntax.DescendantTokens();
-        foreach(var token in tokens)
-        {
-          var symbol = semanticModel.GetSymbolInfo(token.Parent);
-          DefaultValues.Add(new Expression(token.Value.ToString(), GetSymbolTypeName(symbol.Symbol)));
-
-          if (symbol.Symbol != null && symbol.Symbol is INamedTypeSymbol)
-          {
-            // 外部ファイル参照イベント発行
-            RaiseOtherFileReferenced(node, symbol.Symbol);
-          }
-        }
-      }
+      DefaultValues.AddRange(OperationFactory.GetExpressionList(propertyInitializer));
     }
 
     #region 基本インターフェース実装：メソッド

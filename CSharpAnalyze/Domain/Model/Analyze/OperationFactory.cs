@@ -46,6 +46,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze
         case IInstanceReferenceOperation param:
           instance = new InstanceReference(param);
           break;
+        case IObjectCreationOperation param:
+          instance = new ObjectCreation(param);
+          break;
         case IArgumentOperation param:
           instance = new Argument(param);
           break;

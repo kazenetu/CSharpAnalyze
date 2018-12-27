@@ -1,5 +1,4 @@
-﻿using CSharpAnalyze.Domain.Model.Analyze;
-using CSharpAnalyze.Domain.PublicInterfaces;
+﻿using CSharpAnalyze.Domain.PublicInterfaces;
 
 namespace CSharpAnalyze.Domain.Event.Analyze
 {
@@ -9,7 +8,6 @@ namespace CSharpAnalyze.Domain.Event.Analyze
   public class Analyzed : IEvent
   {
     public string FilePath { get; }
-    public IAnalyzeItem AnalyzeResult { get; } = null;
     public IFileRoot FileRoot { get; } = null;
 
     /// <summary>

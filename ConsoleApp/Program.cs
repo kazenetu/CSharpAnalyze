@@ -90,7 +90,6 @@ namespace ConsoleApp
         EventContainer.Register<Analyzed>(csAnalyze, (ev) =>
         {
           Console.WriteLine($"[{ev.FilePath}]");
-          Console.WriteLine(ev.AnalyzeResult?.ToString());
           Console.WriteLine(ev.FileRoot?.ToString());
         });
 

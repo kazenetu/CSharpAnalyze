@@ -1,11 +1,12 @@
 ﻿using CSharpAnalyze.Domain.PublicInterfaces;
+using CSharpAnalyze.Domain.PublicInterfaces.Events;
 
 namespace CSharpAnalyze.Domain.Event.Analyze.Events
 {
   /// <summary>
   /// 解析完了イベント
   /// </summary>
-  public class Analyzed : IEvent
+  public class Analyzed : IAnalyzed
   {
     public string FilePath { get; }
     public IFileRoot FileRoot { get; } = null;

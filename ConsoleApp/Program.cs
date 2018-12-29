@@ -1,7 +1,7 @@
 ﻿using Common;
 using CSharpAnalyze.ApplicationService;
 using CSharpAnalyze.Domain.Event;
-using CSharpAnalyze.Domain.Event.Analyze;
+using CSharpAnalyze.Domain.Event.Analyze.Events;
 using System;
 using System.Collections.Generic;
 using System.IO;

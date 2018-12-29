@@ -1,6 +1,6 @@
 ﻿using CSharpAnalyze.Domain.PublicInterfaces;
 
-namespace CSharpAnalyze.Domain.Event.Analyze
+namespace CSharpAnalyze.Domain.Event.Analyze.Events
 {
   /// <summary>
   /// 解析完了イベント

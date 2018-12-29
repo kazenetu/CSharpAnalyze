@@ -1,4 +1,4 @@
-﻿namespace CSharpAnalyze.Domain.Event
+﻿namespace CSharpAnalyze.Domain.PublicInterfaces
 {
   /// <summary>
   /// イベントインターフェース

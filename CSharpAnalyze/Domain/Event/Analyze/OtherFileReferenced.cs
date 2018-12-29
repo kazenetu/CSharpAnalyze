@@ -1,4 +1,6 @@
-﻿namespace CSharpAnalyze.Domain.Event.Analyze
+﻿using CSharpAnalyze.Domain.PublicInterfaces;
+
+namespace CSharpAnalyze.Domain.Event.Analyze
 {
   /// <summary>
   /// 外部ファイル参照イベント

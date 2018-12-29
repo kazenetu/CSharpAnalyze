@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CSharpAnalyze.Domain.PublicInterfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 

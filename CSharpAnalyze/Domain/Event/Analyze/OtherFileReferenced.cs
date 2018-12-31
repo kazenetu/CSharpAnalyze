@@ -5,7 +5,7 @@ namespace CSharpAnalyze.Domain.Event.Analyze
   /// <summary>
   /// 外部ファイル参照イベント
   /// </summary>
-  public class OtherFileReferenced : IEvent
+  internal class OtherFileReferenced : IEvent
   {
     /// <summary>
     /// 外部ファイルパス

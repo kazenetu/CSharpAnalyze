@@ -6,7 +6,7 @@ namespace CSharpAnalyze.Domain.Event.Analyze.Events
   /// <summary>
   /// 解析完了イベント
   /// </summary>
-  public class Analyzed : IAnalyzed
+  internal class Analyzed : IAnalyzed
   {
     public string FilePath { get; }
     public IFileRoot FileRoot { get; } = null;

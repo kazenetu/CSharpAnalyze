@@ -52,6 +52,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze
         case IArgumentOperation param:
           instance = new Argument(param);
           break;
+        case IBinaryOperation param:
+          instance = new Binary(param);
+          break;
         default:
           Console.Write($" [{operation.Kind} is none] ");
           break;

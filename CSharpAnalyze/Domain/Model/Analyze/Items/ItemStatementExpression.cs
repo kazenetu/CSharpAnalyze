@@ -61,6 +61,10 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         case IInstanceReferenceOperation param:
           RightSadeList.AddRange(OperationFactory.GetExpressionList(param));
           break;
+        case ICompoundAssignmentOperation param:
+          LeftSideList.AddRange(OperationFactory.GetExpressionList(param.Target));
+          RightSadeList.AddRange(OperationFactory.GetExpressionList(param.Value));
+          break;
         default:
           Console.Write($" [{operation.Kind} is none] ");
           break;

@@ -14,11 +14,6 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
   internal class ItemConstructor : AbstractItem
   {
     /// <summary>
-    /// メソッドの型リスト
-    /// </summary>
-    public List<IExpression> MethodTypes { get; } = new List<IExpression>();
-
-    /// <summary>
     /// パラメーターリスト
     /// </summary>
     public List<(string name, List<IExpression> expressions)> Args { get; } = new List<(string name, List<IExpression> expressions)>();
@@ -93,9 +88,6 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         result.Append(indexSpace);
         result.Append($"{modifier} ");
       }
-
-      // メソッドの型
-      MethodTypes.ForEach(type => result.Append(type.Name));
 
       // メソッド名
       result.Append($" {Name}");

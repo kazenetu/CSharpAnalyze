@@ -23,7 +23,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// <summary>
     /// 左辺リスト
     /// </summary>
-    public List<IExpression> RightSadeList { get; } = new List<IExpression>();
+    public List<IExpression> RightSideList { get; } = new List<IExpression>();
 
     /// <summary>
     /// コンストラクタ
@@ -41,29 +41,29 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       {
         case ISimpleAssignmentOperation param:
           LeftSideList.AddRange(OperationFactory.GetExpressionList(param.Target));
-          RightSadeList.AddRange(OperationFactory.GetExpressionList(param.Value));
+          RightSideList.AddRange(OperationFactory.GetExpressionList(param.Value));
           break;
         case IInvocationOperation param:
-          RightSadeList.AddRange(OperationFactory.GetExpressionList(param));
+          RightSideList.AddRange(OperationFactory.GetExpressionList(param));
           break;
         case IPropertyReferenceOperation param:
-          RightSadeList.AddRange(OperationFactory.GetExpressionList(param));
+          RightSideList.AddRange(OperationFactory.GetExpressionList(param));
           break;
         case ILocalReferenceOperation param:
-          RightSadeList.AddRange(OperationFactory.GetExpressionList(param));
+          RightSideList.AddRange(OperationFactory.GetExpressionList(param));
           break;
         case ILiteralOperation param:
-          RightSadeList.AddRange(OperationFactory.GetExpressionList(param));
+          RightSideList.AddRange(OperationFactory.GetExpressionList(param));
           break;
         case IFieldReferenceOperation param:
-          RightSadeList.AddRange(OperationFactory.GetExpressionList(param));
+          RightSideList.AddRange(OperationFactory.GetExpressionList(param));
           break;
         case IInstanceReferenceOperation param:
-          RightSadeList.AddRange(OperationFactory.GetExpressionList(param));
+          RightSideList.AddRange(OperationFactory.GetExpressionList(param));
           break;
         case ICompoundAssignmentOperation param:
           LeftSideList.AddRange(OperationFactory.GetExpressionList(param.Target));
-          RightSadeList.AddRange(OperationFactory.GetExpressionList(param.Value));
+          RightSideList.AddRange(OperationFactory.GetExpressionList(param.Value));
           break;
         default:
           Console.Write($" [{operation.Kind} is none] ");
@@ -92,9 +92,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         }
         result.Append(" = ");
       }
-      if (RightSadeList.Any())
+      if (RightSideList.Any())
       {
-        foreach (var rightItem in RightSadeList)
+        foreach (var rightItem in RightSideList)
         {
           result.Append(rightItem.Name);
         }

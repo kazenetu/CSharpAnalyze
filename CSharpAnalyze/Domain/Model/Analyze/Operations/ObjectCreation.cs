@@ -31,7 +31,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
       foreach (var part in parts)
       {
         var name = $"{part}";
-        var type = GetSymbolTypeName(part.Symbol);
+        var type = Expression.GetSymbolTypeName(part.Symbol);
         if (part.Kind == SymbolDisplayPartKind.ClassName)
         {
           // 外部ファイル参照イベント発行
@@ -55,43 +55,6 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
         isFirst = false;
       }
       Expressions.Add(new Expression(")", string.Empty));
-    }
-
-    /// <summary>
-    /// シンボルインターフェースの型の名前を返す
-    /// </summary>
-    /// <param name="target">対象シンボルインターフェース</param>
-    /// <returns>型名・存在しない場合はstring.Empty</returns>
-    protected string GetSymbolTypeName(ISymbol target)
-    {
-      var methodSymbol = target as IMethodSymbol;
-      if (methodSymbol != null)
-      {
-        return methodSymbol.MethodKind.ToString();
-      }
-      var localSymboll = target as ILocalSymbol;
-      if (localSymboll != null)
-      {
-        return localSymboll.Kind.ToString();
-      }
-
-      var symbol = target as INamedTypeSymbol;
-      if (symbol == null)
-      {
-        return string.Empty;
-      }
-
-      if (symbol.IsGenericType)
-      {
-        return "GenericClass";
-      }
-
-      if (symbol.SpecialType != SpecialType.None)
-      {
-        return symbol.Name;
-      }
-
-      return symbol.TypeKind.ToString();
     }
 
     /// <summary>

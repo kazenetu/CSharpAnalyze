@@ -1,4 +1,5 @@
 ﻿using CSharpAnalyze.Domain.PublicInterfaces;
+using Microsoft.CodeAnalysis;
 using System;
 
 namespace CSharpAnalyze.Domain.Model.Analyze
@@ -61,5 +62,43 @@ namespace CSharpAnalyze.Domain.Model.Analyze
     {
       return Name.GetHashCode(StringComparison.CurrentCulture) + TypeName.GetHashCode(StringComparison.CurrentCulture);
     }
+
+    /// <summary>
+    /// シンボルインターフェースの型の名前を返す
+    /// </summary>
+    /// <param name="target">対象シンボルインターフェース</param>
+    /// <returns>型名・存在しない場合はstring.Empty</returns>
+    internal static string GetSymbolTypeName(ISymbol target)
+    {
+      var methodSymbol = target as IMethodSymbol;
+      if (methodSymbol != null)
+      {
+        return methodSymbol.MethodKind.ToString();
+      }
+      var localSymboll = target as ILocalSymbol;
+      if (localSymboll != null)
+      {
+        return localSymboll.Kind.ToString();
+      }
+
+      var symbol = target as INamedTypeSymbol;
+      if (symbol == null)
+      {
+        return string.Empty;
+      }
+
+      if (symbol.IsGenericType)
+      {
+        return "GenericClass";
+      }
+
+      if (symbol.SpecialType != SpecialType.None)
+      {
+        return symbol.Name;
+      }
+
+      return symbol.TypeKind.ToString();
+    }
+
   }
 }

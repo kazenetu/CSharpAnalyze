@@ -53,7 +53,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       foreach (var part in parts)
       {
         var name = $"{part}";
-        var type = GetSymbolTypeName(part.Symbol);
+        var type = Expression.GetSymbolTypeName(part.Symbol);
         if (part.Kind == SymbolDisplayPartKind.ClassName)
         {
           // 外部ファイル参照イベント発行
@@ -88,7 +88,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         foreach (var token in tokens)
         {
           var symbol = semanticModel.GetSymbolInfo(token.Parent);
-          var targetValue = GetSymbolTypeName(symbol.Symbol);
+          var targetValue = Expression.GetSymbolTypeName(symbol.Symbol);
           var name = token.Value.ToString();
           if (LiteralTokens.Contains(token.Kind()))
           {

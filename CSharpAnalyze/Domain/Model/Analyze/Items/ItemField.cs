@@ -39,7 +39,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       foreach (var part in parts)
       {
         var name = $"{part}";
-        var type = GetSymbolTypeName(part.Symbol);
+        var type = Expression.GetSymbolTypeName(part.Symbol);
         if (part.Kind == SymbolDisplayPartKind.ClassName)
         {
           // 外部ファイル参照イベント発行

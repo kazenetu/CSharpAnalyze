@@ -38,7 +38,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         foreach (var part in displayParts)
         {
           var name = $"{part}";
-          var type = GetSymbolTypeName(part.Symbol);
+          var type = Expression.GetSymbolTypeName(part.Symbol);
           if (part.Symbol != null)
           {
             type = part.Symbol.GetType().Name;

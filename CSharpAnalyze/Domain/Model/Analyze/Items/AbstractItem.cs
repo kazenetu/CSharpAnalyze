@@ -91,43 +91,6 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     }
 
     /// <summary>
-    /// シンボルインターフェースの型の名前を返す
-    /// </summary>
-    /// <param name="target">対象シンボルインターフェース</param>
-    /// <returns>型名・存在しない場合はstring.Empty</returns>
-    protected string GetSymbolTypeName(ISymbol target)
-    {
-      var methodSymbol = target as IMethodSymbol;
-      if (methodSymbol != null)
-      {
-        return methodSymbol.MethodKind.ToString();
-      }
-      var localSymboll = target as ILocalSymbol;
-      if (localSymboll != null)
-      {
-        return localSymboll.Kind.ToString();
-      }
-
-      var symbol = target as INamedTypeSymbol;
-      if (symbol == null)
-      {
-        return string.Empty;
-      }
-
-      if (symbol.IsGenericType)
-      {
-        return "GenericClass";
-      }
-
-      if (symbol.SpecialType != SpecialType.None)
-      {
-        return symbol.Name;
-      }
-
-      return symbol.TypeKind.ToString();
-    }
-
-    /// <summary>
     /// 外部ファイル参照イベント発行
     /// </summary>
     /// <param name="targetNode">対象Node</param>

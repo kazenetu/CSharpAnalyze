@@ -1,4 +1,5 @@
-﻿using CSharpAnalyze.Domain.PublicInterfaces;
+﻿using CSharpAnalyze.Domain.Event;
+using CSharpAnalyze.Domain.PublicInterfaces;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -57,7 +58,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         if (part.Kind == SymbolDisplayPartKind.ClassName)
         {
           // 外部ファイル参照イベント発行
-          RaiseOtherFileReferenced(node, part.Symbol);
+          RaiseEvents.RaiseOtherFileReferenced(node, part.Symbol);
         }
 
         Types.Add(new Expression(name, type));
@@ -104,7 +105,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
           if (symbol.Symbol != null && symbol.Symbol is INamedTypeSymbol)
           {
             // 外部ファイル参照イベント発行
-            RaiseOtherFileReferenced(node, symbol.Symbol);
+            RaiseEvents.RaiseOtherFileReferenced(node, symbol.Symbol);
           }
         }
       }

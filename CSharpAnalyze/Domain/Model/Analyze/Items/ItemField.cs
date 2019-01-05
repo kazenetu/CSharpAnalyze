@@ -1,4 +1,5 @@
-﻿using CSharpAnalyze.Domain.PublicInterfaces;
+﻿using CSharpAnalyze.Domain.Event;
+using CSharpAnalyze.Domain.PublicInterfaces;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -43,7 +44,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         if (part.Kind == SymbolDisplayPartKind.ClassName)
         {
           // 外部ファイル参照イベント発行
-          RaiseOtherFileReferenced(node, part.Symbol);
+          RaiseEvents.RaiseOtherFileReferenced(node, part.Symbol);
         }
 
         FieldTypes.Add(new Expression(name, type));

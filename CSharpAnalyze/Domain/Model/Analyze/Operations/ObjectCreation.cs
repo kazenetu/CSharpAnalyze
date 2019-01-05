@@ -35,7 +35,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
         if (part.Kind == SymbolDisplayPartKind.ClassName)
         {
           // 外部ファイル参照イベント発行
-          RaiseOtherFileReferenced(node, part.Symbol);
+          RaiseEvents.RaiseOtherFileReferenced(node, part.Symbol);
         }
 
         Expressions.Add(new Expression(name, type));
@@ -56,28 +56,5 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
       }
       Expressions.Add(new Expression(")", string.Empty));
     }
-
-    /// <summary>
-    /// 外部ファイル参照イベント発行
-    /// </summary>
-    /// <param name="targetNode">対象Node</param>
-    /// <param name="targetSymbol">比較対象のSymbol</param>
-    protected void RaiseOtherFileReferenced(SyntaxNode targetNode, ISymbol targetSymbol)
-    {
-      if (!targetSymbol.DeclaringSyntaxReferences.Any())
-      {
-        // ファイルパスなしでイベント送信
-        EventContainer.Raise(new OtherFileReferenced(string.Empty, targetSymbol.Name));
-      }
-
-      var targetNodeFilePath = targetNode.SyntaxTree.FilePath;
-      var ReferenceFilePaths = targetSymbol.DeclaringSyntaxReferences.Select(item => item.SyntaxTree.FilePath).Where(filePath => filePath != targetNodeFilePath);
-      foreach (var referenceFilePath in ReferenceFilePaths)
-      {
-        // ファイルパスありでイベント送信
-        EventContainer.Raise(new OtherFileReferenced(referenceFilePath, targetSymbol.Name));
-      }
-    }
-
   }
 }

@@ -23,8 +23,8 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
       else
       {
         Expressions.Add(new Expression(".", string.Empty));
-        Expressions.Add(new Expression(operation.Property.ContainingSymbol.Name, 
-                            Expression.GetSymbolTypeName(operation.Property.ContainingSymbol)));
+        Expressions.Add(new Expression(operation.Property.Name, 
+                            Expression.GetSymbolTypeName(operation.Property.Type)));
       }
     }
 

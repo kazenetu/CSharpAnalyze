@@ -46,6 +46,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze
         case ExpressionStatementSyntax expressionStatementSyntax:
           result = new ItemStatementExpression(expressionStatementSyntax, semanticModel, parent);
           break;
+        case IfStatementSyntax ifStatementSyntax:
+          result = new ItemIf(ifStatementSyntax, semanticModel, parent);
+          break;
       }
 
       return result;

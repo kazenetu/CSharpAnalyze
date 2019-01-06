@@ -1,5 +1,4 @@
 ﻿using CSharpAnalyze.Domain.Event;
-using CSharpAnalyze.Domain.Event.Analyze;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Operations;
 using System.Linq;

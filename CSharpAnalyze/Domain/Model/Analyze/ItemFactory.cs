@@ -49,6 +49,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze
         case IfStatementSyntax ifStatementSyntax:
           result = new ItemIf(ifStatementSyntax, semanticModel, parent);
           break;
+        case ElseClauseSyntax elseClauseSyntax:
+          result = new ItemElseClause(elseClauseSyntax, semanticModel, parent);
+          break;
       }
 
       return result;

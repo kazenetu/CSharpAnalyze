@@ -1,6 +1,6 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using CSharpAnalyze.Domain.Event;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Operations;
-using System.Linq;
 
 namespace CSharpAnalyze.Domain.Model.Analyze.Operations
 {
@@ -16,18 +16,25 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
     /// <param name="target">対象ソースのsemanticModel</param>
     public FieldReference(IFieldReferenceOperation operation)
     {
-      if (operation.Field.DeclaringSyntaxReferences.Any())
+      if (operation.Field.IsStatic)
       {
-        Expressions.Add(new Expression(operation.Field.ContainingSymbol.Name, operation.Field.ContainingSymbol.GetType().Name));
+        Expressions.Add(new Expression(operation.Field.ContainingSymbol.Name,
+                    Expression.GetSymbolTypeName(operation.Field.ContainingSymbol)));
         Expressions.Add(new Expression(".", string.Empty));
-        Expressions.Add(new Expression(operation.Field.Name, operation.Field.Type.Name));
+
+        // 外部参照チェック
+        if (operation.Field.ContainingSymbol is INamedTypeSymbol)
+        {
+          // 外部ファイル参照イベント発行
+          RaiseEvents.RaiseOtherFileReferenced(operation.Syntax, operation.Field.ContainingSymbol);
+        }
       }
       else
       {
-        Expressions.Add(new Expression(operation.Field.ContainingSymbol.Name, operation.Field.ContainingSymbol.GetType().Name));
+        Expressions.Add(new Expression("this", Expression.GetSymbolTypeName(operation.Field)));
         Expressions.Add(new Expression(".", string.Empty));
-        Expressions.Add(new Expression(operation.Field.Name, operation.Field.Type.Name));
       }
+      Expressions.Add(new Expression(operation.Field.Name, Expression.GetSymbolTypeName(operation.Field.Type)));
     }
   }
 }

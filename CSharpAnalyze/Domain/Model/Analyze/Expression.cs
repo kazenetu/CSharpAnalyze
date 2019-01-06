@@ -75,7 +75,8 @@ namespace CSharpAnalyze.Domain.Model.Analyze
       {
         return methodSymbol.MethodKind.ToString();
       }
-      if (target is ILocalSymbol || target is IFieldSymbol || target is IPropertySymbol)
+      if (target is ILocalSymbol || target is IFieldSymbol || 
+          target is IPropertySymbol || target is IParameterSymbol)
       {
         return target.Kind.ToString();
       }

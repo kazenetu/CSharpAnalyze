@@ -75,10 +75,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze
       {
         return methodSymbol.MethodKind.ToString();
       }
-      var localSymboll = target as ILocalSymbol;
-      if (localSymboll != null)
+      if (target is ILocalSymbol || target is IFieldSymbol || target is IPropertySymbol)
       {
-        return localSymboll.Kind.ToString();
+        return target.Kind.ToString();
       }
 
       var symbol = target as INamedTypeSymbol;

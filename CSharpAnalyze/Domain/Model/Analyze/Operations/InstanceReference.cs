@@ -13,7 +13,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
     /// <param name="operation">IOperationインスタンス</param>
     public InstanceReference(IInstanceReferenceOperation operation)
     {
-      Expressions.Add(new Expression($"{operation.Syntax}", operation.GetType().Name));
+      Expressions.Add(new Expression("this", Expression.GetSymbolTypeName(operation.Type)));
     }
   }
 }

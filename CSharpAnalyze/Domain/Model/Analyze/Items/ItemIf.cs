@@ -17,7 +17,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
   {
     private List<IExpression> Conditions = new List<IExpression>();
     private List<IAnalyzeItem> TrueBlock = new List<IAnalyzeItem>();
-    private List<IAnalyzeItem> FalseBlock = new List<IAnalyzeItem>();
+    private List<IAnalyzeItem> FalseBlocks = new List<IAnalyzeItem>();
 
     /// <summary>
     /// コンストラクタ
@@ -33,7 +33,25 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       Conditions.AddRange(OperationFactory.GetExpressionList(condition));
 
       TrueBlock.AddRange(GetBlock(node.Statement, semanticModel));
-      FalseBlock.AddRange(GetBlock(node.Else, semanticModel));
+      FalseBlocks.AddRange(GetElseBlock(node.Else));
+
+      List<IAnalyzeItem> GetElseBlock(ElseClauseSyntax elseNode)
+      {
+        var result = new List<IAnalyzeItem>();
+
+        if(elseNode is null)
+        {
+          return result;
+        }
+
+        result.Add(ItemFactory.Create(elseNode, semanticModel, parent));
+        if (elseNode.Statement is IfStatementSyntax ifNode)
+        {
+          result.AddRange(GetElseBlock(ifNode.Else));
+        }
+
+        return result;
+      }
     }
 
     /// <summary>
@@ -99,18 +117,12 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       result.Append(indexSpace);
       result.AppendLine("}");
 
-      if (FalseBlock.Any())
+      if (FalseBlocks.Any())
       {
-        result.Append(indexSpace);
-        result.AppendLine("else");
-        result.Append(indexSpace);
-        result.AppendLine("{");
-        foreach (var statement in FalseBlock)
+        foreach (var block in FalseBlocks)
         {
-          result.Append(statement.ToString(index + 1));
+          result.Append(block.ToString(index));
         }
-        result.Append(indexSpace);
-        result.AppendLine("}");
       }
 
       return result.ToString();

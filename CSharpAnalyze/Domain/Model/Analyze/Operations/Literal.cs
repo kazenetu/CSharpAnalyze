@@ -18,7 +18,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
       {
         literalValue = $"\"{literalValue}\"";
       }
-      Expressions.Add(new Expression(literalValue.ToString(), literalValue.GetType().Name));
+      Expressions.Add(new Expression(literalValue.ToString(), Expression.GetSymbolTypeName(operation.Type)));
 
     }
   }

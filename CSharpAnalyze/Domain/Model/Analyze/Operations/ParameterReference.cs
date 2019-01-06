@@ -14,7 +14,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
     public ParameterReference(IParameterReferenceOperation operation)
     {
       var symbol = operation.Parameter;
-      Expressions.Add(new Expression(symbol.Name, symbol.Type.Name));
+      Expressions.Add(new Expression(symbol.Name, Expression.GetSymbolTypeName(symbol)));
     }
   }
 }

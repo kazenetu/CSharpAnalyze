@@ -24,7 +24,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
       {
         Expressions.Add(new Expression(".", string.Empty));
         Expressions.Add(new Expression(operation.Property.Name, 
-                            Expression.GetSymbolTypeName(operation.Property.Type)));
+                            Expression.GetSymbolTypeName(operation.Property)));
       }
     }
 
@@ -63,7 +63,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
           Expressions.Add(new Expression(".", string.Empty));
         }
 
-        Expressions.Add(new Expression(prop.Property.Name, Expression.GetSymbolTypeName(prop.Type)));
+        Expressions.Add(new Expression(prop.Property.Name, Expression.GetSymbolTypeName(prop.Property)));
       }
       else
       {

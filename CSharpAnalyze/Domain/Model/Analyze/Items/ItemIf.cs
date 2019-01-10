@@ -112,7 +112,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       result.AppendLine("{");
       foreach (var statement in TrueBlock)
       {
-        result.Append(statement.ToString(index + 1));
+        result.AppendLine(statement.ToString(index + 1));
       }
       result.Append(indexSpace);
       result.AppendLine("}");

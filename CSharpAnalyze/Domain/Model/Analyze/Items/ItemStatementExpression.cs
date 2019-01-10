@@ -99,7 +99,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
           result.Append(rightItem.Name);
         }
       }
-      result.AppendLine(";");
+      result.Append(";");
 
       return result.ToString();
     }

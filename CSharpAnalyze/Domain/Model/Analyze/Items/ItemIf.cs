@@ -102,9 +102,22 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
 
       result.Append(indexSpace);
       result.Append("if(");
-      foreach (var condition in Conditions)
+      for(var i=0;i< Conditions.Count; i++)
       {
-        result.Append($"{condition.Name} ");
+        var isSetSpace = true;
+        if(i == Conditions.Count - 1)
+        {
+          isSetSpace = false;
+        }
+        else if(Conditions[i].Name == "." || Conditions[i+1].Name == ".")
+        {
+          isSetSpace = false;
+        }
+        result.Append($"{Conditions[i].Name}");
+        if (isSetSpace)
+        {
+          result.Append(" ");
+        }
       }
       result.AppendLine(")");
 

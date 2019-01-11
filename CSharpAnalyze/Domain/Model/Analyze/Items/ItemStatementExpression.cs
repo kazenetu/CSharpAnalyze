@@ -83,23 +83,56 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       var result = new StringBuilder();
       var indexSpace = string.Concat(Enumerable.Repeat("  ", index));
 
+      // インデックススペースを作成
       result.Append(indexSpace);
+
+      // 左辺の作成
       if (LeftSideList.Any())
       {
-        foreach(var leftItem in LeftSideList)
-        {
-          result.Append(leftItem.Name);
-        }
+        result.Append(GetSideExpressionList(LeftSideList));
         result.Append(" = ");
       }
+
+      // 右辺の作成
       if (RightSideList.Any())
       {
-        foreach (var rightItem in RightSideList)
-        {
-          result.Append(rightItem.Name);
-        }
+        result.Append(GetSideExpressionList(RightSideList));
       }
       result.Append(";");
+
+      return result.ToString();
+    }
+
+    /// <summary>
+    /// IExpressionのリストを元にC#のソースコードを再現する
+    /// </summary>
+    /// <param name="targetList">取得対象のリスト</param>
+    /// <returns>再現したC#のソースコード</returns>
+    private string GetSideExpressionList(List<IExpression> targetList)
+    {
+      var result = new StringBuilder();
+
+      // スペースを置かないキーワード
+      var nonSpaceKeywords = new List<String>() { ".", "(", ")" };
+
+      // リストから文字列を作成する
+      for (var i = 0; i < targetList.Count; i++)
+      {
+        var isSetSpace = true;
+        if (i == targetList.Count - 1)
+        {
+          isSetSpace = false;
+        }
+        else if (nonSpaceKeywords.Contains(targetList[i].Name) || nonSpaceKeywords.Contains(targetList[i + 1].Name))
+        {
+          isSetSpace = false;
+        }
+        result.Append($"{targetList[i].Name}");
+        if (isSetSpace)
+        {
+          result.Append(" ");
+        }
+      }
 
       return result.ToString();
     }

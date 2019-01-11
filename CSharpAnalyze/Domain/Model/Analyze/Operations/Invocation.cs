@@ -3,7 +3,7 @@
 namespace CSharpAnalyze.Domain.Model.Analyze.Operations
 {
   /// <summary>
-  /// Operation:SimpleAssignment
+  /// Operation:Invocation
   /// </summary>
   internal class Invocation : AbstractOperation
   {

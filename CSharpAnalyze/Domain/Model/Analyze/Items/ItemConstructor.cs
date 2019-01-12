@@ -94,7 +94,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       result.Append($" {Name}");
 
       // パラメーター
-      result.Append(" (");
+      result.Append("(");
       var isFirst = true;
       foreach (var arg in Args)
       {

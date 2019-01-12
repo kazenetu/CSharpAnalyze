@@ -13,8 +13,16 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
     /// <param name="operation">IOperationインスタンス</param>
     public Invocation(IInvocationOperation operation)
     {
-      // インスタンス
-      Expressions.AddRange(OperationFactory.GetExpressionList(operation.Instance));
+      if(operation.Instance is null)
+      {
+        // 組み込み
+        Expressions.Add(new Expression(operation.Type.Name,Expression.GetSymbolTypeName(operation.Type)));
+      }
+      else
+      {
+        // インスタンス
+        Expressions.AddRange(OperationFactory.GetExpressionList(operation.Instance));
+      }
       Expressions.Add(new Expression(".", string.Empty));
 
       // メソッド名

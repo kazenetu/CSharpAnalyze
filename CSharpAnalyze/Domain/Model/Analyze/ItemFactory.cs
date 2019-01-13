@@ -52,6 +52,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze
         case ElseClauseSyntax elseClauseSyntax:
           result = new ItemElseClause(elseClauseSyntax, semanticModel, parent);
           break;
+        case LocalFunctionStatementSyntax localFunctionStatementSyntax:
+          result = new ItemLocalFunction(localFunctionStatementSyntax, semanticModel, parent);
+          break;
       }
 
       return result;

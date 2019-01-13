@@ -25,35 +25,35 @@ namespace CSharpAnalyze.Domain.Model.Analyze
       // nodeの種類によって取得メソッドを実行
       switch (node)
       {
-        case ClassDeclarationSyntax classDeclarationSyntax:
-          result = new ItemClass(classDeclarationSyntax, semanticModel, parent);
+        case ClassDeclarationSyntax targetNode:
+          result = new ItemClass(targetNode, semanticModel, parent);
           break;
-        case PropertyDeclarationSyntax propertyDeclarationSyntax:
-          result = new ItemProperty(propertyDeclarationSyntax, semanticModel, parent);
+        case PropertyDeclarationSyntax targetNode:
+          result = new ItemProperty(targetNode, semanticModel, parent);
           break;
-        case FieldDeclarationSyntax fieldDeclarationSyntax:
-          result = new ItemField(fieldDeclarationSyntax, semanticModel, parent);
+        case FieldDeclarationSyntax targetNode:
+          result = new ItemField(targetNode, semanticModel, parent);
           break;
-        case MethodDeclarationSyntax methodDeclarationSyntax:
-          result = new ItemMethod(methodDeclarationSyntax, semanticModel, parent);
+        case MethodDeclarationSyntax targetNode:
+          result = new ItemMethod(targetNode, semanticModel, parent);
           break;
-        case ConstructorDeclarationSyntax constructorDeclarationSyntax:
-          result = new ItemConstructor(constructorDeclarationSyntax, semanticModel, parent);
+        case ConstructorDeclarationSyntax targetNode:
+          result = new ItemConstructor(targetNode, semanticModel, parent);
           break;
-        case LocalDeclarationStatementSyntax localDeclarationStatementSyntax:
-          result = new ItemStatementLocalDeclaration(localDeclarationStatementSyntax, semanticModel, parent);
+        case LocalDeclarationStatementSyntax targetNode:
+          result = new ItemStatementLocalDeclaration(targetNode, semanticModel, parent);
           break;
-        case ExpressionStatementSyntax expressionStatementSyntax:
-          result = new ItemStatementExpression(expressionStatementSyntax, semanticModel, parent);
+        case ExpressionStatementSyntax targetNode:
+          result = new ItemStatementExpression(targetNode, semanticModel, parent);
           break;
-        case IfStatementSyntax ifStatementSyntax:
-          result = new ItemIf(ifStatementSyntax, semanticModel, parent);
+        case IfStatementSyntax targetNode:
+          result = new ItemIf(targetNode, semanticModel, parent);
           break;
-        case ElseClauseSyntax elseClauseSyntax:
-          result = new ItemElseClause(elseClauseSyntax, semanticModel, parent);
+        case ElseClauseSyntax targetNode:
+          result = new ItemElseClause(targetNode, semanticModel, parent);
           break;
-        case LocalFunctionStatementSyntax localFunctionStatementSyntax:
-          result = new ItemLocalFunction(localFunctionStatementSyntax, semanticModel, parent);
+        case LocalFunctionStatementSyntax targetNode:
+          result = new ItemLocalFunction(targetNode, semanticModel, parent);
           break;
       }
 

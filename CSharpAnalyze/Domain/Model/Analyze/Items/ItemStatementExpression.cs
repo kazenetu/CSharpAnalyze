@@ -65,6 +65,18 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
           LeftSideList.AddRange(OperationFactory.GetExpressionList(param.Target));
           RightSideList.AddRange(OperationFactory.GetExpressionList(param.Value));
           break;
+        case IIncrementOrDecrementOperation param:
+          RightSideList.AddRange(OperationFactory.GetExpressionList(param.Target));
+          switch (param.Kind)
+          {
+            case OperationKind.Increment:
+              RightSideList.Add(new Expression("++", string.Empty));
+              break;
+            case OperationKind.Decrement:
+              RightSideList.Add(new Expression("--", string.Empty));
+              break;
+          }
+          break;
         default:
           Console.Write($" [{operation.Kind} is none] ");
           break;

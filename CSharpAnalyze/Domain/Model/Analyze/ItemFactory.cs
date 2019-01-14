@@ -55,6 +55,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze
         case LocalFunctionStatementSyntax targetNode:
           result = new ItemLocalFunction(targetNode, semanticModel, parent);
           break;
+        case WhileStatementSyntax targetNode:
+          result = new ItemWhile(targetNode, semanticModel, parent);
+          break;
       }
 
       return result;

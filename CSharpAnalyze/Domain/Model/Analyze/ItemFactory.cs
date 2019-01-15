@@ -58,6 +58,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze
         case WhileStatementSyntax targetNode:
           result = new ItemWhile(targetNode, semanticModel, parent);
           break;
+        case ForEachStatementSyntax targetNode:
+          result = new ItemForEach(targetNode, semanticModel, parent);
+          break;
       }
 
       return result;

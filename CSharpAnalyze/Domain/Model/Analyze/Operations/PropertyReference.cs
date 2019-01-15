@@ -1,6 +1,7 @@
 ﻿using CSharpAnalyze.Domain.Event;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Operations;
+using System.Linq;
 
 namespace CSharpAnalyze.Domain.Model.Analyze.Operations
 {
@@ -22,9 +23,19 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
       }
       else
       {
-        Expressions.Add(new Expression(".", string.Empty));
-        Expressions.Add(new Expression(operation.Property.Name, 
-                            Expression.GetSymbolTypeName(operation.Property)));
+        if(operation.Instance is ILocalReferenceOperation)
+        {
+          // ローカルの場合はクリアする
+          Expressions.Clear();
+        }
+        else
+        {
+          // ローカル以外の場合はピリオドを設定
+          Expressions.Add(new Expression(".", string.Empty));
+        }
+
+        // プロパティ格納
+        SetProperty(operation);
       }
     }
 
@@ -57,13 +68,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
             RaiseEvents.RaiseOtherFileReferenced(prop.Syntax, prop.Property.ContainingSymbol);
           }
         }
-        else
-        {
-          Expressions.Add(new Expression("this", Expression.GetSymbolTypeName(prop.Instance.Type)));
-          Expressions.Add(new Expression(".", string.Empty));
-        }
 
-        Expressions.Add(new Expression(prop.Property.Name, Expression.GetSymbolTypeName(prop.Property)));
+        // プロパティ格納
+        SetProperty(prop);
       }
       else
       {
@@ -71,6 +78,42 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
       }
 
       return true;
+    }
+
+    /// <summary>
+    /// プロパティ格納
+    /// </summary>
+    /// <param name="prop">親プロパティ</param>
+    private void SetProperty(IPropertyReferenceOperation prop)
+    {
+      if (prop.Property is IPropertySymbol propItem)
+      {
+        if (propItem.IsIndexer)
+        {
+          // インデクサの場合
+          Expressions.AddRange(OperationFactory.GetExpressionList(prop.Instance));
+          Expressions.Add(new Expression("[", string.Empty));
+          foreach (var arg in prop.Arguments)
+          {
+            if (!arg.Equals(prop.Arguments.First()))
+            {
+              Expressions.Add(new Expression(",", string.Empty));
+            }
+            Expressions.Add(new Expression(arg.Parameter.Name, Expression.GetSymbolTypeName(arg.Parameter.Type)));
+          }
+          Expressions.Add(new Expression("]", string.Empty));
+        }
+        else
+        {
+          // それ以外のプロパティの場合
+          Expressions.Add(new Expression(propItem.Name, Expression.GetSymbolTypeName(propItem)));
+        }
+      }
+      else
+      {
+        // プロパティ以外の場合
+        Expressions.Add(new Expression(prop.Property.Name, Expression.GetSymbolTypeName(prop.Property)));
+      }
     }
   }
 }

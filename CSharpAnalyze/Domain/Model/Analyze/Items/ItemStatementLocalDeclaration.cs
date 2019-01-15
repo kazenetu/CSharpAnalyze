@@ -71,45 +71,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         return;
       }
       var initializer = semanticModel.GetOperation(constantValue.Initializer.Value);
-      if (initializer.ConstantValue.HasValue)
-      {
-        // 値型
-        var targetValue = initializer.ConstantValue;
-        var name = targetValue.Value.ToString();
-        if (targetValue.Value is string)
-        {
-          name = $"\"{name}\"";
-        }
-        DefaultValues.Add(new Expression(name, targetValue.Value.GetType().Name));
-      }
-      else
-      {
-        // クラスインスタンスなど
-        var tokens = initializer.Syntax.DescendantTokens();
-        foreach (var token in tokens)
-        {
-          var symbol = semanticModel.GetSymbolInfo(token.Parent);
-          var targetValue = Expression.GetSymbolTypeName(symbol.Symbol);
-          var name = token.Value.ToString();
-          if (LiteralTokens.Contains(token.Kind()))
-          {
-            if(token.Value is string)
-            {
-              name = $"\"{name}\"";
-            }
-            targetValue = token.Value.GetType().Name;
-          }
-
-          DefaultValues.Add(new Expression(name, targetValue));
-
-          if (symbol.Symbol != null && symbol.Symbol is INamedTypeSymbol)
-          {
-            // 外部ファイル参照イベント発行
-            RaiseEvents.RaiseOtherFileReferenced(node, symbol.Symbol);
-          }
-        }
-      }
-
+      DefaultValues.AddRange(OperationFactory.GetExpressionList(initializer));
     }
 
     #region 基本インターフェース実装：メソッド

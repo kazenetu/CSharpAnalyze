@@ -73,7 +73,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze
       var methodSymbol = target as IMethodSymbol;
       if (methodSymbol != null)
       {
-        return methodSymbol.MethodKind.ToString();
+        return methodSymbol.Kind.ToString();
       }
       if (target is ILocalSymbol || target is IFieldSymbol || 
           target is IPropertySymbol || target is IParameterSymbol)

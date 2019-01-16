@@ -125,7 +125,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       var result = new StringBuilder();
 
       // スペースを置かないキーワード
-      var nonSpaceKeywords = new List<String>() { ".", "(", ")", "[", "]" };
+      var nonSpaceKeywords = new List<string>() { ".", "(", ")", "[", "]" };
 
       // リストから文字列を作成する
       for (var i = 0; i < targetList.Count; i++)

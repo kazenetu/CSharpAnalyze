@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.Operations;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Operations;
 
 namespace CSharpAnalyze.Domain.Model.Analyze.Operations
 {
@@ -25,8 +26,14 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
       }
       Expressions.Add(new Expression(".", string.Empty));
 
+      // メソッドがローカルメソッドの場合はクリアする
+      if(operation.TargetMethod.MethodKind == MethodKind.LocalFunction)
+      {
+        Expressions.Clear();
+      }
+
       // メソッド名
-      Expressions.Add(new Expression(operation.TargetMethod.Name, operation.TargetMethod.GetType().ToString()));
+      Expressions.Add(new Expression(operation.TargetMethod.Name, operation.TargetMethod.MethodKind.ToString()));
 
       // メソッドパラメータ
       Expressions.Add(new Expression("(", string.Empty));

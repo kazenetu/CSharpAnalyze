@@ -10,6 +10,6 @@ C#のコード解析：ConvertCStoTSの再設計版
 ※ルートディレクトリ直下に「publish」フォルダが作成される
 
 # 使用方法
-## ```dotnet publish/ConsoleApp.dll TargetSources```  
+## ```dotnet publish/ConsoleApp.dll TargetSource```  
 ※現時点では解析結果のC#ソースコードが表示される。  
   (未実装あり)

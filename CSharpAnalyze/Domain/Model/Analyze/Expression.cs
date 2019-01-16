@@ -28,6 +28,17 @@ namespace CSharpAnalyze.Domain.Model.Analyze
     {
       Name = name;
       TypeName = typeName;
+
+      // 組み込みは名前を変える
+      switch (Name)
+      {
+        case nameof(Int32):
+          Name = "int";
+          break;
+        case nameof(String):
+          Name = "string";
+          break;
+      }
     }
 
     /// <summary>

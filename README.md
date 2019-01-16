@@ -6,7 +6,7 @@ C#のコード解析：ConvertCStoTSの再設計版
 
 # 前準備
 1. リポジトリのルートディレクトリで下記を実行  
-```dotnet publish ConsoleApp -o ../publish```  
+ ## ```dotnet publish ConsoleApp -o ../publish```  
 ※ルートディレクトリ直下に「publish」フォルダが作成される
 
 # 使用方法

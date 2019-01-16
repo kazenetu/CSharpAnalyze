@@ -16,7 +16,7 @@
   
   <ItemGroup>
     <Reference Include="FrameworkDataTransferObject">
-      <HintPath>..\FrameworkDlls\FrameworkDataTransferObject.dll</HintPath>
+      <HintPath>FrameworkDlls\FrameworkDataTransferObject.dll</HintPath>
     </Reference>
   </ItemGroup>
 

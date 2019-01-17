@@ -12,7 +12,14 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
   /// </summary>
   internal class ItemElseClause : AbstractItem
   {
+    /// <summary>
+    /// 条件
+    /// </summary>
     public List<IExpression> Conditions { get; } = new List<IExpression>();
+
+    /// <summary>
+    /// 内部処理
+    /// </summary>
     public List<IAnalyzeItem> Block { get; } = new List<IAnalyzeItem>();
 
     /// <summary>

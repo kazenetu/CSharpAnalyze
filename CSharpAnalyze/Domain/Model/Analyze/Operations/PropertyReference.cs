@@ -69,6 +69,13 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
           }
         }
 
+        // インスタンスプロパティの場合はthisを追加する
+        if(prop.Instance is IInstanceReferenceOperation)
+        {
+          Expressions.AddRange(OperationFactory.GetExpressionList(prop.Instance));
+          Expressions.Add(new Expression(".", string.Empty));
+        }
+
         // プロパティ格納
         SetProperty(prop);
       }

@@ -67,6 +67,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze
         case BreakStatementSyntax targetNode:
           result = new ItemBreak(targetNode, semanticModel, parent);
           break;
+        case ContinueStatementSyntax targetNode:
+          result = new ItemContinue(targetNode, semanticModel, parent);
+          break;
       }
 
       return result;

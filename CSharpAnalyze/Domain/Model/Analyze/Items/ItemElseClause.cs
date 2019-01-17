@@ -12,8 +12,8 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
   /// </summary>
   internal class ItemElseClause : AbstractItem
   {
-    private List<IExpression> Conditions = new List<IExpression>();
-    private List<IAnalyzeItem> Block = new List<IAnalyzeItem>();
+    public List<IExpression> Conditions { get; } = new List<IExpression>();
+    public List<IAnalyzeItem> Block { get; } = new List<IAnalyzeItem>();
 
     /// <summary>
     /// コンストラクタ

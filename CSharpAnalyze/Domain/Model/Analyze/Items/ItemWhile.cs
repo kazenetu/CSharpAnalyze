@@ -15,7 +15,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// <summary>
     /// 条件
     /// </summary>
-    private List<IExpression> Conditions = new List<IExpression>();
+    public List<IExpression> Conditions { get; } = new List<IExpression>();
 
     /// <summary>
     /// コンストラクタ

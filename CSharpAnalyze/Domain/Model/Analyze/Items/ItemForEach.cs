@@ -16,12 +16,12 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// <summary>
     /// ローカル
     /// </summary>
-    private List<IExpression> Local = new List<IExpression>();
+    public List<IExpression> Local { get; } = new List<IExpression>();
 
     /// <summary>
     /// コレクション
     /// </summary>
-    private List<IExpression> Collection = new List<IExpression>();
+    public List<IExpression> Collection { get; } = new List<IExpression>();
 
     /// <summary>
     /// コンストラクタ

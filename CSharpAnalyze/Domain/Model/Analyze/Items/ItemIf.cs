@@ -12,9 +12,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
   /// </summary>
   internal class ItemIf : AbstractItem
   {
-    private List<IExpression> Conditions = new List<IExpression>();
-    private List<IAnalyzeItem> TrueBlock = new List<IAnalyzeItem>();
-    private List<IAnalyzeItem> FalseBlocks = new List<IAnalyzeItem>();
+    public List<IExpression> Conditions { get; } = new List<IExpression>();
+    public List<IAnalyzeItem> TrueBlock { get; } = new List<IAnalyzeItem>();
+    public List<IAnalyzeItem> FalseBlocks { get; } = new List<IAnalyzeItem>();
 
     /// <summary>
     /// コンストラクタ

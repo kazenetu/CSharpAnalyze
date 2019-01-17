@@ -61,6 +61,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze
         case ForEachStatementSyntax targetNode:
           result = new ItemForEach(targetNode, semanticModel, parent);
           break;
+        case ReturnStatementSyntax targetNode:
+          result = new ItemReturn(targetNode, semanticModel, parent);
+          break;
       }
 
       return result;

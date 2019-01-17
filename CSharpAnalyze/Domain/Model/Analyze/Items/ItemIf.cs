@@ -53,6 +53,8 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         }
 
         result.Add(ItemFactory.Create(elseNode, semanticModel, parent));
+
+        // else ifの場合はさらに続ける
         if (elseNode.Statement is IfStatementSyntax ifNode)
         {
           result.AddRange(GetElseBlock(ifNode.Else));

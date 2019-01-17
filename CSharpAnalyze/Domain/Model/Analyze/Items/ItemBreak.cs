@@ -48,7 +48,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       result.Append(indexSpace);
 
       // break設定
-      result.AppendLine("break;");
+      result.Append("break;");
 
       return result.ToString();
     }

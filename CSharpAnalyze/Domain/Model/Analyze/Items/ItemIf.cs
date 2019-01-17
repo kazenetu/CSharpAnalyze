@@ -12,8 +12,19 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
   /// </summary>
   internal class ItemIf : AbstractItem
   {
+    /// <summary>
+    /// 条件
+    /// </summary>
     public List<IExpression> Conditions { get; } = new List<IExpression>();
+
+    /// <summary>
+    /// 条件に一致した場合の処理リスト
+    /// </summary>
     public List<IAnalyzeItem> TrueBlock { get; } = new List<IAnalyzeItem>();
+
+    /// <summary>
+    /// 条件に一致しない場合の処理リスト
+    /// </summary>
     public List<IAnalyzeItem> FalseBlocks { get; } = new List<IAnalyzeItem>();
 
     /// <summary>

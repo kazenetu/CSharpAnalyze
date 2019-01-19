@@ -106,7 +106,8 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
             {
               Expressions.Add(new Expression(",", string.Empty));
             }
-            Expressions.Add(new Expression(arg.Parameter.Name, Expression.GetSymbolTypeName(arg.Parameter.Type)));
+            Expressions.AddRange(OperationFactory.GetExpressionList(arg));
+
           }
           Expressions.Add(new Expression("]", string.Empty));
         }

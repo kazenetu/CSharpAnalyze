@@ -25,9 +25,12 @@ namespace CSharpAnalyze.Domain.Model.Analyze
       // nodeの種類によって取得メソッドを実行
       switch (node)
       {
+        // クラス定義
         case ClassDeclarationSyntax targetNode:
           result = new ItemClass(targetNode, semanticModel, parent);
           break;
+        
+        // クラス要素定義
         case PropertyDeclarationSyntax targetNode:
           result = new ItemProperty(targetNode, semanticModel, parent);
           break;
@@ -40,27 +43,35 @@ namespace CSharpAnalyze.Domain.Model.Analyze
         case ConstructorDeclarationSyntax targetNode:
           result = new ItemConstructor(targetNode, semanticModel, parent);
           break;
+        
+        // ローカル定義
+        case LocalFunctionStatementSyntax targetNode:
+          result = new ItemLocalFunction(targetNode, semanticModel, parent);
+          break;
         case LocalDeclarationStatementSyntax targetNode:
           result = new ItemStatementLocalDeclaration(targetNode, semanticModel, parent);
           break;
         case ExpressionStatementSyntax targetNode:
           result = new ItemStatementExpression(targetNode, semanticModel, parent);
           break;
+        
+        // 分岐処理
         case IfStatementSyntax targetNode:
           result = new ItemIf(targetNode, semanticModel, parent);
           break;
         case ElseClauseSyntax targetNode:
           result = new ItemElseClause(targetNode, semanticModel, parent);
           break;
-        case LocalFunctionStatementSyntax targetNode:
-          result = new ItemLocalFunction(targetNode, semanticModel, parent);
-          break;
+        
+        // ループ処理
         case WhileStatementSyntax targetNode:
           result = new ItemWhile(targetNode, semanticModel, parent);
           break;
         case ForEachStatementSyntax targetNode:
           result = new ItemForEach(targetNode, semanticModel, parent);
           break;
+        
+        // その他
         case ReturnStatementSyntax targetNode:
           result = new ItemReturn(targetNode, semanticModel, parent);
           break;

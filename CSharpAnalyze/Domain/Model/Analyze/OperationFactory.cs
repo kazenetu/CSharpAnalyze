@@ -24,11 +24,23 @@ namespace CSharpAnalyze.Domain.Model.Analyze
       AbstractOperation instance = null;
       switch (operation)
       {
+        // 式系
         case ISimpleAssignmentOperation param:
           instance = new SimpleAssignment(param);
           break;
         case IInvocationOperation param:
           instance = new Invocation(param);
+          break;
+        case IBinaryOperation param:
+          instance = new Binary(param);
+          break;
+
+        // 参照系
+        case IInstanceReferenceOperation param:
+          instance = new InstanceReference(param);
+          break;
+        case IFieldReferenceOperation param:
+          instance = new FieldReference(param);
           break;
         case IPropertyReferenceOperation param:
           instance = new PropertyReference(param);
@@ -36,27 +48,24 @@ namespace CSharpAnalyze.Domain.Model.Analyze
         case ILocalReferenceOperation param:
           instance = new LocalReference(param);
           break;
-        case ILiteralOperation param:
-          instance = new Literal(param);
-          break;
-        case IFieldReferenceOperation param:
-          instance = new FieldReference(param);
-          break;
-        case IInstanceReferenceOperation param:
-          instance = new InstanceReference(param);
-          break;
-        case IObjectCreationOperation param:
-          instance = new ObjectCreation(param);
+        case IParameterReferenceOperation param:
+          instance = new ParameterReference(param);
           break;
         case IArgumentOperation param:
           instance = new Argument(param);
           break;
-        case IBinaryOperation param:
-          instance = new Binary(param);
+
+        // 生成系
+        case IObjectCreationOperation param:
+          instance = new ObjectCreation(param);
           break;
-        case IParameterReferenceOperation param:
-          instance = new ParameterReference(param);
+
+        // 直値
+        case ILiteralOperation param:
+          instance = new Literal(param);
           break;
+
+        // その他
         default:
           Console.Write($" [{operation.Kind} is none] ");
           break;

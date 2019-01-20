@@ -125,8 +125,8 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
             result.Append(" ");
           }
         }
-        result.Append(";");
       }
+      result.Append(";");
 
       return result.ToString();
     }

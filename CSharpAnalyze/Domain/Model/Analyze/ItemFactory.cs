@@ -62,7 +62,13 @@ namespace CSharpAnalyze.Domain.Model.Analyze
         case ElseClauseSyntax targetNode:
           result = new ItemElseClause(targetNode, semanticModel, parent);
           break;
-        
+        case SwitchStatementSyntax targetNode:
+          result = new ItemSwitch(targetNode, semanticModel, parent);
+          break;
+        case SwitchSectionSyntax targetNode:
+          result = new ItemSwitchCase(targetNode, semanticModel, parent);
+          break;
+
         // ループ処理
         case WhileStatementSyntax targetNode:
           result = new ItemWhile(targetNode, semanticModel, parent);

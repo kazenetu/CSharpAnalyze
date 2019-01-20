@@ -54,10 +54,16 @@ namespace CSharpAnalyze.Domain.Model.Analyze
         case IArgumentOperation param:
           instance = new Argument(param);
           break;
+        case IArrayCreationOperation param:
+          instance = new ArrayCreation(param);
+          break;
 
         // 生成系
         case IObjectCreationOperation param:
           instance = new ObjectCreation(param);
+          break;
+        case IArrayElementReferenceOperation param:
+          instance = new ArrayElementReference(param);
           break;
 
         // 直値

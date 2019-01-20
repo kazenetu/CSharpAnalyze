@@ -66,6 +66,10 @@ namespace CSharpAnalyze.Domain.Model.Analyze
           break;
 
         // その他
+        case IDefaultCaseClauseOperation  param:
+          instance = new DefalutCase(param);
+          break;
+
         default:
           Console.Write($" [{operation.Kind} is none] ");
           break;

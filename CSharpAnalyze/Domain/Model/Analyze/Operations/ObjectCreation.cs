@@ -11,6 +11,12 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
   internal class ObjectCreation : AbstractOperation
   {
     /// <summary>
+    /// NewキーワードのTypeName
+    /// </summary>
+    /// <remarks>クラスインスタンスの生成であることを格納する</remarks>
+    private const string NewKeywordTypeName = "Instance";
+
+    /// <summary>
     /// コンストラクタ
     /// </summary>
     /// <param name="operation">IOperationインスタンス</param>
@@ -24,7 +30,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
       }
 
       // newキーワード追加
-      Expressions.Add(new Expression("new", string.Empty));
+      Expressions.Add(new Expression("new", NewKeywordTypeName));
 
       // クラス生成
       foreach (var part in parts)

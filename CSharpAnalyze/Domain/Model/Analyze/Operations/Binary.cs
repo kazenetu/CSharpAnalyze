@@ -21,6 +21,12 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
         case BinaryOperatorKind.Add:
           operatorName = "+";
           break;
+        case BinaryOperatorKind.Multiply:
+          operatorName = "*";
+          break;
+        case BinaryOperatorKind.Divide:
+          operatorName = "/";
+          break;
         case BinaryOperatorKind.And:
           operatorName = "&&";
           break;
@@ -29,9 +35,6 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
           break;
         case BinaryOperatorKind.ConditionalOr:
           operatorName = "|";
-          break;
-        case BinaryOperatorKind.Divide:
-          operatorName = "/";
           break;
         case BinaryOperatorKind.Equals:
           operatorName = "==";
@@ -56,9 +59,6 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
           break;
         case BinaryOperatorKind.Or:
           operatorName = "||";
-          break;
-        case BinaryOperatorKind.Multiply:
-          operatorName = "*";
           break;
       }
       if (!string.IsNullOrEmpty(operatorName))

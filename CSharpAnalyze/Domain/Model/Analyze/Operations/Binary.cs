@@ -21,6 +21,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
         case BinaryOperatorKind.Add:
           operatorName = "+";
           break;
+        case BinaryOperatorKind.Subtract:
+          operatorName = "-";
+          break;
         case BinaryOperatorKind.Multiply:
           operatorName = "*";
           break;

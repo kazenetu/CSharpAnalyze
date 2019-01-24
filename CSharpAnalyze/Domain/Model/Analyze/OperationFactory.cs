@@ -34,6 +34,12 @@ namespace CSharpAnalyze.Domain.Model.Analyze
         case IBinaryOperation param:
           instance = new Binary(param);
           break;
+        case IIncrementOrDecrementOperation param:
+          instance = new Increment(param);
+          break;
+        case ICompoundAssignmentOperation param:
+          instance = new CompoundAssignment(param);
+          break;
 
         // 参照系
         case IInstanceReferenceOperation param:
@@ -64,6 +70,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze
           break;
         case IArrayCreationOperation param:
           instance = new ArrayCreation(param);
+          break;
+        case IVariableDeclaratorOperation param:
+          instance = new VariableDeclarator(param);
           break;
 
         // 直値

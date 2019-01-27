@@ -35,9 +35,10 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       {
         Labels.Add(OperationFactory.GetExpressionList(item.Children.First()));
       }
-      foreach(var item in operation.Clauses.Where(item => item is IDefaultCaseClauseOperation))
+
+      // defaultラベル設定
+      foreach (var item in operation.Clauses.Where(item => item is IDefaultCaseClauseOperation))
       {
-        // TODO defaultを扱えるようにする
         Labels.Add(OperationFactory.GetExpressionList(item));
       }
 
@@ -81,23 +82,31 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       foreach(var label in Labels)
       {
         result.Append(indexSpace);
-        result.Append("case ");
 
-        for (var i = 0; i < label.Count; i++)
+        if (label.Count == 1 && label.First().TypeName == CaseKind.Default.ToString())
         {
-          var isSetSpace = true;
-          if (i == label.Count - 1)
+          result.Append("default");
+        }
+        else
+        {
+          result.Append("case ");
+
+          for (var i = 0; i < label.Count; i++)
           {
-            isSetSpace = false;
-          }
-          else if (label[i].Name == "." || label[i + 1].Name == ".")
-          {
-            isSetSpace = false;
-          }
-          result.Append($"{label[i].Name}");
-          if (isSetSpace)
-          {
-            result.Append(" ");
+            var isSetSpace = true;
+            if (i == label.Count - 1)
+            {
+              isSetSpace = false;
+            }
+            else if (label[i].Name == "." || label[i + 1].Name == ".")
+            {
+              isSetSpace = false;
+            }
+            result.Append($"{label[i].Name}");
+            if (isSetSpace)
+            {
+              result.Append(" ");
+            }
           }
         }
 

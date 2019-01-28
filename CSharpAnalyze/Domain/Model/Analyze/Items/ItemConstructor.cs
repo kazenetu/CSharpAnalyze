@@ -1,5 +1,6 @@
 ﻿using CSharpAnalyze.Domain.Event;
 using CSharpAnalyze.Domain.PublicInterfaces;
+using CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -12,7 +13,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
   /// <summary>
   /// アイテム：コンストラクタ
   /// </summary>
-  internal class ItemConstructor : AbstractItem
+  internal class ItemConstructor : AbstractItem, IItemConstructor
   {
     /// <summary>
     /// パラメーターリスト

@@ -1,4 +1,5 @@
 ﻿using CSharpAnalyze.Domain.PublicInterfaces;
+using CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
@@ -12,7 +13,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
   /// <summary>
   /// アイテム：式
   /// </summary>
-  internal class ItemStatementExpression : AbstractItem
+  internal class ItemStatementExpression : AbstractItem, IItemStatementExpression
   {
     /// <summary>
     /// 左辺リスト

@@ -1,5 +1,6 @@
 ﻿using CSharpAnalyze.Domain.Event;
 using CSharpAnalyze.Domain.PublicInterfaces;
+using CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -12,7 +13,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
   /// <summary>
   /// アイテム：ローカルメソッド
   /// </summary>
-  internal class ItemLocalFunction : AbstractItem
+  internal class ItemLocalFunction : AbstractItem, IItemLocalFunction
   {
     /// <summary>
     /// メソッドの型リスト

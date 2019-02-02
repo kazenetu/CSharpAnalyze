@@ -114,7 +114,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze
     }
 
     /// <summary>
-    /// OperationKind(またはKind)に紐づくExpressionインスタンスを取得
+    /// 演算子用Expressionインスタンスを取得
     /// </summary>
     /// <param name="operation">IOperationインスタンス</param>
     /// <returns>Expressionインスタンス(Listで表現)</returns>

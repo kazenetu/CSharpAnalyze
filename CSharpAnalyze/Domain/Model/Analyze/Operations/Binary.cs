@@ -13,62 +13,13 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
     /// <param name="operation">IOperationインスタンス</param>
     public Binary(IBinaryOperation operation)
     {
+      // 左辺
       Expressions.AddRange(OperationFactory.GetExpressionList(operation.LeftOperand));
 
-      var operatorName = string.Empty;
-      switch (operation.OperatorKind)
-      {
-        case BinaryOperatorKind.Add:
-          operatorName = "+";
-          break;
-        case BinaryOperatorKind.Subtract:
-          operatorName = "-";
-          break;
-        case BinaryOperatorKind.Multiply:
-          operatorName = "*";
-          break;
-        case BinaryOperatorKind.Divide:
-          operatorName = "/";
-          break;
-        case BinaryOperatorKind.And:
-          operatorName = "&&";
-          break;
-        case BinaryOperatorKind.ConditionalAnd:
-          operatorName = "&";
-          break;
-        case BinaryOperatorKind.ConditionalOr:
-          operatorName = "|";
-          break;
-        case BinaryOperatorKind.Equals:
-          operatorName = "==";
-          break;
-        case BinaryOperatorKind.ExclusiveOr:
-          operatorName = "^";
-          break;
-        case BinaryOperatorKind.GreaterThan:
-          operatorName = ">";
-          break;
-        case BinaryOperatorKind.GreaterThanOrEqual:
-          operatorName = ">=";
-          break;
-        case BinaryOperatorKind.LessThan:
-          operatorName = "<";
-          break;
-        case BinaryOperatorKind.LessThanOrEqual:
-          operatorName = "<=";
-          break;
-        case BinaryOperatorKind.NotEquals:
-          operatorName = "!=";
-          break;
-        case BinaryOperatorKind.Or:
-          operatorName = "||";
-          break;
-      }
-      if (!string.IsNullOrEmpty(operatorName))
-      {
-        Expressions.Add(new Expression(operatorName, string.Empty));
-      }
+      // 演算子
+      Expressions.AddRange(Expression.GetOperationKindExpression(operation));
 
+      // 右辺
       Expressions.AddRange(OperationFactory.GetExpressionList(operation.RightOperand));
     }
   }

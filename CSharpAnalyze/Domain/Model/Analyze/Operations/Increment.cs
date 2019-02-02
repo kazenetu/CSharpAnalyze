@@ -18,15 +18,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
       Expressions.AddRange(OperationFactory.GetExpressionList(operation.Target));
 
       // インクリメント・デクリメント
-      switch (operation.Kind)
-      {
-        case OperationKind.Increment:
-          Expressions.Add(new Expression("++", operation.Kind.ToString()));
-          break;
-        case OperationKind.Decrement:
-          Expressions.Add(new Expression("--", operation.Kind.ToString()));
-          break;
-      }
+      Expressions.AddRange(Expression.GetOperationKindExpression(operation));
     }
   }
 }

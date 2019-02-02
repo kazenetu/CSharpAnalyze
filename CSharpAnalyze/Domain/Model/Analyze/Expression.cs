@@ -1,6 +1,8 @@
 ﻿using CSharpAnalyze.Domain.PublicInterfaces;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Operations;
 using System;
+using System.Collections.Generic;
 
 namespace CSharpAnalyze.Domain.Model.Analyze
 {
@@ -111,5 +113,89 @@ namespace CSharpAnalyze.Domain.Model.Analyze
       return symbol.TypeKind.ToString();
     }
 
+    /// <summary>
+    /// OperationKind(またはKind)に紐づくExpressionインスタンスを取得
+    /// </summary>
+    /// <param name="operation">IOperationインスタンス</param>
+    /// <returns>Expressionインスタンス(Listで表現)</returns>
+    internal static List<Expression> GetOperationKindExpression(IOperation operation)
+    {
+      var result = new List<Expression>();
+
+      var operatorName = string.Empty;
+      var operatorType = string.Empty;
+      switch (operation)
+      {
+        case IBinaryOperation binaryOperation:
+          switch (binaryOperation.OperatorKind)
+          {
+            case BinaryOperatorKind.Add:
+              operatorName = "+";
+              break;
+            case BinaryOperatorKind.Subtract:
+              operatorName = "-";
+              break;
+            case BinaryOperatorKind.Multiply:
+              operatorName = "*";
+              break;
+            case BinaryOperatorKind.Divide:
+              operatorName = "/";
+              break;
+            case BinaryOperatorKind.And:
+              operatorName = "&&";
+              break;
+            case BinaryOperatorKind.ConditionalAnd:
+              operatorName = "&";
+              break;
+            case BinaryOperatorKind.ConditionalOr:
+              operatorName = "|";
+              break;
+            case BinaryOperatorKind.Equals:
+              operatorName = "==";
+              break;
+            case BinaryOperatorKind.ExclusiveOr:
+              operatorName = "^";
+              break;
+            case BinaryOperatorKind.GreaterThan:
+              operatorName = ">";
+              break;
+            case BinaryOperatorKind.GreaterThanOrEqual:
+              operatorName = ">=";
+              break;
+            case BinaryOperatorKind.LessThan:
+              operatorName = "<";
+              break;
+            case BinaryOperatorKind.LessThanOrEqual:
+              operatorName = "<=";
+              break;
+            case BinaryOperatorKind.NotEquals:
+              operatorName = "!=";
+              break;
+            case BinaryOperatorKind.Or:
+              operatorName = "||";
+              break;
+          }
+          operatorType = binaryOperation.OperatorKind.ToString();
+          break;
+        default:
+          switch (operation.Kind)
+          {
+            case OperationKind.Increment:
+              operatorName = "++";
+              break;
+            case OperationKind.Decrement:
+              operatorName = "--";
+              break;
+          }
+          operatorType = operation.Kind.ToString();
+          break;
+      }
+      if (!string.IsNullOrEmpty(operatorName))
+      {
+        result.Add(new Expression(operatorName, operatorType));
+      }
+
+      return result;
+    }
   }
 }

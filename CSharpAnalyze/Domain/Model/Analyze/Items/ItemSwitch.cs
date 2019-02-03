@@ -1,4 +1,5 @@
 ﻿using CSharpAnalyze.Domain.PublicInterfaces;
+using CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
@@ -11,7 +12,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
   /// <summary>
   /// アイテム：Switch
   /// </summary>
-  internal class ItemSwitch : AbstractItem
+  internal class ItemSwitch : AbstractItem, IItemSwitch
   {
     /// <summary>
     /// 条件

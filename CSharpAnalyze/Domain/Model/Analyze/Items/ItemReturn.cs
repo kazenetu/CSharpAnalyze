@@ -1,4 +1,5 @@
 ﻿using CSharpAnalyze.Domain.PublicInterfaces;
+using CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
@@ -11,7 +12,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
   /// <summary>
   /// アイテム：return
   /// </summary>
-  internal class ItemReturn : AbstractItem
+  internal class ItemReturn : AbstractItem, IItemReturn
   {
     /// <summary>
     /// 戻り値リスト

@@ -1,4 +1,5 @@
 ﻿using CSharpAnalyze.Domain.PublicInterfaces;
+using CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
   /// <summary>
   /// アイテム：continue
   /// </summary>
-  internal class ItemContinue : AbstractItem
+  internal class ItemContinue : AbstractItem, IItemContinue
   {
     /// <summary>
     /// コンストラクタ

@@ -54,13 +54,7 @@ namespace CSharpAnalyze.Domain.Service
       // 解析処理収集
       foreach (var model in models)
       {
-        // HACK まずTestLogic・SearchResponse・SearchRequestだけ確認
-        if (model.SyntaxTree.FilePath.Contains("TestLogic", System.StringComparison.CurrentCulture) ||
-            model.SyntaxTree.FilePath.Contains("SearchResponse", System.StringComparison.CurrentCulture) ||
-            model.SyntaxTree.FilePath.Contains("SearchRequest", System.StringComparison.CurrentCulture))
-        {
-          FileRoot.Create(model);
-        }
+        FileRoot.Create(model);
       }
     }
     #endregion

@@ -1,8 +1,5 @@
-﻿using CSharpAnalyze.Domain.Event;
-using CSharpAnalyze.Domain.Event.Analyze;
-using CSharpAnalyze.Domain.Service;
+﻿using CSharpAnalyze.Domain.Service;
 using CSharpAnalyze.Infrastructure;
-using System;
 
 namespace CSharpAnalyze.ApplicationService
 {

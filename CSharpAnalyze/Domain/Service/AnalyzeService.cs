@@ -2,6 +2,7 @@
 using CSharpAnalyze.Domain.Model.File;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -46,7 +47,8 @@ namespace CSharpAnalyze.Domain.Service
       var models = CreateModels();
       if (!models.Any())
       {
-        // TODO エラー
+        // リスト作成失敗
+        throw new Exception("ファイルの解析に失敗しました。");
       }
 
       // 解析処理収集

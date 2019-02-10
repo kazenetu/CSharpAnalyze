@@ -1,4 +1,4 @@
-﻿using CSharpAnalyze.Domain.Model.File;
+﻿using CSharpAnalyze.Domain.PublicInterfaces.Repository;
 using CSharpAnalyze.Domain.Service;
 using CSharpAnalyze.Infrastructure;
 

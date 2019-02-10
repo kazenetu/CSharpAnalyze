@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace CSharpAnalyze.Domain.Model.File
+namespace CSharpAnalyze.Domain.PublicInterfaces.Repository
 {
   /// <summary>
   /// C#ファイルデータ読み込み

@@ -1,4 +1,5 @@
-﻿using CSharpAnalyze.Domain.Service;
+﻿using CSharpAnalyze.Domain.Model.File;
+using CSharpAnalyze.Domain.Service;
 using CSharpAnalyze.Infrastructure;
 
 namespace CSharpAnalyze.ApplicationService
@@ -9,9 +10,23 @@ namespace CSharpAnalyze.ApplicationService
   /// <remarks>リクエストとレスポンスの変換アダプタなどを行う</remarks>
   public class AnalyzeApplication
   {
+    /// <summary>
+    /// C#解析処理
+    /// </summary>
+    /// <param name="rootPath">対象ルートフォルダ</param>
     public void Analyze(string rootPath)
     {
-      var fileRepository = new CSFileRepository();
+      // 対象フォルダの解析を行う
+      Analyze(rootPath, new CSFileRepository());
+    }
+
+    /// <summary>
+    /// C#解析処理
+    /// </summary>
+    /// <param name="rootPath">対象ルートフォルダ</param>
+    /// <param name="fileRepository">ファイルリポジトリ</param>
+    public void Analyze(string rootPath, ICSFileRepository fileRepository)
+    {
       var analizeService = new AnalyzeService(rootPath, fileRepository);
 
       // 対象フォルダの解析を行う

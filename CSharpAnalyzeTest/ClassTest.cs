@@ -11,6 +11,40 @@ namespace CSharpAnalyzeTest
   public class ClassTest : TestBase
   {
     /// <summary>
+    /// ソース作成パターン
+    /// </summary>
+    private enum CreatePattern
+    {
+      Standard,
+      SubClass,
+      InnerClass
+    }
+
+    /// <summary>
+    /// ファイル名、ソースコード取得処理
+    /// </summary>
+    /// <param name="pattern">生成パターン</param>
+    /// <returns>ファイルパスとソースコード</returns>
+    private (string filePath, string source) CreateSource(CreatePattern pattern)
+    {
+      var source = new StringBuilder();
+      var filePath = string.Empty;
+
+      switch (pattern)
+      {
+        case CreatePattern.Standard:
+          filePath = "Test.cs";
+
+          source.AppendLine("public class ClassTest");
+          source.AppendLine("{");
+          source.AppendLine("}");
+          break;
+      }
+
+      return (filePath, source.ToString());
+    }
+
+    /// <summary>
     /// Setup
     /// </summary>
     public ClassTest():base()
@@ -73,6 +107,6 @@ namespace CSharpAnalyzeTest
       // 解析実行
       CSAnalyze.Analyze(string.Empty, Files);
     }
+   
   }
-
 }

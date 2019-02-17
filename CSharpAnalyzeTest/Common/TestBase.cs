@@ -42,6 +42,14 @@ namespace CSharpAnalyzeTest.Common
       baseSource.AppendLine("}}");
       BaseSource = baseSource.ToString();
 
+      // 解析終了時に呼ばれるイベントを登録
+      EventContainer.Register<IAnalyzed>(CSAnalyze, (ev) =>
+      {
+        var method = Files.GetDelegateMethod(ev.FilePath);
+        if (method == null) return;
+
+        method(ev);
+      });
     }
 
     /// <summary>
@@ -60,10 +68,10 @@ namespace CSharpAnalyzeTest.Common
     /// <param name="fileName">ファイル名</param>
     /// <param name="addUsing">追加Using</param>
     /// <param name="sourceCode">ソースコード</param>
-    protected void CreateFileData(string fileName,string addUsing, string sourceCode)
+    protected void CreateFileData(string fileName,string addUsing, string sourceCode, Action<IAnalyzed> delegateMethod)
     {
-      var source = string.Format(CultureInfo.CurrentCulture, BaseSource, addUsing, sourceCode);
-      Files.Add(fileName, source);
+      var source = string.Format(CultureInfo.CurrentCulture, BaseSource, addUsing, sourceCode, delegateMethod);
+      Files.Add(fileName, source, delegateMethod);
     }
   }
 }

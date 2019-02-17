@@ -1,7 +1,5 @@
-using CSharpAnalyze.Domain.Event;
 using CSharpAnalyze.Domain.PublicInterfaces;
 using CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems;
-using CSharpAnalyze.Domain.PublicInterfaces.Events;
 using CSharpAnalyzeTest.Common;
 using System;
 using System.Text;

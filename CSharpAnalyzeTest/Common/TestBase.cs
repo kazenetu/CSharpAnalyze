@@ -68,6 +68,7 @@ namespace CSharpAnalyzeTest.Common
     /// <param name="fileName">ファイル名</param>
     /// <param name="addUsing">追加Using</param>
     /// <param name="sourceCode">ソースコード</param>
+    /// <param name="delegateMethod">イベント処理</param>
     protected void CreateFileData(string fileName,string addUsing, string sourceCode, Action<IAnalyzed> delegateMethod)
     {
       var source = string.Format(CultureInfo.CurrentCulture, BaseSource, addUsing, sourceCode, delegateMethod);

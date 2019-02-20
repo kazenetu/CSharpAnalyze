@@ -25,8 +25,9 @@ namespace CSharpAnalyzeTest
     /// </summary>
     /// <param name="pattern">生成パターン</param>
     /// <returns>ファイルパスとソースコード</returns>
-    private (string filePath, string source) CreateSource(CreatePattern pattern)
+    private FileData CreateSource(CreatePattern pattern)
     {
+      var usingList = new StringBuilder();
       var source = new StringBuilder();
       var filePath = string.Empty;
 
@@ -41,7 +42,7 @@ namespace CSharpAnalyzeTest
           break;
       }
 
-      return (filePath, source.ToString());
+      return new FileData(filePath, usingList.ToString(), source.ToString());
     }
 
     /// <summary>

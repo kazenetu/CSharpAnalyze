@@ -56,14 +56,8 @@ namespace CSharpAnalyzeTest
     [Fact(DisplayName = "Standard")]
     public void StandardTest()
     {
-      // テストコード生成
-      var source = new StringBuilder();
-      source.AppendLine("public class ClassTest");
-      source.AppendLine("{");
-      source.AppendLine("}");
-
       // テストコードを追加
-      CreateFileData("Test.cs", "", source.ToString(), (ev) =>
+      CreateFileData(CreateSource(CreatePattern.Standard), (ev) =>
          {
            // ファイル名の確認
            Assert.True(ev.FilePath == "Test.cs");

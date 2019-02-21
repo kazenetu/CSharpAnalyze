@@ -1,4 +1,4 @@
-using CSharpAnalyze.Domain.PublicInterfaces;
+ï»¿using CSharpAnalyze.Domain.PublicInterfaces;
 using CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems;
 using CSharpAnalyzeTest.Common;
 using System;
@@ -7,11 +7,11 @@ using Xunit;
 
 namespace CSharpAnalyzeTest
 {
-  [Trait("ƒNƒ‰ƒX‚ÌƒeƒXƒg",nameof(ClassTest))]
+  [Trait("ã‚¯ãƒ©ã‚¹ã®ãƒ†ã‚¹ãƒˆ",nameof(ClassTest))]
   public class ClassTest : TestBase
   {
     /// <summary>
-    /// ƒ\[ƒXì¬ƒpƒ^[ƒ“
+    /// ã‚½ãƒ¼ã‚¹ä½œæˆãƒ‘ã‚¿ãƒ¼ãƒ³
     /// </summary>
     private enum CreatePattern
     {
@@ -21,10 +21,10 @@ namespace CSharpAnalyzeTest
     }
 
     /// <summary>
-    /// ƒtƒ@ƒCƒ‹–¼Aƒ\[ƒXƒR[ƒhæ“¾ˆ—
+    /// ãƒ•ã‚¡ã‚¤ãƒ«åã€ã‚½ãƒ¼ã‚¹ã‚³ãƒ¼ãƒ‰å–å¾—å‡¦ç†
     /// </summary>
-    /// <param name="pattern">¶¬ƒpƒ^[ƒ“</param>
-    /// <returns>ƒtƒ@ƒCƒ‹ƒpƒX‚Æƒ\[ƒXƒR[ƒh</returns>
+    /// <param name="pattern">ç”Ÿæˆãƒ‘ã‚¿ãƒ¼ãƒ³</param>
+    /// <returns>ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹ã¨ã‚½ãƒ¼ã‚¹ã‚³ãƒ¼ãƒ‰</returns>
     private FileData CreateSource(CreatePattern pattern)
     {
       var usingList = new StringBuilder();
@@ -56,50 +56,50 @@ namespace CSharpAnalyzeTest
     [Fact(DisplayName = "Standard")]
     public void StandardTest()
     {
-      // ƒeƒXƒgƒR[ƒh‚ğ’Ç‰Á
+      // ãƒ†ã‚¹ãƒˆã‚³ãƒ¼ãƒ‰ã‚’è¿½åŠ 
       CreateFileData(CreateSource(CreatePattern.Standard), (ev) =>
          {
-           // ƒtƒ@ƒCƒ‹–¼‚ÌŠm”F
+           // ãƒ•ã‚¡ã‚¤ãƒ«åã®ç¢ºèª
            Assert.True(ev.FilePath == "Test.cs");
 
-           // ‰ğÍŒ‹‰Ê‚Ì‘¶İŠm”F
+           // è§£æçµæœã®å­˜åœ¨ç¢ºèª
            Assert.NotNull(ev.FileRoot);
 
-           // ŠO•”QÆ‚Ì‘¶İŠm”F
+           // å¤–éƒ¨å‚ç…§ã®å­˜åœ¨ç¢ºèª
            Assert.True(ev.FileRoot.OtherFiles.Count == 0);
 
-           // ‰ğÍŒ‹‰Ê‚ÌŒ”Šm”F
+           // è§£æçµæœã®ä»¶æ•°ç¢ºèª
            Assert.True(ev.FileRoot.Members.Count == 1);
 
-           // IItemClassƒCƒ“ƒXƒ^ƒ“ƒX‚ÌŠm”F
+           // IItemClassã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã®ç¢ºèª
            Assert.True(ev.FileRoot.Members[0] is IItemClass);
 
-           // IItemClassƒCƒ“ƒXƒ^ƒ“ƒX‚ğæ“¾
+           // IItemClassã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’å–å¾—
            var itemClass = ev.FileRoot.Members[0] as IItemClass;
 
-           // ƒX[ƒp[ƒNƒ‰ƒX‚Ìİ’èŠm”F
+           // ã‚¹ãƒ¼ãƒ‘ãƒ¼ã‚¯ãƒ©ã‚¹ã®è¨­å®šç¢ºèª
            Assert.True(itemClass.SuperClass.Count == 0);
 
-           // e‚Ì‘¶İŠm”F
+           // è¦ªã®å­˜åœ¨ç¢ºèª
            Assert.Null(itemClass.Parent);
 
-           // ƒNƒ‰ƒX–¼‚ÌŠm”F
+           // ã‚¯ãƒ©ã‚¹åã®ç¢ºèª
            Assert.True(itemClass.Name == "ClassTest");
 
-           // ƒXƒR[ƒvCüq‚ÌŒ”Šm”F
+           // ã‚¹ã‚³ãƒ¼ãƒ—ä¿®é£¾å­ã®ä»¶æ•°ç¢ºèª
            Assert.True(itemClass.Modifiers.Count == 1);
 
-           // ƒXƒR[ƒvCüq‚Ì“à—eŠm”F
+           // ã‚¹ã‚³ãƒ¼ãƒ—ä¿®é£¾å­ã®å†…å®¹ç¢ºèª
            Assert.Contains("public", itemClass.Modifiers);
 
-           // ItemType‚ÌŠm”F
+           // ItemTypeã®ç¢ºèª
            Assert.True(itemClass.ItemType == ItemTypes.Class);
 
-           // ƒNƒ‰ƒX“à‚Ì—v‘f‚Ì‘¶İŠm”F
+           // ã‚¯ãƒ©ã‚¹å†…ã®è¦ç´ ã®å­˜åœ¨ç¢ºèª
            Assert.True(itemClass.Members.Count == 0);
          });
 
-      // ‰ğÍÀs
+      // è§£æå®Ÿè¡Œ
       CSAnalyze.Analyze(string.Empty, Files);
     }
    

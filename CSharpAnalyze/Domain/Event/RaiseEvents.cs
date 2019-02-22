@@ -20,6 +20,7 @@ namespace CSharpAnalyze.Domain.Event
       {
         // ファイルパスなしでイベント送信
         EventContainer.Raise(new OtherFileReferenced(string.Empty, targetSymbol.Name));
+        return;
       }
 
       var targetNodeFilePath = targetNode.SyntaxTree.FilePath;

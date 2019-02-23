@@ -22,11 +22,13 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// <summary>
     /// 宣言部が型推論か否か
     /// </summary>
+    /// <remarks>定義済の場合は設定なし</remarks>
     public bool IsVar { get; }
 
     /// <summary>
     /// 宣言部の型リスト
     /// </summary>
+    /// <remarks>定義済の場合は設定なし</remarks>
     public List<IExpression> Types { get; } = new List<IExpression>();
 
     /// <summary>
@@ -49,26 +51,26 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     {
       ItemType = ItemTypes.MethodStatement;
 
-      // 型設定
-      IsVar = node.Declaration.Type.IsVar;
-      var declaredSymbol = semanticModel.GetDeclaredSymbol(node.Declaration.Variables.First());
-      var parts = ((ILocalSymbol)declaredSymbol).Type.ToDisplayParts(SymbolDisplayFormat.MinimallyQualifiedFormat);
-      foreach (var part in parts)
-      {
-        var name = $"{part}";
-        var type = Expression.GetSymbolTypeName(part.Symbol);
-        if (part.Kind == SymbolDisplayPartKind.ClassName)
-        {
-          // 外部ファイル参照イベント発行
-          RaiseEvents.RaiseOtherFileReferenced(node, part.Symbol);
-        }
-
-        Types.Add(new Expression(name, type));
-      }
-
       // 宣言部
       if(node.Declaration != null)
       {
+        // 型設定
+        IsVar = node.Declaration.Type.IsVar;
+        var declaredSymbol = semanticModel.GetDeclaredSymbol(node.Declaration.Variables.First());
+        var parts = ((ILocalSymbol)declaredSymbol).Type.ToDisplayParts(SymbolDisplayFormat.MinimallyQualifiedFormat);
+        foreach (var part in parts)
+        {
+          var name = $"{part}";
+          var type = Expression.GetSymbolTypeName(part.Symbol);
+          if (part.Kind == SymbolDisplayPartKind.ClassName)
+          {
+            // 外部ファイル参照イベント発行
+            RaiseEvents.RaiseOtherFileReferenced(node, part.Symbol);
+          }
+
+          Types.Add(new Expression(name, type));
+        }
+
         // ローカル定義
         foreach (var variable in node.Declaration.Variables)
         {

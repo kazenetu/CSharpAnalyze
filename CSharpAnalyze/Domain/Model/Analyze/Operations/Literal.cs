@@ -18,8 +18,15 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
       {
         literalValue = $"\"{literalValue}\"";
       }
-      Expressions.Add(new Expression(literalValue.ToString(), Expression.GetSymbolTypeName(operation.Type)));
-
+      if(literalValue is null)
+      {
+        var type = "null";
+        Expressions.Add(new Expression(type, type));
+      }
+      else
+      {
+        Expressions.Add(new Expression(literalValue.ToString(), Expression.GetSymbolTypeName(operation.Type)));
+      }
     }
   }
 }

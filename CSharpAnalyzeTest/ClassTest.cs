@@ -8,7 +8,7 @@ using Xunit;
 
 namespace CSharpAnalyzeTest
 {
-  [Trait("クラスのテスト",nameof(ClassTest))]
+  [Trait("クラスのテスト", nameof(ClassTest))]
   public class ClassTest : TestBase
   {
     /// <summary>
@@ -68,7 +68,7 @@ namespace CSharpAnalyzeTest
     /// <summary>
     /// Setup
     /// </summary>
-    public ClassTest():base()
+    public ClassTest() : base()
     {
       System.Diagnostics.Debug.WriteLine($"Setup {Environment.CurrentDirectory}");
     }

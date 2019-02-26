@@ -1,3 +1,4 @@
+﻿using CSharpAnalyze.Domain.PublicInterfaces;
 using CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems;
 using CSharpAnalyzeTest.Common;
 using System;
@@ -93,37 +94,13 @@ namespace CSharpAnalyzeTest
            var itemClass = ev.FileRoot.Members[0] as IItemClass;
 
            // クラス内の要素の存在確認
-           Assert.True(itemClass.Members.Count == 2);
-
-           var fields = new List<(string name, string type, bool isInit, object init)>();
-           fields.Add(("fieldString", "string", false, null));
-           fields.Add(("fieldInt", "int", true, "1"));
-
-           var memberCount = 0;
-           foreach (var member in itemClass.Members)
+           var fields = new List<(string name, string type, bool isInit, List<string> init)>
            {
-             var memberField = member as IItemField;
-             if (memberField == null) continue;
+             ("fieldString", "string", false, null),
+             ("fieldInt", "int", true, new List<string>() { "1" })
+           };
 
-             var memberFieldType = new StringBuilder();
-             memberField.FieldTypes.ForEach(item => memberFieldType.Append(item.Name));
-             var targetFileds = fields.Where(field => field.name == memberField.Name && field.type == memberFieldType.ToString());
-             if (!targetFileds.Any())
-             {
-               continue;
-             }
-
-             var targetFiled = targetFileds.First();
-             if (targetFiled.isInit)
-             {
-               if (memberField.DefaultValues.Count != 1) continue;
-               if (memberField.DefaultValues[0].Name != targetFiled.init.ToString()) continue;
-             }
-
-             memberCount++;
-           }
-
-           Assert.True(itemClass.Members.Count == memberCount);
+           Assert.True(itemClass.Members.Count == GetMemberCount(itemClass, fields));
          });
 
       // 解析実行
@@ -160,44 +137,62 @@ namespace CSharpAnalyzeTest
            var itemClass = ev.FileRoot.Members[0] as IItemClass;
 
            // クラス内の要素の存在確認
-           Assert.True(itemClass.Members.Count == 3);
-
-           var fields = new List<(string name, string type, bool isInit, object init)>();
-           fields.Add(("fieldClass1", "ClassTest", false, null));
-           fields.Add(("fieldClass2", "ClassTest", true, "new ClassTest()"));
-           fields.Add(("fieldClass3", "ClassTest", true, "null"));
-
-           var memberCount = 0;
-           foreach (var member in itemClass.Members)
+           var fields = new List<(string name, string type, bool isInit, List<string> init)>
            {
-             var memberField = member as IItemField;
-             if (memberField == null) continue;
+             ("fieldClass1", "ClassTest", false, null),
+             ("fieldClass2", "ClassTest", true, new List<string>() { "new", "ClassTest", "(", ")" }),
+             ("fieldClass3", "ClassTest", true, new List<string>() { "null" })
+           };
+           Assert.True(itemClass.Members.Count == GetMemberCount(itemClass, fields));
 
-             var memberFieldType = new StringBuilder();
-             memberField.FieldTypes.ForEach(item => memberFieldType.Append(item.Name));
-             var targetFileds = fields.Where(field => field.name == memberField.Name && field.type == memberFieldType.ToString());
-             if (!targetFileds.Any())
-             {
-               continue;
-             }
-
-             var targetFiled = targetFileds.First();
-             if (targetFiled.isInit)
-             {
-               if (memberField.DefaultValues.Count != 1) continue;
-               if (memberField.DefaultValues[0].Name != targetFiled.init.ToString()) continue;
-             }
-
-             memberCount++;
-           }
-
-           Assert.True(itemClass.Members.Count == memberCount);
          });
 
       // 解析実行
       CSAnalyze.Analyze(string.Empty, Files);
     }
 
+    /// <summary>
+    /// メンバー数を取得
+    /// </summary>
+    /// <param name="itemClass">対象のアイテムクラス</param>
+    /// <param name="condition">条件</param>
+    /// <returns>条件が一致するメンバー数</returns>
+    private int GetMemberCount(IItemClass itemClass, List<(string name, string type, bool isInit, List<string> init)> condition)
+    {
+      var memberCount = 0;
+      foreach (var member in itemClass.Members)
+      {
+        // フィールド以外は次のmemberへ
+        if (!(member is IItemField memberField)) continue;
+
+        // 型の取得と一致確認
+        var memberFieldType = new StringBuilder();
+        memberField.FieldTypes.ForEach(item => memberFieldType.Append(item.Name));
+        var targetFileds = condition.Where(field => field.name == memberField.Name && field.type == memberFieldType.ToString());
+        if (!targetFileds.Any()) continue;
+
+        // 条件取得
+        var (name, type, isInit, init) = targetFileds.First();
+
+        // 初期値が設定されている
+        if (isInit)
+        {
+          // 初期値の数が一致しない場合は次のmemberへ
+          if (memberField.DefaultValues.Count != init.Count) continue;
+
+          // 初期値のコレクションと条件のコレクションの一致確認
+          var defaultValueIndex = 0;
+          memberField.DefaultValues.ForEach(value => { if (value.Name == init[defaultValueIndex]) defaultValueIndex++; });
+
+          // 初期値と条件が完全に一致しない場合は次のmemberへ
+          if (memberField.DefaultValues.Count != defaultValueIndex) continue;
+        }
+
+        memberCount++;
+      }
+
+      return memberCount;
+    }
 
   }
 }

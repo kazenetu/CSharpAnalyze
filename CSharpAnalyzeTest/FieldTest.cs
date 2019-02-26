@@ -47,8 +47,6 @@ namespace CSharpAnalyzeTest
         case CreatePattern.ClassField:
           filePath = "ClassField.cs";
 
-          //usingList.AppendLine("using ClassTest;");
-
           source.AppendLine("public class ClassField");
           source.AppendLine("{");
           source.AppendLine("  public ClassTest fieldClass1;");
@@ -99,8 +97,7 @@ namespace CSharpAnalyzeTest
              ("fieldString", "string", false, null),
              ("fieldInt", "int", true, new List<string>() { "1" })
            };
-
-           Assert.True(itemClass.Members.Count == GetMemberCount(itemClass, fields));
+           Assert.Equal(fields.Count , GetMemberCount(itemClass, fields));
          });
 
       // 解析実行
@@ -143,8 +140,7 @@ namespace CSharpAnalyzeTest
              ("fieldClass2", "ClassTest", true, new List<string>() { "new", "ClassTest", "(", ")" }),
              ("fieldClass3", "ClassTest", true, new List<string>() { "null" })
            };
-           Assert.True(itemClass.Members.Count == GetMemberCount(itemClass, fields));
-
+           Assert.Equal(fields.Count , GetMemberCount(itemClass, fields));
          });
 
       // 解析実行
@@ -165,9 +161,11 @@ namespace CSharpAnalyzeTest
         // フィールド以外は次のmemberへ
         if (!(member is IItemField memberField)) continue;
 
-        // 型の取得と一致確認
+        // 型の取得
         var memberFieldType = new StringBuilder();
         memberField.FieldTypes.ForEach(item => memberFieldType.Append(item.Name));
+
+        // 型の一致確認
         var targetFileds = condition.Where(field => field.name == memberField.Name && field.type == memberFieldType.ToString());
         if (!targetFileds.Any()) continue;
 
@@ -181,11 +179,8 @@ namespace CSharpAnalyzeTest
           if (memberField.DefaultValues.Count != init.Count) continue;
 
           // 初期値のコレクションと条件のコレクションの一致確認
-          var defaultValueIndex = 0;
-          memberField.DefaultValues.ForEach(value => { if (value.Name == init[defaultValueIndex]) defaultValueIndex++; });
-
-          // 初期値と条件が完全に一致しない場合は次のmemberへ
-          if (memberField.DefaultValues.Count != defaultValueIndex) continue;
+          var defaultValues = memberField.DefaultValues.Select(value => value.Name).ToList();
+          Assert.Equal(defaultValues, init);
         }
 
         memberCount++;

@@ -43,7 +43,10 @@ namespace CSharpAnalyze.Domain.Model.Analyze
         case ConstructorDeclarationSyntax targetNode:
           result = new ItemConstructor(targetNode, semanticModel, parent);
           break;
-        
+        case EnumDeclarationSyntax targetNode:
+          result = new ItemEnum(targetNode, semanticModel, parent);
+          break;
+
         // ローカル定義
         case LocalFunctionStatementSyntax targetNode:
           result = new ItemLocalFunction(targetNode, semanticModel, parent);

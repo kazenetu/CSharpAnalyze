@@ -91,12 +91,12 @@ namespace CSharpAnalyzeTest
            var itemClass = ev.FileRoot.Members[0] as IItemClass;
 
            // クラス内の要素の存在確認
-           var fields = new List<(string name, string type, bool isInit, List<string> init)>
+           var fields = new List<(List<string> modifiers, string name, string type, bool isInit, List<string> init)>
            {
-             ("fieldString", "string", false, null),
-             ("fieldInt", "int", true, new List<string>() { "1" })
+             (new List<string>() { "public" }, "fieldString", "string", false, null),
+             (new List<string>() { "public" }, "fieldInt", "int", true, new List<string>() { "1" })
            };
-           Assert.Equal(fields.Count , GetMemberCount(itemClass, fields));
+           Assert.Equal(fields.Count, GetMemberCount(itemClass, fields));
          });
 
       // 解析実行
@@ -133,11 +133,11 @@ namespace CSharpAnalyzeTest
            var itemClass = ev.FileRoot.Members[0] as IItemClass;
 
            // クラス内の要素の存在確認
-           var fields = new List<(string name, string type, bool isInit, List<string> init)>
+           var fields = new List<(List<string> modifiers, string name, string type, bool isInit, List<string> init)>
            {
-             ("fieldClass1", "ClassTest", false, null),
-             ("fieldClass2", "ClassTest", true, new List<string>() { "new", "ClassTest", "(", ")" }),
-             ("fieldClass3", "ClassTest", true, new List<string>() { "null" })
+             (new List<string>() { "public" }, "fieldClass1", "ClassTest", false, null),
+             (new List<string>() { "public" }, "fieldClass2", "ClassTest", true, new List<string>() { "new", "ClassTest", "(", ")" }),
+             (new List<string>() { "public" }, "fieldClass3", "ClassTest", true, new List<string>() { "null" })
            };
            Assert.Equal(fields.Count , GetMemberCount(itemClass, fields));
          });
@@ -152,7 +152,7 @@ namespace CSharpAnalyzeTest
     /// <param name="itemClass">対象のアイテムクラス</param>
     /// <param name="condition">条件</param>
     /// <returns>条件が一致するメンバー数</returns>
-    private int GetMemberCount(IItemClass itemClass, List<(string name, string type, bool isInit, List<string> init)> condition)
+    private int GetMemberCount(IItemClass itemClass, List<(List<string> modifiers, string name, string type, bool isInit, List<string> init)> condition)
     {
       var memberCount = 0;
       foreach (var member in itemClass.Members)
@@ -169,7 +169,10 @@ namespace CSharpAnalyzeTest
         if (!targetFileds.Any()) continue;
 
         // 条件取得
-        var (name, type, isInit, init) = targetFileds.First();
+        var (modifiers, name, type, isInit, init) = targetFileds.First();
+
+        // アクセス修飾子の確認
+        Assert.Equal(memberField.Modifiers, modifiers);
 
         // 初期値が設定されている
         if (isInit)

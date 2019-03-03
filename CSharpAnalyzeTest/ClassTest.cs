@@ -1,7 +1,9 @@
 ﻿using CSharpAnalyze.Domain.PublicInterfaces;
 using CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems;
+using CSharpAnalyze.Domain.PublicInterfaces.Events;
 using CSharpAnalyzeTest.Common;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Xunit;
@@ -73,29 +75,39 @@ namespace CSharpAnalyzeTest
       System.Diagnostics.Debug.WriteLine($"Setup {Environment.CurrentDirectory}");
     }
 
+    /// <summary>
+    /// クラスインターフェースインスタンスの取得
+    /// </summary>
+    /// <param name="ev">解析結果イベントインスタンス</param>
+    /// <param name="filePath">ファイル名</param>
+    /// <param name="classIndex">取得対象インデックス(初期値:0)</param>
+    /// <returns>クラスインターフェースインスタンス</returns>
+    protected IItemClass GetClassInstance(IAnalyzed ev, string filePath,int classIndex=0)
+    {
+      // ファイル名の確認
+      Assert.Equal(ev.FilePath, filePath);
+
+      // 解析結果の存在確認
+      Assert.NotNull(ev.FileRoot);
+
+      // 解析結果の件数確認
+      Assert.True(ev.FileRoot.Members.Count >= classIndex + 1,$"{ev.FileRoot.Members.Count} < {classIndex + 1}");
+
+      // IItemClassインスタンスの確認
+      Assert.NotNull(ev.FileRoot.Members[classIndex] as IItemClass);
+
+      // IItemClassインスタンスを返す
+      return ev.FileRoot.Members[classIndex] as IItemClass;
+    }
+
     [Fact(DisplayName = "Standard")]
     public void StandardTest()
     {
       // テストコードを追加
       CreateFileData(CreateSource(CreatePattern.Standard), (ev) =>
          {
-           // ファイル名の確認
-           Assert.True(ev.FilePath == "Test.cs");
-
-           // 解析結果の存在確認
-           Assert.NotNull(ev.FileRoot);
-
-           // 外部参照の存在確認
-           Assert.True(ev.FileRoot.OtherFiles.Count == 0);
-
-           // 解析結果の件数確認
-           Assert.True(ev.FileRoot.Members.Count == 1);
-
-           // IItemClassインスタンスの確認
-           Assert.True(ev.FileRoot.Members[0] is IItemClass);
-
            // IItemClassインスタンスを取得
-           var itemClass = ev.FileRoot.Members[0] as IItemClass;
+           var itemClass = GetClassInstance(ev, "Test.cs", 0);
 
            // スーパークラスの設定確認
            Assert.True(itemClass.SuperClass.Count == 0);
@@ -132,11 +144,8 @@ namespace CSharpAnalyzeTest
       // テストコードを追加
       CreateFileData(CreateSource(CreatePattern.SubClass), (ev) =>
          {
-           // ファイル名の確認
-           Assert.True(ev.FilePath == "SubClass.cs");
-
-           // 解析結果の存在確認
-           Assert.NotNull(ev.FileRoot);
+           // IItemClassインスタンスを取得
+           var itemClass = GetClassInstance(ev, "SubClass.cs", 0);
 
            // 外部参照の存在確認
            Assert.True(ev.FileRoot.OtherFiles.Count == 1);
@@ -145,12 +154,6 @@ namespace CSharpAnalyzeTest
 
            // 解析結果の件数確認
            Assert.True(ev.FileRoot.Members.Count == 1);
-
-           // IItemClassインスタンスの確認
-           Assert.True(ev.FileRoot.Members[0] is IItemClass);
-
-           // IItemClassインスタンスを取得
-           var itemClass = ev.FileRoot.Members[0] as IItemClass;
 
            // スーパークラスの設定確認
            Assert.True(itemClass.SuperClass.Count == 1);
@@ -185,23 +188,11 @@ namespace CSharpAnalyzeTest
       // テストコードを追加
       CreateFileData(CreateSource(CreatePattern.InnerClass), (ev) =>
       {
-        // ファイル名の確認
-        Assert.True(ev.FilePath == "InnerClass.cs");
-
-        // 解析結果の存在確認
-        Assert.NotNull(ev.FileRoot);
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "InnerClass.cs", 0);
 
         // 外部参照の存在確認
         Assert.True(ev.FileRoot.OtherFiles.Count == 0);
-
-        // 解析結果の件数確認
-        Assert.True(ev.FileRoot.Members.Count == 1);
-
-        // IItemClassインスタンスの確認
-        Assert.True(ev.FileRoot.Members[0] is IItemClass);
-
-        // IItemClassインスタンスを取得
-        var itemClass = ev.FileRoot.Members[0] as IItemClass;
 
         // スーパークラスの設定確認
         Assert.True(itemClass.SuperClass.Count == 0);

@@ -62,6 +62,8 @@ namespace CSharpAnalyzeTest.Common
       GC.SuppressFinalize(this);
     }
 
+    #region テスト情報作成メソッド
+
     /// <summary>
     /// テスト情報作成
     /// </summary>
@@ -85,5 +87,8 @@ namespace CSharpAnalyzeTest.Common
       var source = string.Format(CultureInfo.CurrentCulture, BaseSource, fileData.AddUsing, fileData.Source, delegateMethod);
       Files.Add(fileData.FilePath, source, delegateMethod);
     }
+
+    #endregion
+
   }
 }

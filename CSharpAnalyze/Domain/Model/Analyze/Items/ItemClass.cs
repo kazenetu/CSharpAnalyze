@@ -22,6 +22,11 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     public List<IExpression> SuperClass { get; } = new List<IExpression>();
 
     /// <summary>
+    /// ジェネリックタイプリスト
+    /// </summary>
+    public List<string> GenericTypes { get; } = new List<string>();
+
+    /// <summary>
     /// コンストラクタ
     /// </summary>
     /// <param name="node">対象Node</param>
@@ -60,6 +65,13 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         }
       }
 
+      // ジェネリックタイプ
+      if (declaredClass.TypeParameters.Any())
+      {
+        var types = declaredClass.TypeParameters.Select(item => item.Name);
+        GenericTypes.AddRange(types);
+      }
+
       // メンバ
       foreach (var childSyntax in node.ChildNodes())
       {
@@ -96,10 +108,28 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         result.Append($"{modifier} ");
       }
       result.Append($"class {Name}");
+
+      // ジェネリックタイプ
+      if (GenericTypes.Any())
+      {
+        result.Append("<");
+
+        GenericTypes.ForEach(item => {
+          result.Append(item);
+          if (GenericTypes.IndexOf(item) > 0) result.Append(", ");
+        });
+
+        result.Append(">");
+      }
+
+      // スーパークラス/インターフェイス
       if (SuperClass.Any())
       {
         result.Append(" : ");
-        SuperClass.ForEach(item => result.Append(item.Name));
+        SuperClass.ForEach(item => {
+          result.Append(item.Name);
+          if (SuperClass.IndexOf(item) > 0) result.Append(", ");
+        });
       }
       result.AppendLine();
       result.Append(indexSpace);

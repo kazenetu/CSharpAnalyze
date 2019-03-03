@@ -11,5 +11,10 @@ namespace CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems
     /// スーパークラスリスト
     /// </summary>
     List<IExpression> SuperClass { get; }
+
+    /// <summary>
+    /// ジェネリックタイプリスト
+    /// </summary>
+    List<string> GenericTypes { get; }
   }
 }

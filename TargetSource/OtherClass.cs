@@ -19,6 +19,8 @@ namespace DataTransferObjects
         return "hellow!" + name;
       }
     }
+    public static string StaticProp{get;}
+
     public static string StaticField = "456";
     public static string StaticMethod()
     {

@@ -9,20 +9,9 @@ namespace DataTransferObjects
   public class TestLogic
   {
     /// <summary>
-    /// ソース作成パターン
-    /// </summary>
-    private enum CreatePattern
-    {
-      Standard,
-      ClassField = 20
-    }
-
-    /// <summary>
     /// 定数フィールド
     /// </summary>
     public const string ConstField = "123";
-
-    public string instanceField = "123";
 
     public TestMethod MethodField = new TestMethod();
 
@@ -38,29 +27,6 @@ namespace DataTransferObjects
     /// </summary>
     public void Method()
     {
-      // for構文確認
-      for (int i = 0,fors=1; i < 10; i++,fors+=10)
-      {
-        prop = i.ToString();
-      }
-
-      // 配列テスト:要素1
-      var testArray =  new string[5];
-      testArray[2] = "test";
-
-      // 配列テスト:要素2
-      var matrixTest = new string[5,5];
-      var matrixTestB = matrixTest[2,3];
-
-      // 配列テスト:要素3
-      int[,,] RGBTest;
-      RGBTest = new int[255, 255, 255];
-      RGBTest[0,0,0] = 0;
-
-
-      instanceField = "111";
-      var instanceFieldTest = instanceField.Length;
-
       int a(int arg){
         var b = arg;
         b += arg;
@@ -68,23 +34,9 @@ namespace DataTransferObjects
       }
 
       int test = a(10);
-      if (this.prop.Length > 0)
-      {
-        test = this.Method2(prop);
-      }
-      else{
-        test = 100;
-      }
-
       if (prop.Length > 0)
       {
         test = this.Method2(prop);
-      }
-      else if(prop.Length == 10){
-        test = 110;
-      }
-      else if(prop.Length+1 == 11){
-        test = 111;
       }
 
       // while構文(インクリメント)
@@ -95,7 +47,6 @@ namespace DataTransferObjects
 
         // 条件用変数をインクリメント
         index++;
-        continue;
       }
 
       // while構文(デクリメント)
@@ -106,12 +57,6 @@ namespace DataTransferObjects
 
         // 条件用変数をデクリメント
         index--;
-      }
-
-      // for構文確認
-      for (index = 0; index < 10; index++)
-      {
-        prop = index.ToString();
       }
 
       var dc = new Dictionary<string,TestLogic>();
@@ -158,19 +103,17 @@ namespace DataTransferObjects
 
     /// <summary>
     /// コンストラクタ
-    /// </summary>
+    /// /// </summary>
     public TestLogic()
     {
       // ローカル変数宣言確認(型推論)
       var local = 123;
 
       // ローカル変数の値分岐
-      if (local >= 10 && local < 50)
+      if (local >= 10)
       {
         prop = local.ToString();
         local = 1;
-        prop = OtherClass.StaticProp;
-        prop = OtherClass.StaticField;
       }
       else
       {

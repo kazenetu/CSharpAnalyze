@@ -99,25 +99,25 @@ namespace CSharpAnalyzeTest
            var itemClass = GetClassInstance(ev, "Test.cs", 0);
 
            // スーパークラスの設定確認
-           Assert.True(itemClass.SuperClass.Count == 0);
+           Assert.Empty(itemClass.SuperClass);
 
            // 親の存在確認
            Assert.Null(itemClass.Parent);
 
            // クラス名の確認
-           Assert.True(itemClass.Name == "ClassTest");
+           Assert.Equal("ClassTest",itemClass.Name );
 
            // スコープ修飾子の件数確認
-           Assert.True(itemClass.Modifiers.Count == 1);
+           Assert.Single(itemClass.Modifiers);
 
            // スコープ修飾子の内容確認
            Assert.Contains("public", itemClass.Modifiers);
 
            // ItemTypeの確認
-           Assert.True(itemClass.ItemType == ItemTypes.Class);
+           Assert.Equal(ItemTypes.Class, itemClass.ItemType );
 
            // クラス内の要素の存在確認
-           Assert.True(itemClass.Members.Count == 0);
+           Assert.Empty(itemClass.Members);
          });
 
       // 解析実行
@@ -140,34 +140,34 @@ namespace CSharpAnalyzeTest
            var itemClass = GetClassInstance(ev, "SubClass.cs", 0);
 
            // 外部参照の存在確認
-           Assert.True(ev.FileRoot.OtherFiles.Count == 1);
-           Assert.True(ev.FileRoot.OtherFiles.First().Key == "ClassTest");
-           Assert.True(ev.FileRoot.OtherFiles.First().Value == "Test.cs");
+           Assert.Single(ev.FileRoot.OtherFiles);
+           Assert.Equal("ClassTest", ev.FileRoot.OtherFiles.First().Key);
+           Assert.Equal("Test.cs", ev.FileRoot.OtherFiles.First().Value);
 
            // 解析結果の件数確認
-           Assert.True(ev.FileRoot.Members.Count == 1);
+           Assert.Single(ev.FileRoot.Members);
 
            // スーパークラスの設定確認
-           Assert.True(itemClass.SuperClass.Count == 1);
-           Assert.True(itemClass.SuperClass.First().Name == "ClassTest");
+           Assert.Single(itemClass.SuperClass);
+           Assert.Equal("ClassTest", itemClass.SuperClass.First().Name);
 
            // 親の存在確認
            Assert.Null(itemClass.Parent);
 
            // クラス名の確認
-           Assert.True(itemClass.Name == "SubClass");
+           Assert.Equal("SubClass", itemClass.Name);
 
            // スコープ修飾子の件数確認
-           Assert.True(itemClass.Modifiers.Count == 1);
+           Assert.Single(itemClass.Modifiers);
 
            // スコープ修飾子の内容確認
            Assert.Contains("public", itemClass.Modifiers);
 
            // ItemTypeの確認
-           Assert.True(itemClass.ItemType == ItemTypes.Class);
+           Assert.Equal(ItemTypes.Class, itemClass.ItemType);
 
            // クラス内の要素の存在確認
-           Assert.True(itemClass.Members.Count == 0);
+           Assert.Empty(itemClass.Members);
          });
 
       // 解析実行
@@ -187,48 +187,48 @@ namespace CSharpAnalyzeTest
         var itemClass = GetClassInstance(ev, "InnerClass.cs", 0);
 
         // 外部参照の存在確認
-        Assert.True(ev.FileRoot.OtherFiles.Count == 0);
+        Assert.Empty(ev.FileRoot.OtherFiles);
 
         // スーパークラスの設定確認
-        Assert.True(itemClass.SuperClass.Count == 0);
+        Assert.Empty(itemClass.SuperClass);
 
         // 親の存在確認
         Assert.Null(itemClass.Parent);
 
         // クラス名の確認
-        Assert.True(itemClass.Name == "ClassTest");
+        Assert.Equal("ClassTest", itemClass.Name);
 
         // スコープ修飾子の件数確認
-        Assert.True(itemClass.Modifiers.Count == 1);
+        Assert.Single(itemClass.Modifiers);
 
         // スコープ修飾子の内容確認
         Assert.Contains("public", itemClass.Modifiers);
 
         // ItemTypeの確認
-        Assert.True(itemClass.ItemType == ItemTypes.Class);
+        Assert.Equal(ItemTypes.Class, itemClass.ItemType);
 
         // クラス内の要素の存在確認
-        Assert.True(itemClass.Members.Count == 1);
+        Assert.Single(itemClass.Members);
 
         #region 内部クラスの確認
 
         // クラス内の要素がクラス要素である確認
-        Assert.True(itemClass.Members[0] is IItemClass);
+        Assert.IsAssignableFrom<IItemClass>(itemClass.Members[0]);
         var innerClass = itemClass.Members[0] as IItemClass;
-        Assert.True(innerClass.Name == "InnerClass");
+        Assert.Equal("InnerClass", innerClass.Name);
 
         // スコープ修飾子の件数確認
-        Assert.True(innerClass.Modifiers.Count == 2);
+        Assert.Equal(2, innerClass.Modifiers.Count);
 
         // スコープ修飾子の内容確認
         Assert.Contains("private", innerClass.Modifiers);
         Assert.Contains("static", innerClass.Modifiers);
 
         // ItemTypeの確認
-        Assert.True(innerClass.ItemType == ItemTypes.Class);
+        Assert.Equal(ItemTypes.Class, innerClass.ItemType);
 
         // クラス内の要素の存在確認
-        Assert.True(innerClass.Members.Count == 0);
+        Assert.Empty(innerClass.Members);
 
         #endregion
       });
@@ -250,26 +250,26 @@ namespace CSharpAnalyzeTest
         var itemAbstractClass = GetClassInstance(ev, "AbstractClass.cs", 0);
 
         // 外部参照の存在確認
-        Assert.True(ev.FileRoot.OtherFiles.Count == 0);
+        Assert.Empty(ev.FileRoot.OtherFiles);
 
         // スーパークラスの設定確認
-        Assert.True(itemAbstractClass.SuperClass.Count == 0);
+        Assert.Empty(itemAbstractClass.SuperClass);
 
         // 親の存在確認
         Assert.Null(itemAbstractClass.Parent);
 
         // スコープ修飾子の件数確認
-        Assert.True(itemAbstractClass.Modifiers.Count == 2);
+        Assert.Equal(2, itemAbstractClass.Modifiers.Count);
 
         // スコープ修飾子の内容確認
         Assert.Contains("public", itemAbstractClass.Modifiers);
         Assert.Contains("abstract", itemAbstractClass.Modifiers);
 
         // ItemTypeの確認
-        Assert.True(itemAbstractClass.ItemType == ItemTypes.Class);
+        Assert.Equal(ItemTypes.Class, itemAbstractClass.ItemType);
 
         // クラス内の要素の存在確認
-        Assert.True(itemAbstractClass.Members.Count == 0);
+        Assert.Empty(itemAbstractClass.Members);
 
         #region サブクラスの確認
 
@@ -277,23 +277,23 @@ namespace CSharpAnalyzeTest
         var itemSubClass = GetClassInstance(ev, "AbstractClass.cs", 1);
 
         // スーパークラスの設定確認
-        Assert.True(itemSubClass.SuperClass.Count == 1);
-        Assert.True(itemSubClass.SuperClass.First().Name == "AbstractClass");
+        Assert.Single(itemSubClass.SuperClass);
+        Assert.Equal("AbstractClass", itemSubClass.SuperClass.First().Name);
 
         // 親の存在確認
         Assert.Null(itemSubClass.Parent);
 
         // スコープ修飾子の件数確認
-        Assert.True(itemSubClass.Modifiers.Count == 1);
+        Assert.Single(itemSubClass.Modifiers);
 
         // スコープ修飾子の内容確認
         Assert.Contains("public", itemAbstractClass.Modifiers);
 
         // ItemTypeの確認
-        Assert.True(itemSubClass.ItemType == ItemTypes.Class);
+        Assert.Equal(ItemTypes.Class, itemSubClass.ItemType);
 
         // クラス内の要素の存在確認
-        Assert.True(itemSubClass.Members.Count == 0);
+        Assert.Empty(itemSubClass.Members);
 
         #endregion
       });

@@ -109,9 +109,9 @@ namespace CSharpAnalyzeTest
            var itemClass = GetClassInstance(ev, "ClassField.cs");
 
            // 外部参照の存在確認
-           Assert.True(ev.FileRoot.OtherFiles.Count == 1);
-           Assert.True(ev.FileRoot.OtherFiles.First().Key == "ClassTest");
-           Assert.True(ev.FileRoot.OtherFiles.First().Value == "Standard.cs");
+           Assert.Single(ev.FileRoot.OtherFiles);
+           Assert.Equal("ClassTest", ev.FileRoot.OtherFiles.First().Key);
+           Assert.Equal("Standard.cs", ev.FileRoot.OtherFiles.First().Value);
 
            // クラス内の要素の存在確認
            var fields = new List<(List<string> modifiers, string name, string type, bool isInit, List<string> init)>

@@ -73,6 +73,9 @@ namespace CSharpAnalyzeTest
       System.Diagnostics.Debug.WriteLine($"Setup {Environment.CurrentDirectory}");
     }
 
+    /// <summary>
+    /// 基本的なクラステスト
+    /// </summary>
     [Fact(DisplayName = "Standard")]
     public void StandardTest()
     {
@@ -108,6 +111,9 @@ namespace CSharpAnalyzeTest
       CSAnalyze.Analyze(string.Empty, Files);
     }
 
+    /// <summary>
+    /// サブクラスのテスト
+    /// </summary>
     [Fact(DisplayName = "SubClass")]
     public void SubClassTest()
     {
@@ -155,6 +161,9 @@ namespace CSharpAnalyzeTest
       CSAnalyze.Analyze(string.Empty, Files);
     }
 
+    /// <summary>
+    /// 内部クラスのテスト
+    /// </summary>
     [Fact(DisplayName = "InnerClass")]
     public void InnerClassTest()
     {

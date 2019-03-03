@@ -67,6 +67,9 @@ namespace CSharpAnalyzeTest
       System.Diagnostics.Debug.WriteLine($"Setup {Environment.CurrentDirectory}");
     }
 
+    /// <summary>
+    /// 組み込み型フィールドのテスト
+    /// </summary>
     [Fact(DisplayName = "Standard")]
     public void StandardTest()
     {
@@ -90,6 +93,9 @@ namespace CSharpAnalyzeTest
       CSAnalyze.Analyze(string.Empty, Files);
     }
 
+    /// <summary>
+    /// クラス型フィールドのテスト
+    /// </summary>
     [Fact(DisplayName = "ClassField")]
     public void ClassFieldTest()
     {

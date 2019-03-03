@@ -1,9 +1,7 @@
 ﻿using CSharpAnalyze.Domain.PublicInterfaces;
 using CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems;
-using CSharpAnalyze.Domain.PublicInterfaces.Events;
 using CSharpAnalyzeTest.Common;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Xunit;
@@ -73,31 +71,6 @@ namespace CSharpAnalyzeTest
     public ClassTest() : base()
     {
       System.Diagnostics.Debug.WriteLine($"Setup {Environment.CurrentDirectory}");
-    }
-
-    /// <summary>
-    /// クラスインターフェースインスタンスの取得
-    /// </summary>
-    /// <param name="ev">解析結果イベントインスタンス</param>
-    /// <param name="filePath">ファイル名</param>
-    /// <param name="classIndex">取得対象インデックス(初期値:0)</param>
-    /// <returns>クラスインターフェースインスタンス</returns>
-    protected IItemClass GetClassInstance(IAnalyzed ev, string filePath,int classIndex=0)
-    {
-      // ファイル名の確認
-      Assert.Equal(ev.FilePath, filePath);
-
-      // 解析結果の存在確認
-      Assert.NotNull(ev.FileRoot);
-
-      // 解析結果の件数確認
-      Assert.True(ev.FileRoot.Members.Count >= classIndex + 1,$"{ev.FileRoot.Members.Count} < {classIndex + 1}");
-
-      // IItemClassインスタンスの確認
-      Assert.NotNull(ev.FileRoot.Members[classIndex] as IItemClass);
-
-      // IItemClassインスタンスを返す
-      return ev.FileRoot.Members[classIndex] as IItemClass;
     }
 
     [Fact(DisplayName = "Standard")]

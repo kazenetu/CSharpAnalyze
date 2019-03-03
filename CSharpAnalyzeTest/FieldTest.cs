@@ -153,7 +153,7 @@ namespace CSharpAnalyzeTest
         var (modifiers, name, type, isInit, init) = targetFileds.First();
 
         // アクセス修飾子の確認
-        Assert.Equal(memberField.Modifiers, modifiers);
+        Assert.Equal(modifiers, memberField.Modifiers);
 
         // 初期値が設定されている
         if (isInit)
@@ -163,7 +163,7 @@ namespace CSharpAnalyzeTest
 
           // 初期値のコレクションと条件のコレクションの一致確認
           var defaultValues = memberField.DefaultValues.Select(value => value.Name).ToList();
-          Assert.Equal(defaultValues, init);
+          Assert.Equal(init, defaultValues);
         }
 
         memberCount++;

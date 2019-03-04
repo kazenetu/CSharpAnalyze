@@ -17,7 +17,8 @@ namespace CSharpAnalyzeTest
     private enum CreatePattern
     {
       Standard,
-      ClassField
+      ClassField,
+      ListField
     }
 
     /// <summary>
@@ -52,6 +53,16 @@ namespace CSharpAnalyzeTest
           source.AppendLine("  private ClassTest fieldClass1;");
           source.AppendLine("  protected ClassTest fieldClass2 = new ClassTest();");
           source.AppendLine("  private static ClassTest fieldClass3 = null;");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.ListField:
+          filePath = "ListField.cs";
+
+          source.AppendLine("public class ListField");
+          source.AppendLine("{");
+          source.AppendLine("  private List<string> field1;");
+          source.AppendLine("  private List<string> field2 = new List<string>();");
           source.AppendLine("}");
           break;
       }
@@ -119,6 +130,36 @@ namespace CSharpAnalyzeTest
              (new List<string>() { "private" }, "fieldClass1", "ClassTest", false, null),
              (new List<string>() { "protected" }, "fieldClass2", "ClassTest", true, new List<string>() { "new", "ClassTest", "(", ")" }),
              (new List<string>() { "private", "static" }, "fieldClass3", "ClassTest", true, new List<string>() { "null" })
+           };
+           Assert.Equal(fields.Count , GetMemberCount(itemClass, fields));
+         });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 組み込みジェネリッククラスフィールドのテスト
+    /// </summary>
+    [Fact(DisplayName = "ListField")]
+    public void ListFieldTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.ListField), (ev) =>
+         {
+           // IItemClassインスタンスを取得
+           var itemClass = GetClassInstance(ev, "ListField.cs");
+
+           // 外部参照の存在確認
+           Assert.Single(ev.FileRoot.OtherFiles);
+           Assert.Equal("List", ev.FileRoot.OtherFiles.First().Key);
+           Assert.Equal(string.Empty, ev.FileRoot.OtherFiles.First().Value);
+
+           // クラス内の要素の存在確認
+           var fields = new List<(List<string> modifiers, string name, string type, bool isInit, List<string> init)>
+           {
+             (new List<string>() { "private" }, "field1", "List<string>", false, null),
+             (new List<string>() { "private" }, "field2", "List<string>", true, new List<string>() { "new", "List","<","string",">", "(", ")" })
            };
            Assert.Equal(fields.Count , GetMemberCount(itemClass, fields));
          });

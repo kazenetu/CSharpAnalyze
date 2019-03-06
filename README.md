@@ -13,3 +13,7 @@ C#のコード解析：ConvertCStoTSの再設計版
 ## ```dotnet publish/ConsoleApp.dll TargetSource```  
 ※現時点では解析結果のC#ソースコードが表示される。  
   (未実装あり)
+
+# テスト
+## ```dotnet test CSharpAnalyzeTest```  
+※テストコード作成中

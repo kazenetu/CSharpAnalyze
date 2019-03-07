@@ -22,6 +22,17 @@ namespace DataTransferObjects
 
     public int propInt { set; get; } = 50;
 
+    private string field;
+    public string Field
+    {
+      set{
+        field = value;
+      }
+      get{
+        return field;
+      }
+    }
+
     /// <summary>
     /// メソッド例
     /// </summary>

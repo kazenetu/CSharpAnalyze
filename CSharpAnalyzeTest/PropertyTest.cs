@@ -41,6 +41,7 @@ namespace CSharpAnalyzeTest
           source.AppendLine("  public int PropertydInt{get;} = 1;");
           source.AppendLine("}");
           break;
+      }
 
       return new FileData(filePath, usingList.ToString(), source.ToString());
     }

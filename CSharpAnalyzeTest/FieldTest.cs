@@ -91,13 +91,13 @@ namespace CSharpAnalyzeTest
            var itemClass = GetClassInstance(ev, "Standard.cs");
 
            // クラス内の要素の存在確認
-           var fields = new List<(List<string> modifiers, string name, string type, bool isInit, List<string> init)>
+           var expectedList = new List<(List<string> modifiers, string name, string type, bool isInit, List<string> init)>
            {
              (new List<string>() { "public" }, "FieldString", "string", false, null),
              (new List<string>() { "public" }, "FieldInt", "int", true, new List<string>() { "1" }),
              (new List<string>() { "private","const" }, "Const", "string", true, new List<string>() { "\"123\"" })
            };
-           Assert.Equal(fields.Count, GetMemberCount(itemClass, fields));
+           Assert.Equal(expectedList.Count, GetMemberCount(itemClass, expectedList));
          });
 
       // 解析実行
@@ -125,13 +125,13 @@ namespace CSharpAnalyzeTest
            Assert.Equal("Standard.cs", ev.FileRoot.OtherFiles.First().Value);
 
            // クラス内の要素の存在確認
-           var fields = new List<(List<string> modifiers, string name, string type, bool isInit, List<string> init)>
+           var expectedList = new List<(List<string> modifiers, string name, string type, bool isInit, List<string> init)>
            {
              (new List<string>() { "private" }, "fieldClass1", "ClassTest", false, null),
              (new List<string>() { "protected" }, "fieldClass2", "ClassTest", true, new List<string>() { "new", "ClassTest", "(", ")" }),
              (new List<string>() { "private", "static" }, "fieldClass3", "ClassTest", true, new List<string>() { "null" })
            };
-           Assert.Equal(fields.Count , GetMemberCount(itemClass, fields));
+           Assert.Equal(expectedList.Count , GetMemberCount(itemClass, expectedList));
          });
 
       // 解析実行
@@ -156,12 +156,12 @@ namespace CSharpAnalyzeTest
            Assert.Equal(string.Empty, ev.FileRoot.OtherFiles.First().Value);
 
            // クラス内の要素の存在確認
-           var fields = new List<(List<string> modifiers, string name, string type, bool isInit, List<string> init)>
+           var expectedList = new List<(List<string> modifiers, string name, string type, bool isInit, List<string> init)>
            {
              (new List<string>() { "private" }, "field1", "List<string>", false, null),
              (new List<string>() { "private" }, "field2", "List<string>", true, new List<string>() { "new", "List","<","string",">", "(", ")" })
            };
-           Assert.Equal(fields.Count , GetMemberCount(itemClass, fields));
+           Assert.Equal(expectedList.Count , GetMemberCount(itemClass, expectedList));
          });
 
       // 解析実行
@@ -172,9 +172,9 @@ namespace CSharpAnalyzeTest
     /// メンバー数を取得
     /// </summary>
     /// <param name="itemClass">対象のアイテムクラス</param>
-    /// <param name="condition">条件</param>
+    /// <param name="expectedList">予想値リスト</param>
     /// <returns>条件が一致するメンバー数</returns>
-    private int GetMemberCount(IItemClass itemClass, List<(List<string> modifiers, string name, string type, bool isInit, List<string> init)> condition)
+    private int GetMemberCount(IItemClass itemClass, List<(List<string> modifiers, string name, string type, bool isInit, List<string> init)> expectedList)
     {
       var memberCount = 0;
       foreach (var member in itemClass.Members)
@@ -187,7 +187,7 @@ namespace CSharpAnalyzeTest
         memberField.FieldTypes.ForEach(item => memberFieldType.Append(item.Name));
 
         // 型の一致確認
-        var targetFileds = condition.Where(field => field.name == memberField.Name && field.type == memberFieldType.ToString());
+        var targetFileds = expectedList.Where(field => field.name == memberField.Name && field.type == memberFieldType.ToString());
         if (!targetFileds.Any()) continue;
 
         // 条件取得

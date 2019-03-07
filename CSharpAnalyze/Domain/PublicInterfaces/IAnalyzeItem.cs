@@ -57,6 +57,7 @@ namespace CSharpAnalyze.Domain.PublicInterfaces
     Enum,
     Field,
     Property,
+    Accessor,
     Constructor,
     Method,
     MethodStatement

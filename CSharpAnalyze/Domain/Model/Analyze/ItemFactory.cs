@@ -57,7 +57,10 @@ namespace CSharpAnalyze.Domain.Model.Analyze
         case ExpressionStatementSyntax targetNode:
           result = new ItemStatementExpression(targetNode, semanticModel, parent);
           break;
-        
+        case AccessorDeclarationSyntax targetNode:
+          result = new ItemAccessor(targetNode, semanticModel, parent);
+          break;
+
         // 分岐処理
         case IfStatementSyntax targetNode:
           result = new ItemIf(targetNode, semanticModel, parent);

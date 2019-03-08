@@ -106,7 +106,7 @@ namespace CSharpAnalyzeTest
         var (modifiers, name, type, accessors, isInit, init) = targetProperties.First();
 
         // アクセサの一致確認
-        Assert.Equal(accessors, memberProperty.AccessorList);
+        Assert.Equal(accessors, memberProperty.AccessorList.Select(accessor=>accessor.Name));
 
         // アクセス修飾子の確認
         Assert.Equal(modifiers, memberProperty.Modifiers);

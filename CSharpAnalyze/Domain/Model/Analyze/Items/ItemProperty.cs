@@ -27,7 +27,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// <summary>
     /// アクセサリスト
     /// </summary>
-    public List<string> AccessorList { get; } = new List<string>();
+    public List<IAnalyzeItem> AccessorList { get; } = new List<IAnalyzeItem>();
 
     /// <summary>
     /// コンストラクタ
@@ -57,7 +57,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       }
 
       // アクセサ設定
-      AccessorList.AddRange(node.AccessorList.Accessors.Select(accessor => $"{accessor.Keyword}"));
+      AccessorList.AddRange(node.AccessorList.Accessors.Select(accessor => ItemFactory.Create(accessor, semanticModel, this)));
 
       // デフォルト設定
       if (node.Initializer == null)
@@ -100,7 +100,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
 
       // アクセサ
       result.Append(" {");
-      AccessorList.ForEach(accessor => result.Append($" {accessor};"));
+      AccessorList.ForEach(accessor => result.Append($" {accessor.ToString(index + 1)}"));
       result.Append(" }");
 
       if (DefaultValues.Any())

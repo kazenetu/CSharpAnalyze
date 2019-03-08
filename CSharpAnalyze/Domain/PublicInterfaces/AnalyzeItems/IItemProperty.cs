@@ -20,6 +20,6 @@ namespace CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems
     /// <summary>
     /// アクセサリスト
     /// </summary>
-    List<string> AccessorList { get; }
+    List<IAnalyzeItem> AccessorList { get; }
   }
 }

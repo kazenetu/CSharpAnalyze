@@ -17,6 +17,7 @@ namespace CSharpAnalyzeTest
     private enum CreatePattern
     {
       Standard,
+      RefField,
     }
 
     /// <summary>
@@ -39,6 +40,24 @@ namespace CSharpAnalyzeTest
           source.AppendLine("{");
           source.AppendLine("  public string PropertyString{set; get;}");
           source.AppendLine("  public int PropertydInt{get;} = 1;");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.RefField:
+          filePath = "RefField.cs";
+
+          source.AppendLine("public class RefFieldTest");
+          source.AppendLine("{");
+          source.AppendLine("  private string FieldString;");
+          source.AppendLine("  public string PropertyString");
+          source.AppendLine("  {");
+          source.AppendLine("    set{");
+          source.AppendLine("      FieldString = value;");
+          source.AppendLine("    }");
+          source.AppendLine("    get{");
+          source.AppendLine("      return FieldString;");
+          source.AppendLine("    }");
+          source.AppendLine("  }");
           source.AppendLine("}");
           break;
       }
@@ -79,6 +98,29 @@ namespace CSharpAnalyzeTest
       CSAnalyze.Analyze(string.Empty, Files);
     }
 
+    /// <summary>
+    /// プライベートフィールドのアクセスプロパティのテスト
+    /// </summary>
+    [Fact(DisplayName = "RefField")]
+    public void RefFieldTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.RefField), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "RefField.cs");
+
+        // クラス内の要素の存在確認
+        var expectedList = new List<(List<string> modifiers, string name, string type, List<string> accessors, bool isInit, List<string> init)>
+           {
+             (new List<string>() { "public" }, "PropertyString", "string",new List<string>(){"set","get"} , false, null),
+           };
+        Assert.Equal(expectedList.Count, GetMemberCount(itemClass, expectedList));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
 
     /// <summary>
     /// メンバー数を取得

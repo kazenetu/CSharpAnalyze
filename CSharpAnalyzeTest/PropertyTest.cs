@@ -48,14 +48,14 @@ namespace CSharpAnalyzeTest
 
           source.AppendLine("public class RefFieldTest");
           source.AppendLine("{");
-          source.AppendLine("  private string FieldString;");
+          source.AppendLine("  private string fieldString;");
           source.AppendLine("  public string PropertyString");
           source.AppendLine("  {");
           source.AppendLine("    set{");
-          source.AppendLine("      FieldString = value;");
+          source.AppendLine("      fieldString = value;");
           source.AppendLine("    }");
           source.AppendLine("    get{");
-          source.AppendLine("      return FieldString;");
+          source.AppendLine("      return fieldString;");
           source.AppendLine("    }");
           source.AppendLine("  }");
           source.AppendLine("}");

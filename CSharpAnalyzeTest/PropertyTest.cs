@@ -86,10 +86,10 @@ namespace CSharpAnalyzeTest
         var itemClass = GetClassInstance(ev, "Standard.cs");
 
         // クラス内の要素の存在確認
-        var expectedList = new List<(List<string> modifiers, string name, string type, List<string> accessors, bool isInit, List<string> init)>
+        var expectedList = new List<(List<string> modifiers, string name, string type, Dictionary<string, List<string>> accessors, bool isInit, List<string> init)>
            {
-             (new List<string>() { "public" }, "PropertyString", "string",new List<string>(){"set","get"} , false, null),
-             (new List<string>() { "public" }, "PropertydInt", "int",new List<string>(){"get"}, true, new List<string>() { "1" }),
+             (new List<string>() { "public" }, "PropertyString", "string",new Dictionary<string,List<string>>(){ { "set",new List<string>()  },{ "get", new List<string>() } } , false, null),
+             (new List<string>() { "public" }, "PropertydInt", "int",new Dictionary<string,List<string>>(){{ "get", new List<string>() } }, true, new List<string>() { "1" }),
            };
         Assert.Equal(expectedList.Count, GetMemberCount(itemClass, expectedList));
       });
@@ -111,9 +111,9 @@ namespace CSharpAnalyzeTest
         var itemClass = GetClassInstance(ev, "RefField.cs");
 
         // クラス内の要素の存在確認
-        var expectedList = new List<(List<string> modifiers, string name, string type, List<string> accessors, bool isInit, List<string> init)>
+        var expectedList = new List<(List<string> modifiers, string name, string type, Dictionary<string, List<string>> accessors, bool isInit, List<string> init)>
            {
-             (new List<string>() { "public" }, "PropertyString", "string",new List<string>(){"set","get"} , false, null),
+             (new List<string>() { "public" }, "PropertyString", "string",new Dictionary<string,List<string>>(){ { "set",new List<string>() { "this.fieldString = value;" } },{ "get", new List<string>() { "return this.fieldString;" } } } , false, null),
            };
         Assert.Equal(expectedList.Count, GetMemberCount(itemClass, expectedList));
       });
@@ -128,7 +128,7 @@ namespace CSharpAnalyzeTest
     /// <param name="itemClass">対象のアイテムクラス</param>
     /// <param name="expectedList">予想値リスト</param>
     /// <returns>条件が一致するメンバー数</returns>
-    private int GetMemberCount(IItemClass itemClass, List<(List<string> modifiers, string name, string type, List<string> accessors, bool isInit, List<string> init)> expectedList)
+    private int GetMemberCount(IItemClass itemClass, List<(List<string> modifiers, string name, string type, Dictionary<string,List<string>> accessors, bool isInit, List<string> init)> expectedList)
     {
       var memberCount = 0;
       foreach (var member in itemClass.Members)
@@ -148,7 +148,31 @@ namespace CSharpAnalyzeTest
         var (modifiers, name, type, accessors, isInit, init) = targetProperties.First();
 
         // アクセサの一致確認
-        Assert.Equal(accessors, memberProperty.AccessorList.Select(accessor=>accessor.Name));
+        var accessorCount = 0;
+        foreach(var expectedItem in accessors)
+        {
+          // 対象のアクセサの存在確認
+          var targets = memberProperty.AccessorList.Where(accessor => accessor.Name == expectedItem.Key);
+          Assert.Single(targets);
+
+          // 対象を取得
+          var target = targets.First();
+
+          // コード数の一致確認
+          Assert.Equal(expectedItem.Value.Count, target.Members.Count);
+
+          // コードの確認
+          var accessorMemberCount = 0;
+          foreach(var expectedMember in expectedItem.Value)
+          {
+            Assert.Equal(expectedMember, target.Members[accessorMemberCount].ToString());
+            accessorMemberCount++;
+          }
+
+          accessorCount++;
+        }
+        // 確認済アクセサ数の一致確認
+        Assert.Equal(accessorCount, memberProperty.AccessorList.Count);
 
         // アクセス修飾子の確認
         Assert.Equal(modifiers, memberProperty.Modifiers);

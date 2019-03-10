@@ -18,6 +18,7 @@ namespace CSharpAnalyzeTest
     {
       Standard,
       RefField,
+      Static
     }
 
     /// <summary>
@@ -58,6 +59,15 @@ namespace CSharpAnalyzeTest
           source.AppendLine("      return fieldString;");
           source.AppendLine("    }");
           source.AppendLine("  }");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.Static:
+          filePath = "Static.cs";
+
+          source.AppendLine("public class StaticTest");
+          source.AppendLine("{");
+          source.AppendLine("  public static string PropertyString{set; get;}");
           source.AppendLine("}");
           break;
       }
@@ -114,6 +124,30 @@ namespace CSharpAnalyzeTest
         var expectedList = new List<(List<string> modifiers, string name, string type, Dictionary<string, List<string>> accessors, bool isInit, List<string> init)>
            {
              (new List<string>() { "public" }, "PropertyString", "string",new Dictionary<string,List<string>>(){ { "set",new List<string>() { "this.fieldString = value;" } },{ "get", new List<string>() { "return this.fieldString;" } } } , false, null),
+           };
+        Assert.Equal(expectedList.Count, GetMemberCount(itemClass, expectedList));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// クラスプロパティのテスト
+    /// </summary>
+    [Fact(DisplayName = "Static")]
+    public void StaticTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.Static), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "Static.cs");
+
+        // クラス内の要素の存在確認
+        var expectedList = new List<(List<string> modifiers, string name, string type, Dictionary<string, List<string>> accessors, bool isInit, List<string> init)>
+           {
+             (new List<string>() { "public","static" }, "PropertyString", "string",new Dictionary<string,List<string>>(){ { "set",new List<string>() },{ "get", new List<string>() } } , false, null),
            };
         Assert.Equal(expectedList.Count, GetMemberCount(itemClass, expectedList));
       });

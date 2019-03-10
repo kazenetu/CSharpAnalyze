@@ -18,7 +18,8 @@ namespace CSharpAnalyzeTest
     {
       Standard,
       RefField,
-      Static
+      Static,
+      ClassProperty,
     }
 
     /// <summary>
@@ -68,6 +69,15 @@ namespace CSharpAnalyzeTest
           source.AppendLine("public class StaticTest");
           source.AppendLine("{");
           source.AppendLine("  public static string PropertyString{set; get;}");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.ClassProperty:
+          filePath = "ClassProperty.cs";
+
+          source.AppendLine("public class ClassPropertyTest");
+          source.AppendLine("{");
+          source.AppendLine("  public ClassTest PropertyString{set; get;}");
           source.AppendLine("}");
           break;
       }
@@ -148,6 +158,38 @@ namespace CSharpAnalyzeTest
         var expectedList = new List<(List<string> modifiers, string name, string type, Dictionary<string, List<string>> accessors, bool isInit, List<string> init)>
            {
              (new List<string>() { "public","static" }, "PropertyString", "string",new Dictionary<string,List<string>>(){ { "set",new List<string>() },{ "get", new List<string>() } } , false, null),
+           };
+        Assert.Equal(expectedList.Count, GetMemberCount(itemClass, expectedList));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// クラス型プロパティのテスト
+    /// </summary>
+    [Fact(DisplayName = "ClassProperty")]
+    public void ClassPropertyTest()
+    {
+      // スーパークラスを追加
+      CreateFileData(CreateSource(CreatePattern.Standard), null);
+
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.ClassProperty), (ev) =>
+      {
+        // 外部参照の存在確認
+        Assert.Single(ev.FileRoot.OtherFiles);
+        Assert.Equal("ClassTest", ev.FileRoot.OtherFiles.First().Key);
+        Assert.Equal("Standard.cs", ev.FileRoot.OtherFiles.First().Value);
+
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "ClassProperty.cs");
+
+        // クラス内の要素の存在確認
+        var expectedList = new List<(List<string> modifiers, string name, string type, Dictionary<string, List<string>> accessors, bool isInit, List<string> init)>
+           {
+             (new List<string>() { "public" }, "PropertyString", "ClassTest",new Dictionary<string,List<string>>(){ { "set",new List<string>()  },{ "get", new List<string>() } } , false, null),
            };
         Assert.Equal(expectedList.Count, GetMemberCount(itemClass, expectedList));
       });

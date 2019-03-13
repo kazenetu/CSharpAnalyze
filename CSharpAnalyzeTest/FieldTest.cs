@@ -206,6 +206,10 @@ namespace CSharpAnalyzeTest
           var defaultValues = memberField.DefaultValues.Select(value => value.Name).ToList();
           Assert.Equal(init, defaultValues);
         }
+        else
+        {
+          Assert.Empty(memberField.DefaultValues);
+        }
 
         memberCount++;
       }

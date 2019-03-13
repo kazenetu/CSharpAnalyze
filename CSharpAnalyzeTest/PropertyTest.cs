@@ -302,6 +302,10 @@ namespace CSharpAnalyzeTest
           var defaultValues = memberProperty.DefaultValues.Select(value => value.Name).ToList();
           Assert.Equal(init, defaultValues);
         }
+        else
+        {
+          Assert.Empty(memberProperty.DefaultValues);
+        }
 
         memberCount++;
       }

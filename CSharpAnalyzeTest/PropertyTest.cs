@@ -87,7 +87,7 @@ namespace CSharpAnalyzeTest
 
           source.AppendLine("public class GenericTest");
           source.AppendLine("{");
-          source.AppendLine("  public List<string> PropertyList{set; get;}");
+          source.AppendLine("  public List<string> PropertyList{set; get;} = new List<string>();");
           source.AppendLine("}");
           break;
       }
@@ -228,7 +228,7 @@ namespace CSharpAnalyzeTest
         // クラス内の要素の存在確認
         var expectedList = new List<(List<string> modifiers, string name, string type, Dictionary<string, List<string>> accessors, bool isInit, List<string> init)>
            {
-             (new List<string>() { "public" }, "PropertyList", "List<string>",new Dictionary<string,List<string>>(){ { "set",new List<string>()  },{ "get", new List<string>() } } , false, null),
+             (new List<string>() { "public" }, "PropertyList", "List<string>",new Dictionary<string,List<string>>(){ { "set",new List<string>()  },{ "get", new List<string>() } } , true, new List<string>() { "new", "List","<","string",">", "(", ")" }),
            };
         Assert.Equal(expectedList.Count, GetMemberCount(itemClass, expectedList));
       });

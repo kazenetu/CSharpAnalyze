@@ -58,7 +58,7 @@ namespace CSharpAnalyzeTest
     }
 
     /// <summary>
-    /// 組み込み型フィールドのテスト
+    /// 列挙型のスタンダードなテスト
     /// </summary>
     [Fact(DisplayName = "Standard")]
     public void StandardTest()

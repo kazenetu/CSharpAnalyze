@@ -16,6 +16,7 @@ namespace CSharpAnalyzeTest
     private enum CreatePattern
     {
       Standard,
+      DefValue,
     }
 
     /// <summary>
@@ -41,6 +42,20 @@ namespace CSharpAnalyzeTest
           source.AppendLine("    First,");
           source.AppendLine("    Second,");
           source.AppendLine("    Third");
+          source.AppendLine("  }");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.DefValue:
+          filePath = "DefValue.cs";
+
+          source.AppendLine("public class DefValueTest");
+          source.AppendLine("{");
+          source.AppendLine("  private enum CreatePattern");
+          source.AppendLine("  {");
+          source.AppendLine("    First=10,");
+          source.AppendLine("    Second,");
+          source.AppendLine("    Third=100");
           source.AppendLine("  }");
           source.AppendLine("}");
           break;
@@ -96,6 +111,44 @@ namespace CSharpAnalyzeTest
       CSAnalyze.Analyze(string.Empty, Files);
     }
 
+    /// <summary>
+    /// デフォルト値のテスト
+    /// </summary>
+    [Fact(DisplayName = "DefValue")]
+    public void DefValueTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.DefValue), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "DefValue.cs");
+
+        // メンバー数確認
+        Assert.Single(itemClass.Members);
+
+        // 列挙型であることを確認
+        Assert.IsAssignableFrom<IItemEnum>(itemClass.Members[0]);
+
+        var itemEmun = itemClass.Members[0] as IItemEnum;
+
+        // アクセス修飾子の確認
+        var modifiers = new List<string>() { "private" };
+        Assert.Equal(modifiers, itemEmun.Modifiers);
+
+        // 要素の確認
+        var items = new Dictionary<string, string>()
+        {
+          { "First","10" },
+          { "Second","11"},
+          { "Third","100"},
+        };
+        Assert.Equal(items, itemEmun.Items);
+
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
 
 
   }

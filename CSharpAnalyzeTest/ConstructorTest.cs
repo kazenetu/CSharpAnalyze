@@ -68,35 +68,47 @@ namespace CSharpAnalyzeTest
         // IItemClassインスタンスを取得
         var itemClass = GetClassInstance(ev, "Standard.cs");
 
-        // コンストラクタの存在確認
-        var constructors = itemClass.Members.Where(member=>member is IItemConstructor);
-        Assert.Single(constructors);
-        var constructor = constructors.First() as IItemConstructor;
-
-        // アクセス修飾子の確認
+        // クラス内の要素の存在確認
         var expectedModifiers = new List<string>() { "public" };
-        Assert.Equal(expectedModifiers, constructor.Modifiers);
-
-        // パラメータの確認
         var expectedArgs = new List<(string name, string expressions)>();
 
-        var argCount = 0;
-        foreach(var expectedArg in expectedArgs)
-        {
-          var actualArgs = constructor.Args
-                          .Where(arg => arg.name == expectedArg.name)
-                          .Where(arg => GetExpressions(arg.expressions) == expectedArg.expressions);
-          if (actualArgs.Any())
-          {
-            argCount++;
-          }
-        }
-
-        Assert.Equal(expectedArgs.Count, argCount);
+        Assert.Equal(expectedArgs.Count, GetMemberCount(itemClass, expectedModifiers, expectedArgs));
       });
 
       // 解析実行
       CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// メンバー数を取得
+    /// </summary>
+    /// <param name="itemClass">対象のアイテムクラス</param>
+    /// <param name="modifiers">アクセス修飾子の期待値</param>
+    /// <param name="expectedArgs">パラメータの期待値</param>
+    /// <returns>条件が一致するメンバー数</returns>
+    private int GetMemberCount(IItemClass itemClass, List<string> modifiers, List<(string name, string expressions)> expectedArgs)
+    {
+      // コンストラクタの存在確認
+      var constructors = itemClass.Members.Where(member => member is IItemConstructor);
+      Assert.Single(constructors);
+      var constructor = constructors.First() as IItemConstructor;
+
+      // アクセス修飾子の確認
+      Assert.Equal(modifiers, constructor.Modifiers);
+
+      // パラメータの確認
+      var argCount = 0;
+      foreach (var (name, expressions) in expectedArgs)
+      {
+        var actualArgs = constructor.Args
+                        .Where(arg => arg.name == name)
+                        .Where(arg => GetExpressions(arg.expressions) == expressions);
+        if (actualArgs.Any())
+        {
+          argCount++;
+        }
+      }
+      return argCount;
     }
 
     /// <summary>

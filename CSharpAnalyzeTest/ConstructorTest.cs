@@ -18,6 +18,7 @@ namespace CSharpAnalyzeTest
     private enum CreatePattern
     {
       Standard,
+      StandardArgs,
     }
 
     /// <summary>
@@ -39,6 +40,16 @@ namespace CSharpAnalyzeTest
           source.AppendLine("public class Standard");
           source.AppendLine("{");
           source.AppendLine("  public Standard()");
+          source.AppendLine("  {");
+          source.AppendLine("  }");
+          source.AppendLine("}");
+          break;
+        case CreatePattern.StandardArgs:
+          filePath = "StandardArgs.cs";
+
+          source.AppendLine("public class StandardArgs");
+          source.AppendLine("{");
+          source.AppendLine("  public StandardArgs(string str,int intger,float f,decimal d)");
           source.AppendLine("  {");
           source.AppendLine("  }");
           source.AppendLine("}");
@@ -71,6 +82,35 @@ namespace CSharpAnalyzeTest
         // クラス内の要素の存在確認
         var expectedModifiers = new List<string>() { "public" };
         var expectedArgs = new List<(string name, string expressions)>();
+
+        Assert.Equal(expectedArgs.Count, GetMemberCount(itemClass, expectedModifiers, expectedArgs));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 値型パラメータのテスト
+    /// </summary>
+    [Fact(DisplayName = "StandardArgs")]
+    public void StandardArgsTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.StandardArgs), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "StandardArgs.cs");
+
+        // クラス内の要素の存在確認
+        var expectedModifiers = new List<string>() { "public" };
+        var expectedArgs = new List<(string name, string expressions)>()
+        {
+          ( "str","string"),
+          ( "intger","int"),
+          ( "f","float"),
+          ( "d","decimal"),
+        };
 
         Assert.Equal(expectedArgs.Count, GetMemberCount(itemClass, expectedModifiers, expectedArgs));
       });

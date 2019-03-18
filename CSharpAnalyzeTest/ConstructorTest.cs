@@ -19,6 +19,7 @@ namespace CSharpAnalyzeTest
     {
       Standard,
       StandardArgs,
+      ClassArgs,
     }
 
     /// <summary>
@@ -50,6 +51,16 @@ namespace CSharpAnalyzeTest
           source.AppendLine("public class StandardArgs");
           source.AppendLine("{");
           source.AppendLine("  public StandardArgs(string str,int intger,float f,decimal d)");
+          source.AppendLine("  {");
+          source.AppendLine("  }");
+          source.AppendLine("}");
+          break;
+        case CreatePattern.ClassArgs:
+          filePath = "ClassArgs.cs";
+
+          source.AppendLine("public class ClassArgs");
+          source.AppendLine("{");
+          source.AppendLine("  public ClassArgs(Standard instance)");
           source.AppendLine("  {");
           source.AppendLine("  }");
           source.AppendLine("}");
@@ -110,6 +121,39 @@ namespace CSharpAnalyzeTest
           ( "intger","int"),
           ( "f","float"),
           ( "d","decimal"),
+        };
+
+        Assert.Equal(expectedArgs.Count, GetMemberCount(itemClass, expectedModifiers, expectedArgs));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// クラスインスタンスのパラメータのテスト
+    /// </summary>
+    [Fact(DisplayName = "ClassArgs")]
+    public void ClassArgsTest()
+    {
+      CreateFileData(CreateSource(CreatePattern.Standard), null);
+
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.ClassArgs), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "ClassArgs.cs");
+
+        // 外部参照の存在確認
+        Assert.Single(ev.FileRoot.OtherFiles);
+        Assert.Equal("Standard", ev.FileRoot.OtherFiles.First().Key);
+        Assert.Equal("Standard.cs", ev.FileRoot.OtherFiles.First().Value);
+
+        // クラス内の要素の存在確認
+        var expectedModifiers = new List<string>() { "public" };
+        var expectedArgs = new List<(string name, string expressions)>()
+        {
+          ( "instance","Standard"),
         };
 
         Assert.Equal(expectedArgs.Count, GetMemberCount(itemClass, expectedModifiers, expectedArgs));

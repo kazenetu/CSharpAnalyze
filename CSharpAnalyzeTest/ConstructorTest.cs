@@ -202,7 +202,7 @@ namespace CSharpAnalyzeTest
     /// <returns></returns>
     private string GetExpressions(List<IExpression> expressions)
     {
-      return string.Join(",", expressions.Select(expression => expression.Name));
+      return string.Concat(expressions.Select(expression => expression.Name));
     }
 
   }

@@ -20,6 +20,7 @@ namespace CSharpAnalyzeTest
       Standard,
       StandardArgs,
       ClassArgs,
+      ListArgs,
     }
 
     /// <summary>
@@ -61,6 +62,16 @@ namespace CSharpAnalyzeTest
           source.AppendLine("public class ClassArgs");
           source.AppendLine("{");
           source.AppendLine("  public ClassArgs(Standard instance)");
+          source.AppendLine("  {");
+          source.AppendLine("  }");
+          source.AppendLine("}");
+          break;
+        case CreatePattern.ListArgs:
+          filePath = "ListArgs.cs";
+
+          source.AppendLine("public class ListArgs");
+          source.AppendLine("{");
+          source.AppendLine("  public ListArgs(List<string> list)");
           source.AppendLine("  {");
           source.AppendLine("  }");
           source.AppendLine("}");
@@ -154,6 +165,32 @@ namespace CSharpAnalyzeTest
         var expectedArgs = new List<(string name, string expressions)>()
         {
           ( "instance","Standard"),
+        };
+
+        Assert.Equal(expectedArgs.Count, GetMemberCount(itemClass, expectedModifiers, expectedArgs));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 組み込みジェネリックインスタンスのパラメータのテスト
+    /// </summary>
+    [Fact(DisplayName = "ListArgs")]
+    public void ListArgsTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.ListArgs), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "ListArgs.cs");
+
+        // クラス内の要素の存在確認
+        var expectedModifiers = new List<string>() { "public" };
+        var expectedArgs = new List<(string name, string expressions)>()
+        {
+          ( "list","List<string>"),
         };
 
         Assert.Equal(expectedArgs.Count, GetMemberCount(itemClass, expectedModifiers, expectedArgs));

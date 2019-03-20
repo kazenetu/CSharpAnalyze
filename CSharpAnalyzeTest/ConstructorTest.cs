@@ -46,6 +46,7 @@ namespace CSharpAnalyzeTest
           source.AppendLine("  }");
           source.AppendLine("}");
           break;
+
         case CreatePattern.StandardArgs:
           filePath = "StandardArgs.cs";
 
@@ -56,6 +57,7 @@ namespace CSharpAnalyzeTest
           source.AppendLine("  }");
           source.AppendLine("}");
           break;
+
         case CreatePattern.ClassArgs:
           filePath = "ClassArgs.cs";
 
@@ -66,6 +68,7 @@ namespace CSharpAnalyzeTest
           source.AppendLine("  }");
           source.AppendLine("}");
           break;
+
         case CreatePattern.ListArgs:
           filePath = "ListArgs.cs";
 

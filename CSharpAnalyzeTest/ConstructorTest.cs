@@ -21,6 +21,7 @@ namespace CSharpAnalyzeTest
       StandardArgs,
       ClassArgs,
       ListArgs,
+      CallSuperConstructor,
     }
 
     /// <summary>
@@ -75,6 +76,17 @@ namespace CSharpAnalyzeTest
           source.AppendLine("public class ListArgs");
           source.AppendLine("{");
           source.AppendLine("  public ListArgs(List<string> list)");
+          source.AppendLine("  {");
+          source.AppendLine("  }");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.CallSuperConstructor:
+          filePath = "CallSuperConstructor.cs";
+
+          source.AppendLine("public class CallSuperConstructor : StandardArgs");
+          source.AppendLine("{");
+          source.AppendLine("  public CallSuperConstructor(string str,int intger,float f,decimal d):base(str,intger,f,d)");
           source.AppendLine("  {");
           source.AppendLine("  }");
           source.AppendLine("}");
@@ -197,6 +209,44 @@ namespace CSharpAnalyzeTest
         };
 
         Assert.Equal(expectedArgs.Count, GetMemberCount(itemClass, expectedModifiers, expectedArgs));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// スーパークラスのコンストラクタ呼び出しのテスト
+    /// </summary>
+    [Fact(DisplayName = "CallSuperConstructor")]
+    public void BaseArgsTest()
+    {
+      CreateFileData(CreateSource(CreatePattern.StandardArgs), null);
+
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.CallSuperConstructor), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "CallSuperConstructor.cs");
+
+        // 外部参照の存在確認
+        Assert.Single(ev.FileRoot.OtherFiles);
+        Assert.Equal("StandardArgs", ev.FileRoot.OtherFiles.First().Key);
+        Assert.Equal("StandardArgs.cs", ev.FileRoot.OtherFiles.First().Value);
+
+        // クラス内の要素の存在確認
+        var expectedModifiers = new List<string>() { "public" };
+        var expectedArgs = new List<(string name, string expressions)>()
+        {
+          ( "str","string"),
+          ( "intger","int"),
+          ( "f","float"),
+          ( "d","decimal"),
+        };
+
+        Assert.Equal(expectedArgs.Count, GetMemberCount(itemClass, expectedModifiers, expectedArgs));
+
+        // TODO スーパークラスのコンストラクタ呼び出し確認
       });
 
       // 解析実行

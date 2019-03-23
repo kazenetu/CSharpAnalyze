@@ -86,7 +86,7 @@ namespace CSharpAnalyzeTest
 
           source.AppendLine("public class CallSuperConstructor : StandardArgs");
           source.AppendLine("{");
-          source.AppendLine("  public CallSuperConstructor(string str,int intger,float f,decimal d):base(str,intger,f,d)");
+          source.AppendLine("  public CallSuperConstructor(string str1,int integer1,float f1,decimal d1,int integer2):base(str1,integer1,f1,d1)");
           source.AppendLine("  {");
           source.AppendLine("  }");
           source.AppendLine("}");
@@ -238,10 +238,11 @@ namespace CSharpAnalyzeTest
         var expectedModifiers = new List<string>() { "public" };
         var expectedArgs = new List<(string name, string expressions)>()
         {
-          ( "str","string"),
-          ( "intger","int"),
-          ( "f","float"),
-          ( "d","decimal"),
+          ( "str1","string"),
+          ( "integer1","int"),
+          ( "f1","float"),
+          ( "d1","decimal"),
+          ( "integer2","int"),
         };
 
         Assert.Equal(expectedArgs.Count, GetMemberCount(itemClass, expectedModifiers, expectedArgs));

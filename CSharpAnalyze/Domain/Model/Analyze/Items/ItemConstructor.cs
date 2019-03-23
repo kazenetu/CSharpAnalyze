@@ -21,6 +21,11 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     public List<(string name, List<IExpression> expressions)> Args { get; } = new List<(string name, List<IExpression> expressions)>();
 
     /// <summary>
+    /// ベースパラメーターリスト
+    /// </summary>
+    public List<string> BaseArgs { get; } = new List<string>();
+
+    /// <summary>
     /// コンストラクタ
     /// </summary>
     /// <param name="node">対象Node</param>
@@ -54,6 +59,16 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
           arg.Add(new Expression(name, type));
         }
         Args.Add((param.Name, arg));
+      }
+
+      // ベースクラスコンストラクタ呼び出し
+      if (!(node.Initializer is null))
+      {
+        var basea = node.Initializer as ConstructorInitializerSyntax;
+        foreach (var baseArg in basea.ArgumentList.Arguments)
+        {
+          BaseArgs.Add($"{baseArg}");
+        }
       }
 
       // メンバ
@@ -107,7 +122,27 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         result.Append($" {arg.name}");
         isFirst = false;
       }
-      result.AppendLine(") ");
+      result.Append(")");
+
+      // ベースクラスコンストラクタ呼び出し
+      if (BaseArgs.Any())
+      {
+        result.Append(" : base(");
+
+        isFirst = true;
+        foreach (var paramName in BaseArgs)
+        {
+          if (!isFirst)
+          {
+            result.Append(",");
+          }
+          result.Append(paramName);
+          isFirst = false;
+        }
+
+        result.Append(")");
+      }
+      result.AppendLine();
 
       // メソッド内容
       result.Append(indexSpace);

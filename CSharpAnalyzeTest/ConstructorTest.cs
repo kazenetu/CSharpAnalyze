@@ -150,6 +150,14 @@ namespace CSharpAnalyzeTest
         };
 
         Assert.Equal(expectedArgs.Count, GetMemberCount(itemClass, expectedModifiers, expectedArgs));
+
+        // スーパークラスのコンストラクタ呼び出し確認
+        var expectedBaseArgs = new List<string>();
+        // コンストラクタの存在確認
+        var constructors = itemClass.Members.Where(member => member is IItemConstructor);
+        Assert.Single(constructors);
+        var constructor = constructors.First() as IItemConstructor;
+        Assert.Equal(expectedBaseArgs, constructor.BaseArgs);
       });
 
       // 解析実行
@@ -183,6 +191,14 @@ namespace CSharpAnalyzeTest
         };
 
         Assert.Equal(expectedArgs.Count, GetMemberCount(itemClass, expectedModifiers, expectedArgs));
+
+        // スーパークラスのコンストラクタ呼び出し確認
+        var expectedBaseArgs = new List<string>();
+        // コンストラクタの存在確認
+        var constructors = itemClass.Members.Where(member => member is IItemConstructor);
+        Assert.Single(constructors);
+        var constructor = constructors.First() as IItemConstructor;
+        Assert.Equal(expectedBaseArgs, constructor.BaseArgs);
       });
 
       // 解析実行
@@ -209,6 +225,14 @@ namespace CSharpAnalyzeTest
         };
 
         Assert.Equal(expectedArgs.Count, GetMemberCount(itemClass, expectedModifiers, expectedArgs));
+
+        // スーパークラスのコンストラクタ呼び出し確認
+        var expectedBaseArgs = new List<string>();
+        // コンストラクタの存在確認
+        var constructors = itemClass.Members.Where(member => member is IItemConstructor);
+        Assert.Single(constructors);
+        var constructor = constructors.First() as IItemConstructor;
+        Assert.Equal(expectedBaseArgs, constructor.BaseArgs);
       });
 
       // 解析実行
@@ -247,7 +271,19 @@ namespace CSharpAnalyzeTest
 
         Assert.Equal(expectedArgs.Count, GetMemberCount(itemClass, expectedModifiers, expectedArgs));
 
-        // TODO スーパークラスのコンストラクタ呼び出し確認
+        // スーパークラスのコンストラクタ呼び出し確認
+        var expectedBaseArgs = new List<string>()
+        {
+          "str1",
+          "integer1",
+          "f1",
+          "d1",
+        };
+        // コンストラクタの存在確認
+        var constructors = itemClass.Members.Where(member => member is IItemConstructor);
+        Assert.Single(constructors);
+        var constructor = constructors.First() as IItemConstructor;
+        Assert.Equal(expectedBaseArgs, constructor.BaseArgs);
       });
 
       // 解析実行

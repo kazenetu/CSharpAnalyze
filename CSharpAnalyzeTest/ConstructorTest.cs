@@ -116,11 +116,21 @@ namespace CSharpAnalyzeTest
         // IItemClassインスタンスを取得
         var itemClass = GetClassInstance(ev, "Standard.cs");
 
+        // IItemConstructorsインスタンスのリストを取得
+        var constructors = GetIItemConstructors(itemClass);
+
+        // constructorインスタンスを取得
+        Assert.Single(constructors);
+        var constructor = constructors.First() as IItemConstructor;
+
         // クラス内の要素の存在確認
         var expectedModifiers = new List<string>() { "public" };
         var expectedArgs = new List<(string name, string expressions)>();
+        Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
 
-        Assert.Equal(expectedArgs.Count, GetMemberCount(itemClass, expectedModifiers, expectedArgs));
+        // スーパークラスのコンストラクタ呼び出し確認
+        var expectedBaseArgs = new List<string>();
+        Assert.Equal(expectedBaseArgs, constructor.BaseArgs);
       });
 
       // 解析実行
@@ -139,6 +149,13 @@ namespace CSharpAnalyzeTest
         // IItemClassインスタンスを取得
         var itemClass = GetClassInstance(ev, "StandardArgs.cs");
 
+        // IItemConstructorsインスタンスのリストを取得
+        var constructors = GetIItemConstructors(itemClass);
+
+        // constructorインスタンスを取得
+        Assert.Single(constructors);
+        var constructor = constructors.First() as IItemConstructor;
+
         // クラス内の要素の存在確認
         var expectedModifiers = new List<string>() { "public" };
         var expectedArgs = new List<(string name, string expressions)>()
@@ -148,15 +165,10 @@ namespace CSharpAnalyzeTest
           ( "f","float"),
           ( "d","decimal"),
         };
-
-        Assert.Equal(expectedArgs.Count, GetMemberCount(itemClass, expectedModifiers, expectedArgs));
+        Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
 
         // スーパークラスのコンストラクタ呼び出し確認
         var expectedBaseArgs = new List<string>();
-        // コンストラクタの存在確認
-        var constructors = itemClass.Members.Where(member => member is IItemConstructor);
-        Assert.Single(constructors);
-        var constructor = constructors.First() as IItemConstructor;
         Assert.Equal(expectedBaseArgs, constructor.BaseArgs);
       });
 
@@ -178,6 +190,13 @@ namespace CSharpAnalyzeTest
         // IItemClassインスタンスを取得
         var itemClass = GetClassInstance(ev, "ClassArgs.cs");
 
+        // IItemConstructorsインスタンスのリストを取得
+        var constructors = GetIItemConstructors(itemClass);
+
+        // constructorインスタンスを取得
+        Assert.Single(constructors);
+        var constructor = constructors.First() as IItemConstructor;
+
         // 外部参照の存在確認
         Assert.Single(ev.FileRoot.OtherFiles);
         Assert.Equal("Standard", ev.FileRoot.OtherFiles.First().Key);
@@ -189,15 +208,10 @@ namespace CSharpAnalyzeTest
         {
           ( "instance","Standard"),
         };
-
-        Assert.Equal(expectedArgs.Count, GetMemberCount(itemClass, expectedModifiers, expectedArgs));
+        Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
 
         // スーパークラスのコンストラクタ呼び出し確認
         var expectedBaseArgs = new List<string>();
-        // コンストラクタの存在確認
-        var constructors = itemClass.Members.Where(member => member is IItemConstructor);
-        Assert.Single(constructors);
-        var constructor = constructors.First() as IItemConstructor;
         Assert.Equal(expectedBaseArgs, constructor.BaseArgs);
       });
 
@@ -217,21 +231,23 @@ namespace CSharpAnalyzeTest
         // IItemClassインスタンスを取得
         var itemClass = GetClassInstance(ev, "ListArgs.cs");
 
+        // IItemConstructorsインスタンスのリストを取得
+        var constructors = GetIItemConstructors(itemClass);
+
+        // constructorインスタンスを取得
+        Assert.Single(constructors);
+        var constructor = constructors.First() as IItemConstructor;
+
         // クラス内の要素の存在確認
         var expectedModifiers = new List<string>() { "public" };
         var expectedArgs = new List<(string name, string expressions)>()
         {
           ( "list","List<string>"),
         };
-
-        Assert.Equal(expectedArgs.Count, GetMemberCount(itemClass, expectedModifiers, expectedArgs));
+        Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
 
         // スーパークラスのコンストラクタ呼び出し確認
         var expectedBaseArgs = new List<string>();
-        // コンストラクタの存在確認
-        var constructors = itemClass.Members.Where(member => member is IItemConstructor);
-        Assert.Single(constructors);
-        var constructor = constructors.First() as IItemConstructor;
         Assert.Equal(expectedBaseArgs, constructor.BaseArgs);
       });
 
@@ -253,6 +269,13 @@ namespace CSharpAnalyzeTest
         // IItemClassインスタンスを取得
         var itemClass = GetClassInstance(ev, "CallSuperConstructor.cs");
 
+        // IItemConstructorsインスタンスのリストを取得
+        var constructors = GetIItemConstructors(itemClass);
+
+        // constructorインスタンスを取得
+        Assert.Single(constructors);
+        var constructor = constructors.First() as IItemConstructor;
+
         // 外部参照の存在確認
         Assert.Single(ev.FileRoot.OtherFiles);
         Assert.Equal("StandardArgs", ev.FileRoot.OtherFiles.First().Key);
@@ -268,8 +291,7 @@ namespace CSharpAnalyzeTest
           ( "d1","decimal"),
           ( "integer2","int"),
         };
-
-        Assert.Equal(expectedArgs.Count, GetMemberCount(itemClass, expectedModifiers, expectedArgs));
+        Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
 
         // スーパークラスのコンストラクタ呼び出し確認
         var expectedBaseArgs = new List<string>()
@@ -279,10 +301,6 @@ namespace CSharpAnalyzeTest
           "f1",
           "d1",
         };
-        // コンストラクタの存在確認
-        var constructors = itemClass.Members.Where(member => member is IItemConstructor);
-        Assert.Single(constructors);
-        var constructor = constructors.First() as IItemConstructor;
         Assert.Equal(expectedBaseArgs, constructor.BaseArgs);
       });
 
@@ -291,27 +309,33 @@ namespace CSharpAnalyzeTest
     }
 
     /// <summary>
-    /// メンバー数を取得
+    /// コンストラクタインスタンスの取得
     /// </summary>
     /// <param name="itemClass">対象のアイテムクラス</param>
+    /// <returns>コンストラクタインスタンスリスト</returns>
+    private List<IItemConstructor> GetIItemConstructors(IItemClass itemClass)
+    {
+      return itemClass.Members.Where(member => member is IItemConstructor).
+              Select(constructor=> constructor as IItemConstructor).ToList();
+    }
+
+    /// <summary>
+    /// メンバー数を取得
+    /// </summary>
+    /// <param name="itemConstructor">対象のコンストラクタクラス</param>
     /// <param name="modifiers">アクセス修飾子の期待値</param>
     /// <param name="expectedArgs">パラメータの期待値</param>
     /// <returns>条件が一致するメンバー数</returns>
-    private int GetMemberCount(IItemClass itemClass, List<string> modifiers, List<(string name, string expressions)> expectedArgs)
+    private int GetMemberCount(IItemConstructor itemConstructor, List<string> modifiers, List<(string name, string expressions)> expectedArgs)
     {
-      // コンストラクタの存在確認
-      var constructors = itemClass.Members.Where(member => member is IItemConstructor);
-      Assert.Single(constructors);
-      var constructor = constructors.First() as IItemConstructor;
-
       // アクセス修飾子の確認
-      Assert.Equal(modifiers, constructor.Modifiers);
+      Assert.Equal(modifiers, itemConstructor.Modifiers);
 
       // パラメータの確認
       var argCount = 0;
       foreach (var (name, expressions) in expectedArgs)
       {
-        var actualArgs = constructor.Args
+        var actualArgs = itemConstructor.Args
                         .Where(arg => arg.name == name)
                         .Where(arg => GetExpressions(arg.expressions) == expressions);
         if (actualArgs.Any())

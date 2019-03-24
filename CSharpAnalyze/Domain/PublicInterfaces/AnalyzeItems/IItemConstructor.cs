@@ -11,5 +11,10 @@ namespace CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems
     /// パラメーターリスト
     /// </summary>
     List<(string name, List<IExpression> expressions)> Args { get; }
+
+    /// <summary>
+    /// ベースパラメーターリスト
+    /// </summary>
+    List<string> BaseArgs { get; }
   }
 }

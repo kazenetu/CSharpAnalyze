@@ -22,6 +22,7 @@ namespace CSharpAnalyzeTest
       ClassArgs,
       ListArgs,
       CallSuperConstructor,
+      Multiple,
     }
 
     /// <summary>
@@ -87,6 +88,20 @@ namespace CSharpAnalyzeTest
           source.AppendLine("public class CallSuperConstructor : StandardArgs");
           source.AppendLine("{");
           source.AppendLine("  public CallSuperConstructor(string str1,int integer1,float f1,decimal d1,int integer2):base(str1,integer1,f1,d1)");
+          source.AppendLine("  {");
+          source.AppendLine("  }");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.Multiple:
+          filePath = "Multiple.cs";
+
+          source.AppendLine("public class Multiple");
+          source.AppendLine("{");
+          source.AppendLine("  public Multiple(string str)");
+          source.AppendLine("  {");
+          source.AppendLine("  }");
+          source.AppendLine("  private Multiple(string str1,int integer)");
           source.AppendLine("  {");
           source.AppendLine("  }");
           source.AppendLine("}");
@@ -302,6 +317,62 @@ namespace CSharpAnalyzeTest
           "d1",
         };
         Assert.Equal(expectedBaseArgs, constructor.BaseArgs);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// スーパークラスのコンストラクタ呼び出しのテスト
+    /// </summary>
+    [Fact(DisplayName = "Multiple")]
+    public void MultipleTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.Multiple), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "Multiple.cs");
+
+        // IItemConstructorsインスタンスのリストを取得
+        var constructors = GetIItemConstructors(itemClass);
+
+        // constructorインスタンスを取得
+        Assert.True(constructors.Count == 2, $"constructors != 2 [{constructors.Count}]");
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // クラス内の要素の想定値を設定
+        var expectedModifiersList = new List<List<string>>() {
+          new List<string>{ "public" },
+          new List<string>{ "private" },
+        };
+        var expectedArgsList = new List<List<(string name, string expressions)>>()
+        {
+          new List<(string name, string expressions)>{
+            ( "str","string"),
+          },
+          new List<(string name, string expressions)>{
+            ( "str1","string"),
+            ( "integer","int"),
+          },
+        };
+
+        var expectedIndex = 0;
+        foreach (IItemConstructor constructor in constructors)
+        {
+          // クラス内の要素の存在確認
+          var expectedModifiers = expectedModifiersList[expectedIndex];
+          var expectedArgs = expectedArgsList[expectedIndex];
+          Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
+
+          // スーパークラスのコンストラクタ呼び出し確認
+          Assert.Equal(new List<string>(), constructor.BaseArgs);
+
+          expectedIndex++;
+        }
       });
 
       // 解析実行

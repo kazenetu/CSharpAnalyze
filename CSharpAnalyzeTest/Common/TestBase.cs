@@ -59,7 +59,7 @@ namespace CSharpAnalyzeTest.Common
     /// </summary>
     public void Dispose()
     {
-      EventContainer.Unregister<IAnalyzed>(CSAnalyze);
+      EventContainer.UnregisterAll();
 
       GC.SuppressFinalize(this);
     }

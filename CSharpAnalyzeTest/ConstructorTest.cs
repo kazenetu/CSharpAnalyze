@@ -260,7 +260,9 @@ namespace CSharpAnalyzeTest
         var constructor = constructors.First() as IItemConstructor;
 
         // 外部参照の存在確認
-        Assert.Empty(ev.FileRoot.OtherFiles);
+        Assert.Single(ev.FileRoot.OtherFiles);
+        Assert.Equal("List", ev.FileRoot.OtherFiles.First().Key);
+        Assert.Equal("", ev.FileRoot.OtherFiles.First().Value);
 
         // クラス内の要素の存在確認
         var expectedModifiers = new List<string>() { "public" };

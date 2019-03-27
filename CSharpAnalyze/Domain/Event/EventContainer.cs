@@ -48,6 +48,17 @@ namespace CSharpAnalyze.Domain.Event
     }
 
     /// <summary>
+    /// イベントの全削除
+    /// </summary>
+    public static void UnregisterAll()
+    {
+      lock (lockObject)
+      {
+        Handles.Clear();
+      }
+    }
+
+    /// <summary>
     /// イベント発行
     /// </summary>
     /// <param name="args">発行イベント</param>
@@ -55,7 +66,7 @@ namespace CSharpAnalyze.Domain.Event
     {
       lock (lockObject)
       {
-        var targets = Handles.Where(handle => handle.callback is Action<T>);
+        var targets = Handles.Where(handle => handle.callback is Action<T>).ToList();
         foreach (var target in targets)
         {
           ((Action<T>)target.callback)(args);

@@ -333,7 +333,7 @@ namespace CSharpAnalyzeTest
     }
 
     /// <summary>
-    /// スーパークラスのコンストラクタ呼び出しのテスト
+    /// 複数コンストラクタ呼び出しのテスト
     /// </summary>
     [Fact(DisplayName = "Multiple")]
     public void MultipleTest()

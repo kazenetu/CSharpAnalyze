@@ -138,6 +138,9 @@ namespace CSharpAnalyzeTest
         Assert.Single(constructors);
         var constructor = constructors.First() as IItemConstructor;
 
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
         // クラス内の要素の存在確認
         var expectedModifiers = new List<string>() { "public" };
         var expectedArgs = new List<(string name, string expressions)>();
@@ -170,6 +173,9 @@ namespace CSharpAnalyzeTest
         // constructorインスタンスを取得
         Assert.Single(constructors);
         var constructor = constructors.First() as IItemConstructor;
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
 
         // クラス内の要素の存在確認
         var expectedModifiers = new List<string>() { "public" };
@@ -252,6 +258,9 @@ namespace CSharpAnalyzeTest
         // constructorインスタンスを取得
         Assert.Single(constructors);
         var constructor = constructors.First() as IItemConstructor;
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
 
         // クラス内の要素の存在確認
         var expectedModifiers = new List<string>() { "public" };

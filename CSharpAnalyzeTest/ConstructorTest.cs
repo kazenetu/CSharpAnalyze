@@ -413,6 +413,9 @@ namespace CSharpAnalyzeTest
       // アクセス修飾子の確認
       Assert.Equal(modifiers, itemConstructor.Modifiers);
 
+      // パラメータ数の確認
+      Assert.Equal(expectedArgs.Count, itemConstructor.Args.Count);
+
       // パラメータの確認
       var argCount = 0;
       foreach (var (name, expressions) in expectedArgs)

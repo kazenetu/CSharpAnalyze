@@ -66,12 +66,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         {
           case RefKind.None:
             break;
-          case RefKind.RefReadOnly:
-            modifiers.Add("ref");
-            modifiers.Add("readonly");
-            break;
           default:
-            modifiers.Add(param.RefKind.ToString().ToLower(CultureInfo.CurrentCulture));
+            var modifiersArray = param.RefKind.ToString().ToLower(CultureInfo.CurrentCulture).Split(' ');
+            modifiers.AddRange(modifiersArray);
             break;
         }
 

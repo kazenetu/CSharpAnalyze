@@ -155,7 +155,7 @@ namespace CSharpAnalyzeTest
 
         // クラス内の要素の存在確認
         var expectedModifiers = new List<string>() { "public" };
-        var expectedArgs = new List<(string name, string expressions)>();
+        var expectedArgs = new List<(string name, string expressions, string refType)>();
         Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
 
         // スーパークラスのコンストラクタ呼び出し確認
@@ -191,12 +191,12 @@ namespace CSharpAnalyzeTest
 
         // クラス内の要素の存在確認
         var expectedModifiers = new List<string>() { "public" };
-        var expectedArgs = new List<(string name, string expressions)>()
+        var expectedArgs = new List<(string name, string expressions, string refType)>()
         {
-          ( "str","string"),
-          ( "intger","int"),
-          ( "f","float"),
-          ( "d","decimal"),
+          ( "str","string",""),
+          ( "intger","int",""),
+          ( "f","float",""),
+          ( "d","decimal",""),
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
 
@@ -237,9 +237,9 @@ namespace CSharpAnalyzeTest
 
         // クラス内の要素の存在確認
         var expectedModifiers = new List<string>() { "public" };
-        var expectedArgs = new List<(string name, string expressions)>()
+        var expectedArgs = new List<(string name, string expressions, string refType)>()
         {
-          ( "instance","Standard"),
+          ( "instance","Standard",""),
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
 
@@ -278,9 +278,9 @@ namespace CSharpAnalyzeTest
 
         // クラス内の要素の存在確認
         var expectedModifiers = new List<string>() { "public" };
-        var expectedArgs = new List<(string name, string expressions)>()
+        var expectedArgs = new List<(string name, string expressions, string refType)>()
         {
-          ( "list","List<string>"),
+          ( "list","List<string>",""),
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
 
@@ -321,13 +321,13 @@ namespace CSharpAnalyzeTest
 
         // クラス内の要素の存在確認
         var expectedModifiers = new List<string>() { "public" };
-        var expectedArgs = new List<(string name, string expressions)>()
+        var expectedArgs = new List<(string name, string expressions, string refType)>()
         {
-          ( "str1","string"),
-          ( "integer1","int"),
-          ( "f1","float"),
-          ( "d1","decimal"),
-          ( "integer2","int"),
+          ( "str1","string",""),
+          ( "integer1","int",""),
+          ( "f1","float",""),
+          ( "d1","decimal",""),
+          ( "integer2","int",""),
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
 
@@ -372,14 +372,14 @@ namespace CSharpAnalyzeTest
           new List<string>{ "public" },
           new List<string>{ "private" },
         };
-        var expectedArgsList = new List<List<(string name, string expressions)>>()
+        var expectedArgsList = new List<List<(string name, string expressions, string refType)>>()
         {
-          new List<(string name, string expressions)>{
-            ( "str","string"),
+          new List<(string name, string expressions, string refType)>{
+            ( "str","string",""),
           },
-          new List<(string name, string expressions)>{
-            ( "str1","string"),
-            ( "integer","int"),
+          new List<(string name, string expressions, string refType)>{
+            ( "str1","string",""),
+            ( "integer","int",""),
           },
         };
 
@@ -423,11 +423,11 @@ namespace CSharpAnalyzeTest
 
         // クラス内の要素の存在確認
         var expectedModifiers = new List<string>() { "public" };
-        var expectedArgs = new List<(string name, string expressions)>()
+        var expectedArgs = new List<(string name, string expressions, string refType)>()
         {
-          ( "integer","int"),
-          ( "str","string"),
-          ( "output","decimal"),
+          ( "integer","int","ref"),
+          ( "str","string","in"),
+          ( "output","decimal","out"),
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
 
@@ -458,7 +458,7 @@ namespace CSharpAnalyzeTest
     /// <param name="modifiers">アクセス修飾子の期待値</param>
     /// <param name="expectedArgs">パラメータの期待値</param>
     /// <returns>条件が一致するメンバー数</returns>
-    private int GetMemberCount(IItemConstructor itemConstructor, List<string> modifiers, List<(string name, string expressions)> expectedArgs)
+    private int GetMemberCount(IItemConstructor itemConstructor, List<string> modifiers, List<(string name, string expressions, string refType)> expectedArgs)
     {
       // アクセス修飾子の確認
       Assert.Equal(modifiers, itemConstructor.Modifiers);
@@ -468,11 +468,12 @@ namespace CSharpAnalyzeTest
 
       // パラメータの確認
       var argCount = 0;
-      foreach (var (name, expressions) in expectedArgs)
+      foreach (var (name, expressions, refType) in expectedArgs)
       {
         var actualArgs = itemConstructor.Args
                         .Where(arg => arg.name == name)
-                        .Where(arg => GetExpressions(arg.expressions) == expressions);
+                        .Where(arg => GetExpressions(arg.expressions) == expressions)
+                        .Where(arg => string.Concat(arg.modifiers) == refType);
         if (actualArgs.Any())
         {
           argCount++;

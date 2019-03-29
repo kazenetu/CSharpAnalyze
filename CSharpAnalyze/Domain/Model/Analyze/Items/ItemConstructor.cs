@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -18,7 +19,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// <summary>
     /// パラメーターリスト
     /// </summary>
-    public List<(string name, List<IExpression> expressions)> Args { get; } = new List<(string name, List<IExpression> expressions)>();
+    public List<(string name, List<IExpression> expressions, List<string> modifiers)> Args { get; } = new List<(string name, List<IExpression> expressions, List<string> modifiers)>();
 
     /// <summary>
     /// ベースパラメーターリスト
@@ -58,7 +59,23 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
 
           arg.Add(new Expression(name, type));
         }
-        Args.Add((param.Name, arg));
+
+        // 参照型を設定
+        var modifiers = new List<string>();
+        switch (param.RefKind)
+        {
+          case RefKind.None:
+            break;
+          case RefKind.RefReadOnly:
+            modifiers.Add("ref");
+            modifiers.Add("readonly");
+            break;
+          default:
+            modifiers.Add(param.RefKind.ToString().ToLower(CultureInfo.CurrentCulture));
+            break;
+        }
+
+        Args.Add((param.Name, arg, modifiers));
       }
 
       // ベースクラスコンストラクタ呼び出し
@@ -118,6 +135,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         {
           result.Append(",");
         }
+        arg.modifiers.ForEach(item => result.Append($"{item} "));
         arg.expressions.ForEach(item => result.Append($"{item.Name}"));
         result.Append($" {arg.name}");
         isFirst = false;

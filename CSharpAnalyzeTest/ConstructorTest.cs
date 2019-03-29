@@ -23,6 +23,7 @@ namespace CSharpAnalyzeTest
       ListArgs,
       CallSuperConstructor,
       Multiple,
+      RefArgs,
     }
 
     /// <summary>
@@ -102,6 +103,17 @@ namespace CSharpAnalyzeTest
           source.AppendLine("  {");
           source.AppendLine("  }");
           source.AppendLine("  private Multiple(string str1,int integer)");
+          source.AppendLine("  {");
+          source.AppendLine("  }");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.RefArgs:
+          filePath = "RefArgs.cs";
+
+          source.AppendLine("public class RefArgs");
+          source.AppendLine("{");
+          source.AppendLine("  public RefArgs(ref int integer,in string str,out decimal output)");
           source.AppendLine("  {");
           source.AppendLine("  }");
           source.AppendLine("}");
@@ -384,6 +396,44 @@ namespace CSharpAnalyzeTest
 
           expectedIndex++;
         }
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 参照系のパラメータのテスト
+    /// </summary>
+    [Fact(DisplayName = "RefArgs")]
+    public void RefArgsTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.RefArgs), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "RefArgs.cs");
+
+        // IItemConstructorsインスタンスのリストを取得
+        var constructors = GetIItemConstructors(itemClass);
+
+        // constructorインスタンスを取得
+        Assert.Single(constructors);
+        var constructor = constructors.First() as IItemConstructor;
+
+        // クラス内の要素の存在確認
+        var expectedModifiers = new List<string>() { "public" };
+        var expectedArgs = new List<(string name, string expressions)>()
+        {
+          ( "integer","int"),
+          ( "str","string"),
+          ( "output","decimal"),
+        };
+        Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
+
+        // スーパークラスのコンストラクタ呼び出し確認
+        var expectedBaseArgs = new List<string>();
+        Assert.Equal(expectedBaseArgs, constructor.BaseArgs);
       });
 
       // 解析実行

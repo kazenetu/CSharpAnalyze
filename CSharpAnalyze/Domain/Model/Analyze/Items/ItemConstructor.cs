@@ -4,6 +4,7 @@ using CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Operations;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// <summary>
     /// パラメーターリスト
     /// </summary>
-    public List<(string name, List<IExpression> expressions, List<string> modifiers)> Args { get; } = new List<(string name, List<IExpression> expressions, List<string> modifiers)>();
+    public List<(string name, List<IExpression> expressions, List<string> modifiers, List<IExpression> defaultValues)> Args { get; } = new List<(string name, List<IExpression> expressions, List<string> modifiers, List<IExpression> defaultValues)>();
 
     /// <summary>
     /// ベースパラメーターリスト
@@ -42,6 +43,8 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       Name = declaredSymbol.ContainingSymbol.Name;
 
       // パラメーター取得
+      var nodeParams = node.ParameterList.Parameters;
+      var paramIndex = 0;
       foreach (var param in declaredSymbol.Parameters)
       {
         var arg = new List<IExpression>();
@@ -72,7 +75,17 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
             break;
         }
 
-        Args.Add((param.Name, arg, modifiers));
+        // デフォルト値を設定
+        var defaultValues = new List<IExpression>();
+        if (param.HasExplicitDefaultValue)
+        {
+          var defaultValueOpration = semanticModel.GetOperation(nodeParams[paramIndex].Default) as IParameterInitializerOperation;
+          defaultValues.AddRange(OperationFactory.GetExpressionList(defaultValueOpration.Value));
+        }
+
+        Args.Add((param.Name, arg, modifiers, defaultValues));
+
+        paramIndex++;
       }
 
       // ベースクラスコンストラクタ呼び出し
@@ -135,6 +148,13 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         arg.modifiers.ForEach(item => result.Append($"{item} "));
         arg.expressions.ForEach(item => result.Append($"{item.Name}"));
         result.Append($" {arg.name}");
+
+        if (arg.defaultValues.Any())
+        {
+          result.Append(" = ");
+          arg.defaultValues.ForEach(item => result.Append($"{item}"));
+        }
+
         isFirst = false;
       }
       result.Append(")");

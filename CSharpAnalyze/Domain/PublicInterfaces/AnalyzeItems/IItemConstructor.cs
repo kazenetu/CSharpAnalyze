@@ -10,7 +10,7 @@ namespace CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems
     /// <summary>
     /// パラメーターリスト
     /// </summary>
-    List<(string name, List<IExpression> expressions, List<string> modifiers)> Args { get; }
+    List<(string name, List<IExpression> expressions, List<string> modifiers, List<IExpression> defaultValues)> Args { get; }
 
     /// <summary>
     /// ベースパラメーターリスト

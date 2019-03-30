@@ -4,7 +4,9 @@ using CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Operations;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -23,7 +25,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// <summary>
     /// パラメーターリスト
     /// </summary>
-    public List<(string name, List<IExpression> expressions)> Args { get; } = new List<(string name, List<IExpression> expressions)>();
+    public List<(string name, List<IExpression> expressions, List<string> modifiers, List<IExpression> defaultValues)> Args { get; } = new List<(string name, List<IExpression> expressions, List<string> modifiers, List<IExpression> defaultValues)>();
 
     /// <summary>
     /// コンストラクタ
@@ -53,7 +55,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       }
 
       // パラメーター取得
-      foreach(var param in declaredSymbol.Parameters)
+      var nodeParams = node.ParameterList.Parameters;
+      var paramIndex = 0;
+      foreach (var param in declaredSymbol.Parameters)
       {
         var arg = new List<IExpression>();
 
@@ -70,7 +74,30 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
 
           arg.Add(new Expression(name, type));
         }
-        Args.Add((param.Name, arg));
+
+        // 参照型を設定
+        var modifiers = new List<string>();
+        switch (param.RefKind)
+        {
+          case RefKind.None:
+            break;
+          default:
+            var modifiersArray = param.RefKind.ToString().ToLower(CultureInfo.CurrentCulture).Split(' ');
+            modifiers.AddRange(modifiersArray);
+            break;
+        }
+
+        // デフォルト値を設定
+        var defaultValues = new List<IExpression>();
+        if (param.HasExplicitDefaultValue)
+        {
+          var defaultValueOpration = semanticModel.GetOperation(nodeParams[paramIndex].Default) as IParameterInitializerOperation;
+          defaultValues.AddRange(OperationFactory.GetExpressionList(defaultValueOpration.Value));
+        }
+
+        Args.Add((param.Name, arg, modifiers, defaultValues));
+
+        paramIndex++;
       }
 
       // メンバ
@@ -124,8 +151,16 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         {
           result.Append(",");
         }
-        arg.expressions.ForEach(item=> result.Append($"{item.Name}"));
+        arg.modifiers.ForEach(item => result.Append($"{item} "));
+        arg.expressions.ForEach(item => result.Append($"{item.Name}"));
         result.Append($" {arg.name}");
+
+        if (arg.defaultValues.Any())
+        {
+          result.Append(" = ");
+          arg.defaultValues.ForEach(item => result.Append($"{item}"));
+        }
+
         isFirst = false;
       }
       result.AppendLine(") ");

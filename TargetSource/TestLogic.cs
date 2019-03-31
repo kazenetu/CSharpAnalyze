@@ -182,7 +182,7 @@ namespace DataTransferObjects
     /// 複数コンストラクタ1
     /// </summary>
     /// <param name="paramValue">パラメータ</param>
-    public TestLogic(int paramValue)
+    public TestLogic(ref int paramValue)
     {
       prop = paramValue.ToString();
     }
@@ -191,7 +191,7 @@ namespace DataTransferObjects
     /// 複数コンストラクタ2
     /// </summary>
     /// <param name="param">パラメータ</param>
-    public TestLogic(string param)
+    public TestLogic(string param = "TEST")
     {
       prop = "コンストラクタ";
     }

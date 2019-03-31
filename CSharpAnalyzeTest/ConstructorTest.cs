@@ -24,6 +24,7 @@ namespace CSharpAnalyzeTest
       CallSuperConstructor,
       Multiple,
       RefArgs,
+      DefaultValues,
     }
 
     /// <summary>
@@ -118,6 +119,17 @@ namespace CSharpAnalyzeTest
           source.AppendLine("  }");
           source.AppendLine("}");
           break;
+
+        case CreatePattern.DefaultValues:
+          filePath = "DefaultValues.cs";
+
+          source.AppendLine("public class DefaultValues");
+          source.AppendLine("{");
+          source.AppendLine("  public DefaultValues(int integer=10,string str=\"ABC\")");
+          source.AppendLine("  {");
+          source.AppendLine("  }");
+          source.AppendLine("}");
+          break;
       }
 
       return new FileData(filePath, usingList.ToString(), source.ToString());
@@ -155,7 +167,7 @@ namespace CSharpAnalyzeTest
 
         // クラス内の要素の存在確認
         var expectedModifiers = new List<string>() { "public" };
-        var expectedArgs = new List<(string name, string expressions, string refType)>();
+        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>();
         Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
 
         // スーパークラスのコンストラクタ呼び出し確認
@@ -191,12 +203,12 @@ namespace CSharpAnalyzeTest
 
         // クラス内の要素の存在確認
         var expectedModifiers = new List<string>() { "public" };
-        var expectedArgs = new List<(string name, string expressions, string refType)>()
+        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
         {
-          ( "str","string",""),
-          ( "intger","int",""),
-          ( "f","float",""),
-          ( "d","decimal",""),
+          ( "str","string","",""),
+          ( "intger","int","",""),
+          ( "f","float","",""),
+          ( "d","decimal","",""),
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
 
@@ -237,9 +249,9 @@ namespace CSharpAnalyzeTest
 
         // クラス内の要素の存在確認
         var expectedModifiers = new List<string>() { "public" };
-        var expectedArgs = new List<(string name, string expressions, string refType)>()
+        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
         {
-          ( "instance","Standard",""),
+          ( "instance","Standard","",""),
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
 
@@ -278,9 +290,9 @@ namespace CSharpAnalyzeTest
 
         // クラス内の要素の存在確認
         var expectedModifiers = new List<string>() { "public" };
-        var expectedArgs = new List<(string name, string expressions, string refType)>()
+        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
         {
-          ( "list","List<string>",""),
+          ( "list","List<string>","",""),
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
 
@@ -321,13 +333,13 @@ namespace CSharpAnalyzeTest
 
         // クラス内の要素の存在確認
         var expectedModifiers = new List<string>() { "public" };
-        var expectedArgs = new List<(string name, string expressions, string refType)>()
+        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
         {
-          ( "str1","string",""),
-          ( "integer1","int",""),
-          ( "f1","float",""),
-          ( "d1","decimal",""),
-          ( "integer2","int",""),
+          ( "str1","string","",""),
+          ( "integer1","int","",""),
+          ( "f1","float","",""),
+          ( "d1","decimal","",""),
+          ( "integer2","int","",""),
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
 
@@ -372,14 +384,14 @@ namespace CSharpAnalyzeTest
           new List<string>{ "public" },
           new List<string>{ "private" },
         };
-        var expectedArgsList = new List<List<(string name, string expressions, string refType)>>()
+        var expectedArgsList = new List<List<(string name, string expressions, string refType, string defaultValue)>>()
         {
-          new List<(string name, string expressions, string refType)>{
-            ( "str","string",""),
+          new List<(string name, string expressions, string refType, string defaultValue)>{
+            ( "str","string","",""),
           },
-          new List<(string name, string expressions, string refType)>{
-            ( "str1","string",""),
-            ( "integer","int",""),
+          new List<(string name, string expressions, string refType, string defaultValue)>{
+            ( "str1","string","",""),
+            ( "integer","int","",""),
           },
         };
 
@@ -423,11 +435,48 @@ namespace CSharpAnalyzeTest
 
         // クラス内の要素の存在確認
         var expectedModifiers = new List<string>() { "public" };
-        var expectedArgs = new List<(string name, string expressions, string refType)>()
+        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
         {
-          ( "integer","int","ref"),
-          ( "str","string","in"),
-          ( "output","decimal","out"),
+          ( "integer","int","ref",""),
+          ( "str","string","in",""),
+          ( "output","decimal","out",""),
+        };
+        Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
+
+        // スーパークラスのコンストラクタ呼び出し確認
+        var expectedBaseArgs = new List<string>();
+        Assert.Equal(expectedBaseArgs, constructor.BaseArgs);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 初期値パラメータのテスト
+    /// </summary>
+    [Fact(DisplayName = "DefaultValues")]
+    public void DefaultValuesTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.DefaultValues), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "DefaultValues.cs");
+
+        // IItemConstructorsインスタンスのリストを取得
+        var constructors = GetIItemConstructors(itemClass);
+
+        // constructorインスタンスを取得
+        Assert.Single(constructors);
+        var constructor = constructors.First() as IItemConstructor;
+
+        // クラス内の要素の存在確認
+        var expectedModifiers = new List<string>() { "public" };
+        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
+        {
+          ( "integer","int","","10"),
+          ( "str","string","","\"ABC\""),
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
 
@@ -458,7 +507,7 @@ namespace CSharpAnalyzeTest
     /// <param name="modifiers">アクセス修飾子の期待値</param>
     /// <param name="expectedArgs">パラメータの期待値</param>
     /// <returns>条件が一致するメンバー数</returns>
-    private int GetMemberCount(IItemConstructor itemConstructor, List<string> modifiers, List<(string name, string expressions, string refType)> expectedArgs)
+    private int GetMemberCount(IItemConstructor itemConstructor, List<string> modifiers, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)
     {
       // アクセス修飾子の確認
       Assert.Equal(modifiers, itemConstructor.Modifiers);
@@ -468,12 +517,13 @@ namespace CSharpAnalyzeTest
 
       // パラメータの確認
       var argCount = 0;
-      foreach (var (name, expressions, refType) in expectedArgs)
+      foreach (var (name, expressions, refType, defaultValue) in expectedArgs)
       {
         var actualArgs = itemConstructor.Args
                         .Where(arg => arg.name == name)
                         .Where(arg => GetExpressions(arg.expressions) == expressions)
-                        .Where(arg => string.Concat(arg.modifiers) == refType);
+                        .Where(arg => string.Concat(arg.modifiers) == refType)
+                        .Where(arg => GetExpressions(arg.defaultValues) == defaultValue);
         if (actualArgs.Any())
         {
           argCount++;

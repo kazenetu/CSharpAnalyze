@@ -152,7 +152,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         if (arg.defaultValues.Any())
         {
           result.Append(" = ");
-          arg.defaultValues.ForEach(item => result.Append($"{item}"));
+          arg.defaultValues.ForEach(item => result.Append($"{item.Name}"));
         }
 
         isFirst = false;

@@ -165,7 +165,7 @@ namespace CSharpAnalyzeTest
         // 外部参照の存在確認
         Assert.Empty(ev.FileRoot.OtherFiles);
 
-        // クラス内の要素の存在確認
+        // パラメータの確認
         var expectedModifiers = new List<string>() { "public" };
         var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>();
         Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
@@ -212,7 +212,7 @@ namespace CSharpAnalyzeTest
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
 
-        // スーパークラスのコンストラクタ呼び出し確認
+        // パラメータの確認
         var expectedBaseArgs = new List<string>();
         Assert.Equal(expectedBaseArgs, constructor.BaseArgs);
       });
@@ -247,7 +247,7 @@ namespace CSharpAnalyzeTest
         Assert.Equal("Standard", ev.FileRoot.OtherFiles.First().Key);
         Assert.Equal("Standard.cs", ev.FileRoot.OtherFiles.First().Value);
 
-        // クラス内の要素の存在確認
+        // パラメータの確認
         var expectedModifiers = new List<string>() { "public" };
         var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
         {
@@ -288,7 +288,7 @@ namespace CSharpAnalyzeTest
         Assert.Equal("List", ev.FileRoot.OtherFiles.First().Key);
         Assert.Equal("", ev.FileRoot.OtherFiles.First().Value);
 
-        // クラス内の要素の存在確認
+        // パラメータの確認
         var expectedModifiers = new List<string>() { "public" };
         var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
         {
@@ -331,7 +331,7 @@ namespace CSharpAnalyzeTest
         Assert.Equal("StandardArgs", ev.FileRoot.OtherFiles.First().Key);
         Assert.Equal("StandardArgs.cs", ev.FileRoot.OtherFiles.First().Value);
 
-        // クラス内の要素の存在確認
+        // パラメータの確認
         var expectedModifiers = new List<string>() { "public" };
         var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
         {
@@ -398,7 +398,7 @@ namespace CSharpAnalyzeTest
         var expectedIndex = 0;
         foreach (IItemConstructor constructor in constructors)
         {
-          // クラス内の要素の存在確認
+          // パラメータの確認
           var expectedModifiers = expectedModifiersList[expectedIndex];
           var expectedArgs = expectedArgsList[expectedIndex];
           Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
@@ -433,7 +433,7 @@ namespace CSharpAnalyzeTest
         Assert.Single(constructors);
         var constructor = constructors.First() as IItemConstructor;
 
-        // クラス内の要素の存在確認
+        // パラメータの確認
         var expectedModifiers = new List<string>() { "public" };
         var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
         {
@@ -471,7 +471,7 @@ namespace CSharpAnalyzeTest
         Assert.Single(constructors);
         var constructor = constructors.First() as IItemConstructor;
 
-        // クラス内の要素の存在確認
+        // パラメータの確認
         var expectedModifiers = new List<string>() { "public" };
         var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
         {

@@ -179,6 +179,9 @@ namespace CSharpAnalyzeTest
           ( "d","decimal","",""),
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedModifiers, expectedArgs));
+
+        // 内部処理の確認
+        Assert.Empty(targetInstance.Members);
       });
 
       // 解析実行
@@ -221,6 +224,9 @@ namespace CSharpAnalyzeTest
           ( "instance","Standard","",""),
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedModifiers, expectedArgs));
+
+        // 内部処理の確認
+        Assert.Empty(targetInstance.Members);
       });
 
       // 解析実行
@@ -261,6 +267,9 @@ namespace CSharpAnalyzeTest
           ( "list","List<string>","",""),
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedModifiers, expectedArgs));
+
+        // 内部処理の確認
+        Assert.Empty(targetInstance.Members);
       });
 
       // 解析実行
@@ -315,6 +324,9 @@ namespace CSharpAnalyzeTest
           var expectedArgs = expectedArgsList[expectedIndex];
           Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedModifiers, expectedArgs));
 
+          // 内部処理の確認
+          Assert.Empty(targetInstance.Members);
+
           expectedIndex++;
         }
       });
@@ -354,6 +366,9 @@ namespace CSharpAnalyzeTest
           ( "output","decimal","out",""),
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedModifiers, expectedArgs));
+
+        // 内部処理の確認
+        Assert.Empty(targetInstance.Members);
       });
 
       // 解析実行
@@ -390,6 +405,9 @@ namespace CSharpAnalyzeTest
           ( "str","string","","\"ABC\""),
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedModifiers, expectedArgs));
+
+        // 内部処理の確認
+        Assert.Empty(targetInstance.Members);
       });
 
       // 解析実行

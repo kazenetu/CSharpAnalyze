@@ -18,6 +18,13 @@ namespace CSharpAnalyzeTest
     private enum CreatePattern
     {
       Standard,
+      StandardArgs,
+      ClassArgs,
+      ListArgs,
+      Multiple,
+      RefArgs,
+      DefaultValues,
+      ReturnValue,
     }
 
     /// <summary>
@@ -41,6 +48,65 @@ namespace CSharpAnalyzeTest
           source.Add("}");
           break;
 
+        case CreatePattern.StandardArgs:
+          filePath = "StandardArgs.cs";
+
+          source.Add("void target(string str,int intger,float f,decimal d)");
+          source.Add("{");
+          source.Add("}");
+          break;
+
+        case CreatePattern.ClassArgs:
+          filePath = "ClassArgs.cs";
+
+          source.Add("void target(Standard instance)");
+          source.Add("{");
+          source.Add("}");
+          break;
+
+        case CreatePattern.ListArgs:
+          filePath = "ListArgs.cs";
+
+          source.Add("void target(List<string> list)");
+          source.Add("{");
+          source.Add("}");
+          break;
+
+        case CreatePattern.Multiple:
+          filePath = "Multiple.cs";
+
+          source.Add("void target(string str)");
+          source.Add("{");
+          source.Add("}");
+          source.Add("void target(string str1,int integer)");
+          source.Add("{");
+          source.Add("}");
+          break;
+
+        case CreatePattern.RefArgs:
+          filePath = "RefArgs.cs";
+
+          source.Add("void target(ref int integer,in string str,out decimal output)");
+          source.Add("{");
+          source.Add("}");
+          break;
+
+        case CreatePattern.DefaultValues:
+          filePath = "DefaultValues.cs";
+
+          source.Add("void target(int integer=10,string str=\"ABC\")");
+          source.Add("{");
+          source.Add("}");
+          break;
+
+        case CreatePattern.ReturnValue:
+          filePath = "ReturnValue.cs";
+
+          source.Add("int target()");
+          source.Add("{");
+          source.Add("  return 10;");
+          source.Add("}");
+          break;
       }
 
       // ソースコード作成
@@ -102,6 +168,279 @@ namespace CSharpAnalyzeTest
 
         // 内部処理の確認
         Assert.Empty(targetInstance.Members);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// クラスインスタンスのパラメータのテスト
+    /// </summary>
+    [Fact(DisplayName = "ClassArgs")]
+    public void ClassArgsTest()
+    {
+      CreateFileData(CreateSource(CreatePattern.Standard), null);
+
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.ClassArgs), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "ClassArgs.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemLocalFunction;
+
+        // 型タイプの確認
+        Assert.Equal("void", GetExpressions(targetInstance.MethodTypes));
+
+        // 外部参照の存在確認
+        Assert.Single(ev.FileRoot.OtherFiles);
+        Assert.Equal("Standard", ev.FileRoot.OtherFiles.First().Key);
+        Assert.Equal("Standard.cs", ev.FileRoot.OtherFiles.First().Value);
+
+        // パラメータの確認
+        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
+        {
+          ( "instance","Standard","",""),
+        };
+        Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedArgs));
+
+        // 内部処理の確認
+        Assert.Empty(targetInstance.Members);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 組み込みジェネリックインスタンスのパラメータのテスト
+    /// </summary>
+    [Fact(DisplayName = "ListArgs")]
+    public void ListArgsTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.ListArgs), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "ListArgs.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemLocalFunction;
+
+        // 型タイプの確認
+        Assert.Equal("void", GetExpressions(targetInstance.MethodTypes));
+
+        // 外部参照の存在確認
+        Assert.Single(ev.FileRoot.OtherFiles);
+        Assert.Equal("List", ev.FileRoot.OtherFiles.First().Key);
+        Assert.Equal("", ev.FileRoot.OtherFiles.First().Value);
+
+        // パラメータの確認
+        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
+        {
+          ( "list","List<string>","",""),
+        };
+        Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedArgs));
+
+        // 内部処理の確認
+        Assert.Empty(targetInstance.Members);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 複数コンストラクタ呼び出しのテスト
+    /// </summary>
+    [Fact(DisplayName = "Multiple")]
+    public void MultipleTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.Multiple), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "Multiple.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetParentInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetParentInstances);
+        var targetParentInstance = targetParentInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstances = GetTargetInstances(targetParentInstance);
+
+        // 対象インスタンスを取得
+        Assert.True(targetInstances.Count == 2, $"targetInstances != 2 [{targetInstances.Count}]");
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // クラス内の要素の想定値を設定
+        var expectedArgsList = new List<List<(string name, string expressions, string refType, string defaultValue)>>()
+        {
+          new List<(string name, string expressions, string refType, string defaultValue)>{
+            ( "str","string","",""),
+          },
+          new List<(string name, string expressions, string refType, string defaultValue)>{
+            ( "str1","string","",""),
+            ( "integer","int","",""),
+          },
+        };
+
+        var expectedIndex = 0;
+        foreach (IItemLocalFunction targetInstance in targetInstances)
+        {
+          // 型タイプの確認
+          Assert.Equal("void", GetExpressions(targetInstance.MethodTypes));
+
+          // パラメータの確認
+          var expectedArgs = expectedArgsList[expectedIndex];
+          Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedArgs));
+
+          // 内部処理の確認
+          Assert.Empty(targetInstance.Members);
+
+          expectedIndex++;
+        }
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 参照系のパラメータのテスト
+    /// </summary>
+    [Fact(DisplayName = "RefArgs")]
+    public void RefArgsTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.RefArgs), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "RefArgs.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemLocalFunction;
+
+        // 型タイプの確認
+        Assert.Equal("void", GetExpressions(targetInstance.MethodTypes));
+
+        // パラメータの確認
+        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
+        {
+          ( "integer","int","ref",""),
+          ( "str","string","in",""),
+          ( "output","decimal","out",""),
+        };
+        Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedArgs));
+
+        // 内部処理の確認
+        Assert.Empty(targetInstance.Members);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 初期値パラメータのテスト
+    /// </summary>
+    [Fact(DisplayName = "DefaultValues")]
+    public void DefaultValuesTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.DefaultValues), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "DefaultValues.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemLocalFunction;
+
+        // 型タイプの確認
+        Assert.Equal("void", GetExpressions(targetInstance.MethodTypes));
+
+        // パラメータの確認
+        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
+        {
+          ( "integer","int","","10"),
+          ( "str","string","","\"ABC\""),
+        };
+        Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedArgs));
+
+        // 内部処理の確認
+        Assert.Empty(targetInstance.Members);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 戻り値のテスト
+    /// </summary>
+    [Fact(DisplayName = "ReturnValue")]
+    public void ReturnValueTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.ReturnValue), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "ReturnValue.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemLocalFunction;
+
+        // 型タイプの確認
+        Assert.Equal("int", GetExpressions(targetInstance.MethodTypes));
+
+        // パラメータの確認
+        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>();
+        Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedArgs));
+
+        // 内部処理の確認
+        Assert.Single(targetInstance.Members);
       });
 
       // 解析実行

@@ -17,7 +17,8 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
       if(operation.Instance is null)
       {
         // 組み込み
-        Expressions.Add(new Expression(operation.Type.Name,Expression.GetSymbolTypeName(operation.Type)));
+        //Expressions.Add(new Expression(operation.Type.Name,Expression.GetSymbolTypeName(operation.Type)));
+        Expressions.Add(new Expression($"{operation.TargetMethod.ConstructedFrom.ContainingType}", string.Empty));
       }
       else
       {

@@ -27,12 +27,34 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// <param name="parent">親IAnalyzeItem</param>
     public ItemReturn(ReturnStatementSyntax node, SemanticModel semanticModel, IAnalyzeItem parent) : base(parent, node, semanticModel)
     {
+      Initialize(node, semanticModel, parent);
+    }
+
+    /// <summary>
+    /// コンストラクタ
+    /// </summary>
+    /// <param name="node">対象Node</param>
+    /// <param name="target">対象ソースのsemanticModel</param>
+    /// <param name="parent">親IAnalyzeItem</param>
+    public ItemReturn(SyntaxNode node, SemanticModel semanticModel, IAnalyzeItem parent) : base(parent, node, semanticModel)
+    {
+      Initialize(node, semanticModel, parent);
+    }
+
+    /// <summary>
+    /// 初期化
+    /// </summary>
+    /// <param name="node">対象Node</param>
+    /// <param name="semanticModel">対象ソースのsemanticModel</param>
+    /// <param name="parent">親IAnalyzeItem</param>
+    public void Initialize(SyntaxNode node, SemanticModel semanticModel, IAnalyzeItem parent)
+    {
       ItemType = ItemTypes.MethodStatement;
 
-      var operation = semanticModel.GetOperation(node) as IReturnOperation;
+      var operation = semanticModel.GetOperation(node);
 
       // 戻り値設定
-      ReturnValue.AddRange(OperationFactory.GetExpressionList(operation.ReturnedValue));
+      ReturnValue.AddRange(OperationFactory.GetExpressionList(operation));
     }
 
     #region 基本インターフェース実装：メソッド

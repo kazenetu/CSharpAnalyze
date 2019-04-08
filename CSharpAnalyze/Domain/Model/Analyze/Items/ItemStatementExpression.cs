@@ -30,14 +30,36 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// コンストラクタ
     /// </summary>
     /// <param name="node">対象Node</param>
-    /// <param name="target">対象ソースのsemanticModel</param>
+    /// <param name="semanticModel">対象ソースのsemanticModel</param>
     /// <param name="parent">親IAnalyzeItem</param>
     public ItemStatementExpression(ExpressionStatementSyntax node, SemanticModel semanticModel, IAnalyzeItem parent) : base(parent, node, semanticModel)
+    {
+      Initialize(node.Expression, semanticModel, parent);
+    }
+
+    /// <summary>
+    /// コンストラクタ
+    /// </summary>
+    /// <param name="node">対象Node</param>
+    /// <param name="semanticModel">対象ソースのsemanticModel</param>
+    /// <param name="parent">親IAnalyzeItem</param>
+    public ItemStatementExpression(SyntaxNode node, SemanticModel semanticModel, IAnalyzeItem parent) : base(parent, node, semanticModel)
+    {
+      Initialize(node, semanticModel, parent);
+    }
+
+    /// <summary>
+    /// 初期化
+    /// </summary>
+    /// <param name="node">対象Node</param>
+    /// <param name="semanticModel">対象ソースのsemanticModel</param>
+    /// <param name="parent">親IAnalyzeItem</param>
+    private void Initialize(SyntaxNode node, SemanticModel semanticModel, IAnalyzeItem parent)
     {
       ItemType = ItemTypes.MethodStatement;
 
       // 式情報を取得
-      var operation = semanticModel.GetOperation(node.Expression);
+      var operation = semanticModel.GetOperation(node);
       switch (operation)
       {
         case ISimpleAssignmentOperation param:

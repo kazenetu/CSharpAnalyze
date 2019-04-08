@@ -40,6 +40,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze
         case ICompoundAssignmentOperation param:
           instance = new CompoundAssignment(param);
           break;
+        case IConversionOperation param:
+          result.AddRange(GetExpressionList(param.Operand));
+          break;
 
         // 参照系
         case IInstanceReferenceOperation param:

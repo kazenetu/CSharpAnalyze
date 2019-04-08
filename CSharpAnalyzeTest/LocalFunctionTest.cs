@@ -25,6 +25,8 @@ namespace CSharpAnalyzeTest
       RefArgs,
       DefaultValues,
       ReturnValue,
+      LambdaReturn,
+      LambdaVoid,
     }
 
     /// <summary>
@@ -106,6 +108,18 @@ namespace CSharpAnalyzeTest
           source.Add("{");
           source.Add("  return 10;");
           source.Add("}");
+          break;
+
+        case CreatePattern.LambdaReturn:
+          filePath = "LambdaReturn.cs";
+
+          source.Add("int target()=>10;target();");
+          break;
+
+        case CreatePattern.LambdaVoid:
+          filePath = "LambdaVoid.cs";
+
+          source.Add("void target() => System.Diagnostics.Debug.WriteLine(10);target();");
           break;
       }
 
@@ -434,6 +448,80 @@ namespace CSharpAnalyzeTest
 
         // 型タイプの確認
         Assert.Equal("int", GetExpressions(targetInstance.MethodTypes));
+
+        // パラメータの確認
+        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>();
+        Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedArgs));
+
+        // 内部処理の確認
+        Assert.Single(targetInstance.Members);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 戻り値のテスト
+    /// </summary>
+    [Fact(DisplayName = "LambdaReturn")]
+    public void LambdaReturnTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.LambdaReturn), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "LambdaReturn.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemLocalFunction;
+
+        // 型タイプの確認
+        Assert.Equal("int", GetExpressions(targetInstance.MethodTypes));
+
+        // パラメータの確認
+        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>();
+        Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedArgs));
+
+        // 内部処理の確認
+        Assert.Single(targetInstance.Members);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 戻り値のテスト
+    /// </summary>
+    [Fact(DisplayName = "LambdaVoid")]
+    public void LambdaVoidTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.LambdaVoid), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "LambdaVoid.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemLocalFunction;
+
+        // 型タイプの確認
+        Assert.Equal("void", GetExpressions(targetInstance.MethodTypes));
 
         // パラメータの確認
         var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>();

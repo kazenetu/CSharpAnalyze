@@ -2,6 +2,7 @@
 using CSharpAnalyze.Domain.PublicInterfaces;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Linq;
 
 namespace CSharpAnalyze.Domain.Model.Analyze
 {
@@ -45,6 +46,22 @@ namespace CSharpAnalyze.Domain.Model.Analyze
           break;
         case EnumDeclarationSyntax targetNode:
           result = new ItemEnum(targetNode, semanticModel, parent);
+          break;
+
+        // ラムダ式
+        case ArrowExpressionClauseSyntax targetNode:
+          {
+            var op = semanticModel.GetOperation(targetNode).Children.First();
+            switch (op)
+            {
+              case Microsoft.CodeAnalysis.Operations.IReturnOperation operation:
+                result =  new ItemReturn(op.Syntax, semanticModel, parent);
+                break;
+              case Microsoft.CodeAnalysis.Operations.IExpressionStatementOperation operation:
+                result = new ItemStatementExpression(op.Syntax, semanticModel, parent);
+                break;
+            }
+          }
           break;
 
         // ローカル定義

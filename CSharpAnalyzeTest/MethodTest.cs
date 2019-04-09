@@ -133,6 +133,24 @@ namespace CSharpAnalyzeTest
           source.AppendLine("  }");
           source.AppendLine("}");
           break;
+
+        case CreatePattern.LambdaReturn:
+          filePath = "LambdaReturn.cs";
+
+          source.AppendLine("public class LambdaReturn");
+          source.AppendLine("{");
+          source.AppendLine("  public int TestMethod() => 10;");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.LambdaVoid:
+          filePath = "LambdaVoid.cs";
+
+          source.AppendLine("public class LambdaVoid");
+          source.AppendLine("{");
+          source.AppendLine("  public void System.Diagnostics.Debug.WriteLine(10);");
+          source.AppendLine("}");
+          break;
       }
 
       return new FileData(filePath, usingList.ToString(), source.ToString());
@@ -506,7 +524,7 @@ namespace CSharpAnalyzeTest
         var targetInstance = targetInstances.First() as IItemMethod;
 
         // 型タイプの確認
-        Assert.Equal("int", GetExpressions(targetInstance.MethodTypes));
+        Assert.Equal("void", GetExpressions(targetInstance.MethodTypes));
 
         // パラメータの確認
         var expectedModifiers = new List<string>() { "public" };

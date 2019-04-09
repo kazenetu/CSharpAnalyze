@@ -101,12 +101,23 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       }
 
       // メンバ
-      foreach (var childSyntax in node.Body.ChildNodes())
+      if (node.Body is null)
       {
-        var memberResult = ItemFactory.Create(childSyntax, semanticModel, this);
+        var memberResult = ItemFactory.Create(node.ExpressionBody, semanticModel, this);
         if (memberResult != null)
         {
           Members.Add(memberResult);
+        }
+      }
+      else if (node.ExpressionBody != null)
+      {
+        foreach (var childSyntax in node.Body.ChildNodes())
+        {
+          var memberResult = ItemFactory.Create(childSyntax, semanticModel, this);
+          if (memberResult != null)
+          {
+            Members.Add(memberResult);
+          }
         }
       }
 

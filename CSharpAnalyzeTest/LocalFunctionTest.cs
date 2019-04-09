@@ -462,7 +462,7 @@ namespace CSharpAnalyzeTest
     }
 
     /// <summary>
-    /// 戻り値のテスト
+    /// ラムダ 戻り値テスト
     /// </summary>
     [Fact(DisplayName = "LambdaReturn")]
     public void LambdaReturnTest()
@@ -499,7 +499,7 @@ namespace CSharpAnalyzeTest
     }
 
     /// <summary>
-    /// 戻り値のテスト
+    /// ラムダ 戻り値なしテスト
     /// </summary>
     [Fact(DisplayName = "LambdaVoid")]
     public void LambdaVoidTest()

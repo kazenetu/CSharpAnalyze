@@ -101,7 +101,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       }
 
       // メンバ
-      if(node.Body is null)
+      if (node.Body is null)
       {
         var memberResult = ItemFactory.Create(node.ExpressionBody, semanticModel, this);
         if (memberResult != null)
@@ -109,7 +109,8 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
           Members.Add(memberResult);
         }
       }
-      else if(node.ExpressionBody != null){
+      else
+      {
         foreach (var childSyntax in node.Body.ChildNodes())
         {
           var memberResult = ItemFactory.Create(childSyntax, semanticModel, this);

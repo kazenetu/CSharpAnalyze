@@ -109,7 +109,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
           Members.Add(memberResult);
         }
       }
-      else if (node.ExpressionBody != null)
+      else
       {
         foreach (var childSyntax in node.Body.ChildNodes())
         {

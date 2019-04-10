@@ -25,6 +25,7 @@ namespace CSharpAnalyzeTest
       Multiple,
       RefArgs,
       DefaultValues,
+      Lambda,
     }
 
     /// <summary>
@@ -128,6 +129,16 @@ namespace CSharpAnalyzeTest
           source.AppendLine("  public DefaultValues(int integer=10,string str=\"ABC\")");
           source.AppendLine("  {");
           source.AppendLine("  }");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.Lambda:
+          filePath = "Lambda.cs";
+
+          source.AppendLine("public class Lambda");
+          source.AppendLine("{");
+          source.AppendLine("  private int field;");
+          source.AppendLine("  public Lambda() => field = 10;");
           source.AppendLine("}");
           break;
       }
@@ -477,6 +488,41 @@ namespace CSharpAnalyzeTest
         {
           ( "integer","int","","10"),
           ( "str","string","","\"ABC\""),
+        };
+        Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
+
+        // スーパークラスのコンストラクタ呼び出し確認
+        var expectedBaseArgs = new List<string>();
+        Assert.Equal(expectedBaseArgs, constructor.BaseArgs);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 式形式のテスト
+    /// </summary>
+    [Fact(DisplayName = "Lambda")]
+    public void LambdaTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.Lambda), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "Lambda.cs");
+
+        // IItemConstructorsインスタンスのリストを取得
+        var constructors = GetIItemConstructors(itemClass);
+
+        // constructorインスタンスを取得
+        Assert.Single(constructors);
+        var constructor = constructors.First() as IItemConstructor;
+
+        // パラメータの確認
+        var expectedModifiers = new List<string>() { "public" };
+        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
+        {
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
 

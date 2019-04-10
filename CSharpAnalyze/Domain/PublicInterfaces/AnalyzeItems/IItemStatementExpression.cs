@@ -14,6 +14,11 @@ namespace CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems
     List<IExpression> LeftSideList { get; }
 
     /// <summary>
+    /// 代入演算子
+    /// </summary>
+    string AssignmentOperator { get; }
+
+    /// <summary>
     /// 左辺リスト
     /// </summary>
     List<IExpression> RightSideList { get; }

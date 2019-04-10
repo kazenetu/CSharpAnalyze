@@ -27,6 +27,11 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     public List<IExpression> RightSideList { get; } = new List<IExpression>();
 
     /// <summary>
+    /// 代入演算子
+    /// </summary>
+    public string AssignmentOperator { get; private set; } = string.Empty;
+
+    /// <summary>
     /// コンストラクタ
     /// </summary>
     /// <param name="node">対象Node</param>
@@ -104,6 +109,12 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
           Console.Write($" [{operation.Kind} is none] ");
           break;
       }
+
+      // 代入演算子
+      if(node is AssignmentExpressionSyntax assignmentExpression)
+      {
+        AssignmentOperator = assignmentExpression.OperatorToken.Text;
+      }
     }
 
     #region 基本インターフェース実装：メソッド
@@ -125,7 +136,12 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       if (LeftSideList.Any())
       {
         result.Append(GetSideExpressionList(LeftSideList));
-        result.Append(" = ");
+      }
+
+      // 代入演算子
+      if (!string.IsNullOrEmpty(AssignmentOperator))
+      {
+        result.Append($" {AssignmentOperator} ");
       }
 
       // 右辺の作成

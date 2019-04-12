@@ -148,7 +148,7 @@ namespace CSharpAnalyzeTest
 
           source.AppendLine("public class LambdaVoid");
           source.AppendLine("{");
-          source.AppendLine("  public void System.Diagnostics.Debug.WriteLine(10);");
+          source.AppendLine("  public void TestMethod() => System.Diagnostics.Debug.WriteLine(10);");
           source.AppendLine("}");
           break;
       }

@@ -63,8 +63,18 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     {
       ItemType = ItemTypes.MethodStatement;
 
+      // 処理内容を取得
+      IOperation operation = null;
+      if (node is ExpressionStatementSyntax expressionStatement)
+      {
+        operation = semanticModel.GetOperation(expressionStatement.Expression);
+      }
+      else
+      {
+        operation = semanticModel.GetOperation(node);
+      }
+
       // 式情報を取得
-      var operation = semanticModel.GetOperation(node);
       switch (operation)
       {
         case ISimpleAssignmentOperation param:

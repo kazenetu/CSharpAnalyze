@@ -10,6 +10,7 @@ using Xunit;
 namespace CSharpAnalyzeTest
 {
   [Trait("コンストラクタのテスト", nameof(ConstructorTest))]
+  [Collection("CollectionName")]
   public class ConstructorTest : TestBase
   {
     /// <summary>

@@ -8,6 +8,7 @@ using Xunit;
 namespace CSharpAnalyzeTest
 {
   [Trait("列挙型のテスト", nameof(EnumTest))]
+  [Collection("CollectionName")]
   public class EnumTest : TestBase
   {
     /// <summary>

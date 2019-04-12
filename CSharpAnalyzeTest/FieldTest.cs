@@ -9,6 +9,7 @@ using Xunit;
 namespace CSharpAnalyzeTest
 {
   [Trait("フィールドのテスト", nameof(FieldTest))]
+  [Collection("CollectionName")]
   public class FieldTest : TestBase
   {
     /// <summary>

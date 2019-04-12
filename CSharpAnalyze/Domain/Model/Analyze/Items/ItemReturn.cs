@@ -54,6 +54,11 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       var operation = semanticModel.GetOperation(node);
 
       // 戻り値設定
+      if (operation is IReturnOperation returnOperation)
+      {
+        ReturnValue.AddRange(OperationFactory.GetExpressionList(returnOperation.ReturnedValue));
+        return;
+      }
       ReturnValue.AddRange(OperationFactory.GetExpressionList(operation));
     }
 

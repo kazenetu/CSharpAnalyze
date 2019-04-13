@@ -9,7 +9,6 @@ using Xunit;
 namespace CSharpAnalyzeTest
 {
   [Trait("プロパティのテスト", nameof(PropertyTest))]
-  [Collection("CollectionName")]
   public class PropertyTest : TestBase
   {
     /// <summary>

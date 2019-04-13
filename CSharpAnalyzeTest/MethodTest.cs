@@ -10,7 +10,6 @@ using Xunit;
 namespace CSharpAnalyzeTest
 {
   [Trait("メソッドのテスト", nameof(MethodTest))]
-  [Collection("CollectionName")]
   public class MethodTest : TestBase
   {
     /// <summary>

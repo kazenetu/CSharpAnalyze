@@ -10,7 +10,6 @@ using Xunit;
 namespace CSharpAnalyzeTest
 {
   [Trait("ローカルメソッドのテスト", nameof(LocalFunctionTest))]
-  [Collection("CollectionName")]
   public class LocalFunctionTest : TestBase
   {
     /// <summary>

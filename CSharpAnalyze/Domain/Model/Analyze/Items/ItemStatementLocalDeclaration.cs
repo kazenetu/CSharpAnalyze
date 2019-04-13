@@ -39,9 +39,10 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// コンストラクタ
     /// </summary>
     /// <param name="node">対象Node</param>
-    /// <param name="target">対象ソースのsemanticModel</param>
+    /// <param name="semanticModel">対象ソースのsemanticModel</param>
     /// <param name="parent">親IAnalyzeItem</param>
-    public ItemStatementLocalDeclaration(LocalDeclarationStatementSyntax node, SemanticModel semanticModel, IAnalyzeItem parent) : base(parent, node, semanticModel)
+    /// <param name="container">イベントコンテナ</param>
+    public ItemStatementLocalDeclaration(LocalDeclarationStatementSyntax node, SemanticModel semanticModel, IAnalyzeItem parent, EventContainer container) : base(parent, node, semanticModel, container)
     {
       ItemType = ItemTypes.MethodStatement;
 
@@ -59,7 +60,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         if (part.Kind == SymbolDisplayPartKind.ClassName)
         {
           // 外部ファイル参照イベント発行
-          RaiseEvents.RaiseOtherFileReferenced(node, part.Symbol);
+          RaiseOtherFileReferenced(node, part.Symbol);
         }
 
         Types.Add(new Expression(name, type));
@@ -72,7 +73,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         return;
       }
       var initializer = semanticModel.GetOperation(constantValue.Initializer.Value);
-      DefaultValues.AddRange(OperationFactory.GetExpressionList(initializer));
+      DefaultValues.AddRange(OperationFactory.GetExpressionList(initializer, container));
     }
 
     #region 基本インターフェース実装：メソッド

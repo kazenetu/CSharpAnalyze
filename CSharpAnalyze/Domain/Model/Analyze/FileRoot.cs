@@ -35,13 +35,14 @@ namespace CSharpAnalyze.Domain.Model.Analyze
     /// コンストラクタ
     /// </summary>
     /// <param name="target">セマンティックモデル</param>
-    public FileRoot(SemanticModel target)
+    /// <param name="container">イベントコンテナ</param>
+    public FileRoot(SemanticModel target,EventContainer container)
     {
       // ファイルパス取得
       FilePath = target.SyntaxTree.FilePath;
 
       // 外部参照イベント登録
-      EventContainer.Register<OtherFileReferenced>(this, (ev) =>
+      container.Register<OtherFileReferenced>(this, (ev) =>
       {
         if (!OtherFiles.ContainsKey(ev.ClassName))
         {
@@ -53,7 +54,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze
       var rootNode = target.SyntaxTree.GetRoot().ChildNodes().Where(syntax => syntax.IsKind(SyntaxKind.NamespaceDeclaration)).First();
       foreach (var item in (rootNode as NamespaceDeclarationSyntax).Members)
       {
-        var memberResult = ItemFactory.Create(item, target);
+        var memberResult = ItemFactory.Create(item, target, container);
         if (memberResult != null)
         {
           Members.Add(memberResult);
@@ -61,7 +62,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze
       }
 
       // 外部参照イベント登録解除
-      EventContainer.Unregister<OtherFileReferenced>(this);
+      container.Unregister<OtherFileReferenced>(this);
     }
 
     /// <summary>
@@ -87,15 +88,16 @@ namespace CSharpAnalyze.Domain.Model.Analyze
     /// FileRootインスタンス作成
     /// </summary>
     /// <param name="target">セマンティックモデル</param>
+    /// <param name="container">イベントコンテナ</param>
     /// <returns>FileRootインスタンス</returns>
     /// <remarks>Analyzedイベントで結果を返す</remarks>
-    public static IFileRoot Create(SemanticModel target)
+    public static IFileRoot Create(SemanticModel target, EventContainer container)
     {
       // ファイル情報取得
-      var instance = new FileRoot(target);
+      var instance = new FileRoot(target, container);
 
       // イベント発行：解析完了
-      EventContainer.Raise(new Analyzed(instance));
+      container.Raise(new Analyzed(instance));
 
       // ファイル情報を返す
       return instance;

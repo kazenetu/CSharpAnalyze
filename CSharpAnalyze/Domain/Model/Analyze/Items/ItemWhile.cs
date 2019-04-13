@@ -1,4 +1,5 @@
-﻿using CSharpAnalyze.Domain.PublicInterfaces;
+﻿using CSharpAnalyze.Domain.Event;
+using CSharpAnalyze.Domain.PublicInterfaces;
 using CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -22,21 +23,22 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// コンストラクタ
     /// </summary>
     /// <param name="node">対象Node</param>
-    /// <param name="target">対象ソースのsemanticModel</param>
+    /// <param name="semanticModel">対象ソースのsemanticModel</param>
     /// <param name="parent">親IAnalyzeItem</param>
-    public ItemWhile(WhileStatementSyntax node, SemanticModel semanticModel, IAnalyzeItem parent) : base(parent, node, semanticModel)
+    /// <param name="container">イベントコンテナ</param>
+    public ItemWhile(WhileStatementSyntax node, SemanticModel semanticModel, IAnalyzeItem parent, EventContainer container) : base(parent, node, semanticModel, container)
     {
       ItemType = ItemTypes.MethodStatement;
 
       // 条件設定
       var condition = semanticModel.GetOperation(node.Condition);
-      Conditions.AddRange(OperationFactory.GetExpressionList(condition));
+      Conditions.AddRange(OperationFactory.GetExpressionList(condition, container));
 
       // 内部処理設定
       var block = node.Statement as BlockSyntax;
       foreach (var statement in block.Statements)
       {
-        Members.Add(ItemFactory.Create(statement, semanticModel, this));
+        Members.Add(ItemFactory.Create(statement, semanticModel, container, this));
       }
 
     }

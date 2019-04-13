@@ -1,4 +1,5 @@
-﻿using CSharpAnalyze.Domain.PublicInterfaces;
+﻿using CSharpAnalyze.Domain.Event;
+using CSharpAnalyze.Domain.PublicInterfaces;
 using CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -37,7 +38,8 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// <param name="node">対象Node</param>
     /// <param name="semanticModel">対象ソースのsemanticModel</param>
     /// <param name="parent">親IAnalyzeItem</param>
-    public ItemStatementExpression(ExpressionStatementSyntax node, SemanticModel semanticModel, IAnalyzeItem parent) : base(parent, node, semanticModel)
+    /// <param name="container">イベントコンテナ</param>
+    public ItemStatementExpression(ExpressionStatementSyntax node, SemanticModel semanticModel, IAnalyzeItem parent, EventContainer container) : base(parent, node, semanticModel, container)
     {
       Initialize(node.Expression, semanticModel, parent);
     }
@@ -48,7 +50,8 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// <param name="node">対象Node</param>
     /// <param name="semanticModel">対象ソースのsemanticModel</param>
     /// <param name="parent">親IAnalyzeItem</param>
-    public ItemStatementExpression(SyntaxNode node, SemanticModel semanticModel, IAnalyzeItem parent) : base(parent, node, semanticModel)
+    /// <param name="container">イベントコンテナ</param>
+    public ItemStatementExpression(SyntaxNode node, SemanticModel semanticModel, IAnalyzeItem parent, EventContainer container) : base(parent, node, semanticModel, container)
     {
       Initialize(node, semanticModel, parent);
     }
@@ -78,33 +81,33 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       switch (operation)
       {
         case ISimpleAssignmentOperation param:
-          LeftSideList.AddRange(OperationFactory.GetExpressionList(param.Target));
-          RightSideList.AddRange(OperationFactory.GetExpressionList(param.Value));
+          LeftSideList.AddRange(OperationFactory.GetExpressionList(param.Target, eventContainer));
+          RightSideList.AddRange(OperationFactory.GetExpressionList(param.Value, eventContainer));
           break;
         case IInvocationOperation param:
-          RightSideList.AddRange(OperationFactory.GetExpressionList(param));
+          RightSideList.AddRange(OperationFactory.GetExpressionList(param, eventContainer));
           break;
         case IPropertyReferenceOperation param:
-          RightSideList.AddRange(OperationFactory.GetExpressionList(param));
+          RightSideList.AddRange(OperationFactory.GetExpressionList(param, eventContainer));
           break;
         case ILocalReferenceOperation param:
-          RightSideList.AddRange(OperationFactory.GetExpressionList(param));
+          RightSideList.AddRange(OperationFactory.GetExpressionList(param, eventContainer));
           break;
         case ILiteralOperation param:
-          RightSideList.AddRange(OperationFactory.GetExpressionList(param));
+          RightSideList.AddRange(OperationFactory.GetExpressionList(param, eventContainer));
           break;
         case IFieldReferenceOperation param:
-          RightSideList.AddRange(OperationFactory.GetExpressionList(param));
+          RightSideList.AddRange(OperationFactory.GetExpressionList(param, eventContainer));
           break;
         case IInstanceReferenceOperation param:
-          RightSideList.AddRange(OperationFactory.GetExpressionList(param));
+          RightSideList.AddRange(OperationFactory.GetExpressionList(param, eventContainer));
           break;
         case ICompoundAssignmentOperation param:
-          LeftSideList.AddRange(OperationFactory.GetExpressionList(param.Target));
-          RightSideList.AddRange(OperationFactory.GetExpressionList(param.Value));
+          LeftSideList.AddRange(OperationFactory.GetExpressionList(param.Target, eventContainer));
+          RightSideList.AddRange(OperationFactory.GetExpressionList(param.Value, eventContainer));
           break;
         case IIncrementOrDecrementOperation param:
-          RightSideList.AddRange(OperationFactory.GetExpressionList(param.Target));
+          RightSideList.AddRange(OperationFactory.GetExpressionList(param.Target, eventContainer));
           switch (param.Kind)
           {
             case OperationKind.Increment:

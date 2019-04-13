@@ -1,4 +1,5 @@
-﻿using CSharpAnalyze.Domain.Model.Analyze.Items;
+﻿using CSharpAnalyze.Domain.Event;
+using CSharpAnalyze.Domain.Model.Analyze.Items;
 using CSharpAnalyze.Domain.PublicInterfaces;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -16,10 +17,11 @@ namespace CSharpAnalyze.Domain.Model.Analyze
     /// IAnalyzeItemインスタンス作成
     /// </summary>
     /// <param name="node">対象Node</param>
-    /// <param name="target">対象ソースのsemanticModel</param>
+    /// <param name="semanticModel">対象ソースのsemanticModel</param>
+    /// <param name="container">イベントコンテナ</param>
     /// <param name="parent">親IAnalyzeItemインスタンス(デフォルトはnull)</param>
     /// <returns>IAnalyzeItemインスタンス</returns>
-    public static IAnalyzeItem Create(SyntaxNode node, SemanticModel semanticModel, IAnalyzeItem parent = null)
+    public static IAnalyzeItem Create(SyntaxNode node, SemanticModel semanticModel, EventContainer container, IAnalyzeItem parent = null)
     {
       IAnalyzeItem result = null;
 
@@ -28,24 +30,24 @@ namespace CSharpAnalyze.Domain.Model.Analyze
       {
         // クラス定義
         case ClassDeclarationSyntax targetNode:
-          result = new ItemClass(targetNode, semanticModel, parent);
+          result = new ItemClass(targetNode, semanticModel, parent, container);
           break;
         
         // クラス要素定義
         case PropertyDeclarationSyntax targetNode:
-          result = new ItemProperty(targetNode, semanticModel, parent);
+          result = new ItemProperty(targetNode, semanticModel, parent, container);
           break;
         case FieldDeclarationSyntax targetNode:
-          result = new ItemField(targetNode, semanticModel, parent);
+          result = new ItemField(targetNode, semanticModel, parent, container);
           break;
         case MethodDeclarationSyntax targetNode:
-          result = new ItemMethod(targetNode, semanticModel, parent);
+          result = new ItemMethod(targetNode, semanticModel, parent, container);
           break;
         case ConstructorDeclarationSyntax targetNode:
-          result = new ItemConstructor(targetNode, semanticModel, parent);
+          result = new ItemConstructor(targetNode, semanticModel, parent, container);
           break;
         case EnumDeclarationSyntax targetNode:
-          result = new ItemEnum(targetNode, semanticModel, parent);
+          result = new ItemEnum(targetNode, semanticModel, parent, container);
           break;
 
         // ラムダ式
@@ -55,10 +57,10 @@ namespace CSharpAnalyze.Domain.Model.Analyze
             switch (op)
             {
               case Microsoft.CodeAnalysis.Operations.IReturnOperation operation:
-                result =  new ItemReturn(op.Syntax, semanticModel, parent);
+                result =  new ItemReturn(op.Syntax, semanticModel, parent, container);
                 break;
               case Microsoft.CodeAnalysis.Operations.IExpressionStatementOperation operation:
-                result = new ItemStatementExpression(op.Syntax, semanticModel, parent);
+                result = new ItemStatementExpression(op.Syntax, semanticModel, parent, container);
                 break;
             }
           }
@@ -66,52 +68,52 @@ namespace CSharpAnalyze.Domain.Model.Analyze
 
         // ローカル定義
         case LocalFunctionStatementSyntax targetNode:
-          result = new ItemLocalFunction(targetNode, semanticModel, parent);
+          result = new ItemLocalFunction(targetNode, semanticModel, parent, container);
           break;
         case LocalDeclarationStatementSyntax targetNode:
-          result = new ItemStatementLocalDeclaration(targetNode, semanticModel, parent);
+          result = new ItemStatementLocalDeclaration(targetNode, semanticModel, parent, container);
           break;
         case ExpressionStatementSyntax targetNode:
-          result = new ItemStatementExpression(targetNode, semanticModel, parent);
+          result = new ItemStatementExpression(targetNode, semanticModel, parent, container);
           break;
         case AccessorDeclarationSyntax targetNode:
-          result = new ItemAccessor(targetNode, semanticModel, parent);
+          result = new ItemAccessor(targetNode, semanticModel, parent, container);
           break;
 
         // 分岐処理
         case IfStatementSyntax targetNode:
-          result = new ItemIf(targetNode, semanticModel, parent);
+          result = new ItemIf(targetNode, semanticModel, parent, container);
           break;
         case ElseClauseSyntax targetNode:
-          result = new ItemElseClause(targetNode, semanticModel, parent);
+          result = new ItemElseClause(targetNode, semanticModel, parent, container);
           break;
         case SwitchStatementSyntax targetNode:
-          result = new ItemSwitch(targetNode, semanticModel, parent);
+          result = new ItemSwitch(targetNode, semanticModel, parent, container);
           break;
         case SwitchSectionSyntax targetNode:
-          result = new ItemSwitchCase(targetNode, semanticModel, parent);
+          result = new ItemSwitchCase(targetNode, semanticModel, parent, container);
           break;
 
         // ループ処理
         case WhileStatementSyntax targetNode:
-          result = new ItemWhile(targetNode, semanticModel, parent);
+          result = new ItemWhile(targetNode, semanticModel, parent, container);
           break;
         case ForEachStatementSyntax targetNode:
-          result = new ItemForEach(targetNode, semanticModel, parent);
+          result = new ItemForEach(targetNode, semanticModel, parent, container);
           break;
         case ForStatementSyntax targetNode:
-          result = new ItemFor(targetNode, semanticModel, parent);
+          result = new ItemFor(targetNode, semanticModel, parent, container);
           break;
 
         // その他
         case ReturnStatementSyntax targetNode:
-          result = new ItemReturn(targetNode, semanticModel, parent);
+          result = new ItemReturn(targetNode, semanticModel, parent, container);
           break;
         case BreakStatementSyntax targetNode:
-          result = new ItemBreak(targetNode, semanticModel, parent);
+          result = new ItemBreak(targetNode, semanticModel, parent, container);
           break;
         case ContinueStatementSyntax targetNode:
-          result = new ItemContinue(targetNode, semanticModel, parent);
+          result = new ItemContinue(targetNode, semanticModel, parent, container);
           break;
       }
 

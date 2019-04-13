@@ -1,4 +1,5 @@
-﻿using CSharpAnalyze.Domain.PublicInterfaces;
+﻿using CSharpAnalyze.Domain.Event;
+using CSharpAnalyze.Domain.PublicInterfaces;
 using CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -23,9 +24,10 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// コンストラクタ
     /// </summary>
     /// <param name="node">対象Node</param>
-    /// <param name="target">対象ソースのsemanticModel</param>
+    /// <param name="semanticModel">対象ソースのsemanticModel</param>
     /// <param name="parent">親IAnalyzeItem</param>
-    public ItemSwitchCase(SwitchSectionSyntax node, SemanticModel semanticModel, IAnalyzeItem parent) : base(parent, node, semanticModel)
+    /// <param name="container">イベントコンテナ</param>
+    public ItemSwitchCase(SwitchSectionSyntax node, SemanticModel semanticModel, IAnalyzeItem parent, EventContainer container) : base(parent, node, semanticModel, container)
     {
       ItemType = ItemTypes.MethodStatement;
 
@@ -34,23 +36,23 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       // Caseラベル設定
       foreach (var item in operation.Clauses.Where(item => !(item is IDefaultCaseClauseOperation)))
       {
-        Labels.Add(OperationFactory.GetExpressionList(item.Children.First()));
+        Labels.Add(OperationFactory.GetExpressionList(item.Children.First(), container));
       }
 
       // defaultラベル設定
       foreach (var item in operation.Clauses.Where(item => item is IDefaultCaseClauseOperation))
       {
-        Labels.Add(OperationFactory.GetExpressionList(item));
+        Labels.Add(OperationFactory.GetExpressionList(item, container));
       }
 
       // 内部処理設定
       foreach (var statement in node.Statements)
       {
-        var item = ItemFactory.Create(statement, semanticModel, this);
+        var item = ItemFactory.Create(statement, semanticModel, container, this);
 
         if(!(item is null))
         {
-          Members.Add(ItemFactory.Create(statement, semanticModel, this));
+          Members.Add(ItemFactory.Create(statement, semanticModel, container, this));
         }
       }
     }

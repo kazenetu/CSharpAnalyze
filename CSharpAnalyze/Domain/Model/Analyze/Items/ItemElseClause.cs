@@ -1,4 +1,5 @@
-﻿using CSharpAnalyze.Domain.PublicInterfaces;
+﻿using CSharpAnalyze.Domain.Event;
+using CSharpAnalyze.Domain.PublicInterfaces;
 using CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -27,21 +28,22 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// コンストラクタ
     /// </summary>
     /// <param name="node">対象Node</param>
-    /// <param name="target">対象ソースのsemanticModel</param>
+    /// <param name="semanticModel">対象ソースのsemanticModel</param>
     /// <param name="parent">親IAnalyzeItem</param>
-    public ItemElseClause(ElseClauseSyntax node, SemanticModel semanticModel, IAnalyzeItem parent) : base(parent, node, semanticModel)
+    /// <param name="container">イベントコンテナ</param>
+    public ItemElseClause(ElseClauseSyntax node, SemanticModel semanticModel, IAnalyzeItem parent, EventContainer container) : base(parent, node, semanticModel, container)
     {
       ItemType = ItemTypes.MethodStatement;
 
       if (node.Statement is IfStatementSyntax ifNode)
       {
         var condition = semanticModel.GetOperation(ifNode.Condition);
-        Conditions.AddRange(OperationFactory.GetExpressionList(condition));
+        Conditions.AddRange(OperationFactory.GetExpressionList(condition, container));
 
         var block = ifNode.Statement as BlockSyntax;
         foreach (var statement in block.Statements)
         {
-          Block.Add(ItemFactory.Create(statement, semanticModel, this));
+          Block.Add(ItemFactory.Create(statement, semanticModel, container, this));
         }
       }
       else
@@ -49,7 +51,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         var block = node.Statement as BlockSyntax;
         foreach (var statement in block.Statements)
         {
-          Block.Add(ItemFactory.Create(statement, semanticModel, this));
+          Block.Add(ItemFactory.Create(statement, semanticModel, container, this));
         }
       }
     }

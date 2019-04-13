@@ -1,4 +1,6 @@
-﻿using CSharpAnalyze.Domain.PublicInterfaces;
+﻿using CSharpAnalyze.Domain.Event;
+using CSharpAnalyze.Domain.Event.Analyze;
+using CSharpAnalyze.Domain.PublicInterfaces;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -44,6 +46,11 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// </summary>
     public List<string> Comments { get; } = new List<string>();
 
+    /// <summary>
+    /// コンテナ
+    /// </summary>
+    protected EventContainer eventContainer = null;
+
     #endregion
 
     #region 基本インターフェース実装：メソッド
@@ -62,8 +69,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// </summary>
     /// <param name="parent">親IAnalyzeItem</param>
     /// <param name="node">対象Node</param>
-    /// <param name="target">対象ソースのsemanticModel</param>
-    protected AbstractItem(IAnalyzeItem parent,SyntaxNode node, SemanticModel semanticModel)
+    /// <param name="semanticModel">対象ソースのsemanticModel</param>
+    /// <param name="container">イベントコンテナ</param>
+    protected AbstractItem(IAnalyzeItem parent,SyntaxNode node, SemanticModel semanticModel, EventContainer container)
     {
       // 親インスタンスを設定
       Parent = parent;
@@ -86,6 +94,32 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
                             Select(item => item.TrimStart().Replace(Environment.NewLine, string.Empty, StringComparison.CurrentCulture)).
                             Where(item => !string.IsNullOrEmpty(item));
       Comments.AddRange(targerComments);
+
+      // イベントコンテナ
+      eventContainer = container;
+    }
+
+    /// <summary>
+    /// 外部ファイル参照イベント発行
+    /// </summary>
+    /// <param name="targetNode">対象Node</param>
+    /// <param name="targetSymbol">比較対象のSymbol</param>
+    protected void RaiseOtherFileReferenced(SyntaxNode targetNode, ISymbol targetSymbol)
+    {
+      if (!targetSymbol.DeclaringSyntaxReferences.Any())
+      {
+        // ファイルパスなしでイベント送信
+        eventContainer.Raise(new OtherFileReferenced(string.Empty, targetSymbol.Name));
+        return;
+      }
+
+      var targetNodeFilePath = targetNode.SyntaxTree.FilePath;
+      var ReferenceFilePaths = targetSymbol.DeclaringSyntaxReferences.Select(item => item.SyntaxTree.FilePath).Where(filePath => filePath != targetNodeFilePath);
+      foreach (var referenceFilePath in ReferenceFilePaths)
+      {
+        // ファイルパスありでイベント送信
+        eventContainer.Raise(new OtherFileReferenced(referenceFilePath, targetSymbol.Name));
+      }
     }
   }
 }

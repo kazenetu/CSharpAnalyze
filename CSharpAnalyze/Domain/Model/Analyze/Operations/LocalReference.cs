@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.Operations;
+﻿using CSharpAnalyze.Domain.Event;
+using Microsoft.CodeAnalysis.Operations;
 
 namespace CSharpAnalyze.Domain.Model.Analyze.Operations
 {
@@ -11,7 +12,8 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
     /// コンストラクタ
     /// </summary>
     /// <param name="operation">IOperationインスタンス</param>
-    public LocalReference(ILocalReferenceOperation operation)
+    /// <param name="container">イベントコンテナ</param>
+    public LocalReference(ILocalReferenceOperation operation, EventContainer container) : base(container)
     {
       Expressions.Add(new Expression(operation.Local.Name, Expression.GetSymbolTypeName(operation.Local)));
     }

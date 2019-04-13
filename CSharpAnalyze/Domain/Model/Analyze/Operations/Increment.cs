@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.Operations;
+﻿using CSharpAnalyze.Domain.Event;
+using Microsoft.CodeAnalysis.Operations;
 
 namespace CSharpAnalyze.Domain.Model.Analyze.Operations
 {
@@ -11,10 +12,11 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
     /// コンストラクタ
     /// </summary>
     /// <param name="operation">IOperationインスタンス</param>
-    public Increment(IIncrementOrDecrementOperation operation)
+    /// <param name="container">イベントコンテナ</param>
+    public Increment(IIncrementOrDecrementOperation operation, EventContainer container) : base(container)
     {
       // インクリメント・デクリメント対象インスタンス
-      Expressions.AddRange(OperationFactory.GetExpressionList(operation.Target));
+      Expressions.AddRange(OperationFactory.GetExpressionList(operation.Target, container));
 
       // インクリメント・デクリメント
       Expressions.AddRange(Expression.GetOperationKindExpression(operation));

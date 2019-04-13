@@ -87,7 +87,7 @@ namespace ConsoleApp
         var csAnalyze = new AnalyzeApplication();
 
         // HACK Domainイベントハンドラ設定
-        EventContainer.Register<IAnalyzed>(csAnalyze, (ev) =>
+        csAnalyze.Register<IAnalyzed>(csAnalyze, (ev) =>
         {
           Console.WriteLine($"[{ev.FilePath}]");
           Console.WriteLine(ev.FileRoot?.ToString());

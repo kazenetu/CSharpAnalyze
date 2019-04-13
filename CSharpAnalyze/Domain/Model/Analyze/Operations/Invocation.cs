@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using CSharpAnalyze.Domain.Event;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Operations;
 
 namespace CSharpAnalyze.Domain.Model.Analyze.Operations
@@ -12,7 +13,8 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
     /// コンストラクタ
     /// </summary>
     /// <param name="operation">IOperationインスタンス</param>
-    public Invocation(IInvocationOperation operation)
+    /// <param name="container">イベントコンテナ</param>
+    public Invocation(IInvocationOperation operation, EventContainer container) : base(container)
     {
       if(operation.Instance is null)
       {
@@ -23,7 +25,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
       else
       {
         // インスタンス
-        Expressions.AddRange(OperationFactory.GetExpressionList(operation.Instance));
+        Expressions.AddRange(OperationFactory.GetExpressionList(operation.Instance, container));
       }
       Expressions.Add(new Expression(".", string.Empty));
 
@@ -45,7 +47,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
         {
           Expressions.Add(new Expression(",", string.Empty));
         }
-        Expressions.AddRange(OperationFactory.GetExpressionList(arg.Value));
+        Expressions.AddRange(OperationFactory.GetExpressionList(arg.Value, container));
 
         isFirst = false;
       }

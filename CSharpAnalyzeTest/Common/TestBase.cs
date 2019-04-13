@@ -1,5 +1,4 @@
 ﻿using CSharpAnalyze.ApplicationService;
-using CSharpAnalyze.Domain.Event;
 using CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems;
 using CSharpAnalyze.Domain.PublicInterfaces.Events;
 using System;
@@ -45,7 +44,7 @@ namespace CSharpAnalyzeTest.Common
       BaseSource = baseSource.ToString();
 
       // 解析終了時に呼ばれるイベントを登録
-      EventContainer.Register<IAnalyzed>(CSAnalyze, (ev) =>
+      CSAnalyze.Register<IAnalyzed>(CSAnalyze, (ev) =>
       {
         var method = Files.GetDelegateMethod(ev.FilePath);
         if (method == null) return;
@@ -59,8 +58,6 @@ namespace CSharpAnalyzeTest.Common
     /// </summary>
     public void Dispose()
     {
-      EventContainer.UnregisterAll();
-
       GC.SuppressFinalize(this);
     }
 

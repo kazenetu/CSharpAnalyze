@@ -1,4 +1,5 @@
-﻿using CSharpAnalyze.Domain.Model.Analyze;
+﻿using CSharpAnalyze.Domain.Event;
+using CSharpAnalyze.Domain.Model.Analyze;
 using CSharpAnalyze.Domain.Model.File;
 using CSharpAnalyze.Domain.PublicInterfaces.Repository;
 using Microsoft.CodeAnalysis;
@@ -42,7 +43,8 @@ namespace CSharpAnalyze.Domain.Service
     /// <summary>
     /// 解析を実施する
     /// </summary>
-    public void Analyze()
+    /// <param name="eventContainer">イベントコンテナ</param>
+    public void Analyze(EventContainer eventContainer)
     {
       // セマンティックモデルのリストを作成する
       var models = CreateModels();
@@ -55,7 +57,7 @@ namespace CSharpAnalyze.Domain.Service
       // 解析処理収集
       foreach (var model in models)
       {
-        FileRoot.Create(model);
+        FileRoot.Create(model, eventContainer);
       }
     }
     #endregion

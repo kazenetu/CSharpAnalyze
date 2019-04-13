@@ -1,4 +1,5 @@
-﻿using CSharpAnalyze.Domain.PublicInterfaces;
+﻿using CSharpAnalyze.Domain.Event;
+using CSharpAnalyze.Domain.PublicInterfaces;
 using CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -23,9 +24,10 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// コンストラクタ
     /// </summary>
     /// <param name="node">対象Node</param>
-    /// <param name="target">対象ソースのsemanticModel</param>
+    /// <param name="semanticModel">対象ソースのsemanticModel</param>
     /// <param name="parent">親IAnalyzeItem</param>
-    public ItemReturn(ReturnStatementSyntax node, SemanticModel semanticModel, IAnalyzeItem parent) : base(parent, node, semanticModel)
+    /// <param name="container">イベントコンテナ</param>
+    public ItemReturn(ReturnStatementSyntax node, SemanticModel semanticModel, IAnalyzeItem parent, EventContainer container) : base(parent, node, semanticModel, container)
     {
       Initialize(node, semanticModel, parent);
     }
@@ -34,9 +36,10 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// コンストラクタ
     /// </summary>
     /// <param name="node">対象Node</param>
-    /// <param name="target">対象ソースのsemanticModel</param>
+    /// <param name="semanticModel">対象ソースのsemanticModel</param>
     /// <param name="parent">親IAnalyzeItem</param>
-    public ItemReturn(SyntaxNode node, SemanticModel semanticModel, IAnalyzeItem parent) : base(parent, node, semanticModel)
+    /// <param name="container">イベントコンテナ</param>
+    public ItemReturn(SyntaxNode node, SemanticModel semanticModel, IAnalyzeItem parent, EventContainer container) : base(parent, node, semanticModel, container)
     {
       Initialize(node, semanticModel, parent);
     }
@@ -56,10 +59,10 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       // 戻り値設定
       if (operation is IReturnOperation returnOperation)
       {
-        ReturnValue.AddRange(OperationFactory.GetExpressionList(returnOperation.ReturnedValue));
+        ReturnValue.AddRange(OperationFactory.GetExpressionList(returnOperation.ReturnedValue, eventContainer));
         return;
       }
-      ReturnValue.AddRange(OperationFactory.GetExpressionList(operation));
+      ReturnValue.AddRange(OperationFactory.GetExpressionList(operation, eventContainer));
     }
 
     #region 基本インターフェース実装：メソッド

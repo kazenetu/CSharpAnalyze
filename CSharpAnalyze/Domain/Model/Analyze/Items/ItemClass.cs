@@ -30,9 +30,10 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// コンストラクタ
     /// </summary>
     /// <param name="node">対象Node</param>
-    /// <param name="target">対象ソースのsemanticModel</param>
+    /// <param name="semanticModel">対象ソースのsemanticModel</param>
     /// <param name="parent">親IAnalyzeItem</param>
-    public ItemClass(ClassDeclarationSyntax node, SemanticModel semanticModel, IAnalyzeItem parent) : base(parent, node, semanticModel)
+    /// <param name="container">イベントコンテナ</param>
+    public ItemClass(ClassDeclarationSyntax node, SemanticModel semanticModel, IAnalyzeItem parent, EventContainer container) : base(parent, node, semanticModel, container)
     {
       ItemType = ItemTypes.Class;
 
@@ -57,7 +58,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
             if (part.Kind == SymbolDisplayPartKind.ClassName)
             {
               // 外部ファイル参照イベント発行
-              RaiseEvents.RaiseOtherFileReferenced(node, part.Symbol);
+              RaiseOtherFileReferenced(node, part.Symbol);
             }
           }
 
@@ -75,7 +76,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       // メンバ
       foreach (var childSyntax in node.ChildNodes())
       {
-        var memberResult = ItemFactory.Create(childSyntax, semanticModel, this);
+        var memberResult = ItemFactory.Create(childSyntax, semanticModel, container, this);
         if (memberResult != null)
         {
           Members.Add(memberResult);

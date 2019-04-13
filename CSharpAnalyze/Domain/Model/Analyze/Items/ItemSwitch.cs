@@ -1,4 +1,5 @@
-﻿using CSharpAnalyze.Domain.PublicInterfaces;
+﻿using CSharpAnalyze.Domain.Event;
+using CSharpAnalyze.Domain.PublicInterfaces;
 using CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -28,21 +29,22 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// コンストラクタ
     /// </summary>
     /// <param name="node">対象Node</param>
-    /// <param name="target">対象ソースのsemanticModel</param>
+    /// <param name="semanticModel">対象ソースのsemanticModel</param>
     /// <param name="parent">親IAnalyzeItem</param>
-    public ItemSwitch(SwitchStatementSyntax node, SemanticModel semanticModel, IAnalyzeItem parent) : base(parent, node, semanticModel)
+    /// <param name="container">イベントコンテナ</param>
+    public ItemSwitch(SwitchStatementSyntax node, SemanticModel semanticModel, IAnalyzeItem parent, EventContainer container) : base(parent, node, semanticModel, container)
     {
       ItemType = ItemTypes.MethodStatement;
 
       var operation = semanticModel.GetOperation(node) as ISwitchOperation;
 
       // 条件設定
-      Conditions.AddRange(OperationFactory.GetExpressionList(operation.Value));
+      Conditions.AddRange(OperationFactory.GetExpressionList(operation.Value, container));
 
       // Caseリスト設定
       foreach(var item in operation.Cases)
       {
-        Cases.Add(ItemFactory.Create(item.Syntax,semanticModel,this));
+        Cases.Add(ItemFactory.Create(item.Syntax, semanticModel, container, this));
       }
 
     }

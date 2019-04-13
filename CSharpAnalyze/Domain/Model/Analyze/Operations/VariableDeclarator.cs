@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.Operations;
+﻿using CSharpAnalyze.Domain.Event;
+using Microsoft.CodeAnalysis.Operations;
 
 namespace CSharpAnalyze.Domain.Model.Analyze.Operations
 {
@@ -11,14 +12,15 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
     /// コンストラクタ
     /// </summary>
     /// <param name="operation">IOperationインスタンス</param>
-    public VariableDeclarator(IVariableDeclaratorOperation operation)
+    /// <param name="container">イベントコンテナ</param>
+    public VariableDeclarator(IVariableDeclaratorOperation operation, EventContainer container) : base(container)
     {
       Expressions.Add(new Expression(operation.Symbol.Name,Expression.GetSymbolTypeName(operation.Symbol)));
 
       if (!(operation.Initializer is null))
       {
         Expressions.Add(new Expression("=", string.Empty));
-        Expressions.AddRange(OperationFactory.GetExpressionList(operation.Initializer.Value));
+        Expressions.AddRange(OperationFactory.GetExpressionList(operation.Initializer.Value, container));
       }
     }
   }

@@ -31,9 +31,10 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// コンストラクタ
     /// </summary>
     /// <param name="node">対象Node</param>
-    /// <param name="target">対象ソースのsemanticModel</param>
+    /// <param name="semanticModel">対象ソースのsemanticModel</param>
     /// <param name="parent">親IAnalyzeItem</param>
-    public ItemConstructor(ConstructorDeclarationSyntax node, SemanticModel semanticModel, IAnalyzeItem parent) : base(parent, node, semanticModel)
+    /// <param name="container">イベントコンテナ</param>
+    public ItemConstructor(ConstructorDeclarationSyntax node, SemanticModel semanticModel, IAnalyzeItem parent, EventContainer container) : base(parent, node, semanticModel, container)
     {
       ItemType = ItemTypes.Constructor;
 
@@ -57,7 +58,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
           if (part.Kind == SymbolDisplayPartKind.ClassName)
           {
             // 外部ファイル参照イベント発行
-            RaiseEvents.RaiseOtherFileReferenced(node, part.Symbol);
+            RaiseOtherFileReferenced(node, part.Symbol);
           }
 
           arg.Add(new Expression(name, type));
@@ -80,7 +81,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         if (param.HasExplicitDefaultValue)
         {
           var defaultValueOpration = semanticModel.GetOperation(nodeParams[paramIndex].Default) as IParameterInitializerOperation;
-          defaultValues.AddRange(OperationFactory.GetExpressionList(defaultValueOpration.Value));
+          defaultValues.AddRange(OperationFactory.GetExpressionList(defaultValueOpration.Value, container));
         }
 
         Args.Add((param.Name, arg, modifiers, defaultValues));
@@ -101,7 +102,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       // メンバ
       if (node.Body is null)
       {
-        var memberResult = ItemFactory.Create(node.ExpressionBody, semanticModel, this);
+        var memberResult = ItemFactory.Create(node.ExpressionBody, semanticModel, container, this);
         if (memberResult != null)
         {
           Members.Add(memberResult);
@@ -111,7 +112,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       {
         foreach (var childSyntax in node.Body.ChildNodes())
         {
-          var memberResult = ItemFactory.Create(childSyntax, semanticModel, this);
+          var memberResult = ItemFactory.Create(childSyntax, semanticModel, container, this);
           if (memberResult != null)
           {
             Members.Add(memberResult);

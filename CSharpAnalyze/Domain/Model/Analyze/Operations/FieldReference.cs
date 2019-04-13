@@ -13,8 +13,8 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
     /// コンストラクタ
     /// </summary>
     /// <param name="operation">IOperationインスタンス</param>
-    /// <param name="target">対象ソースのsemanticModel</param>
-    public FieldReference(IFieldReferenceOperation operation)
+    /// <param name="container">イベントコンテナ</param>
+    public FieldReference(IFieldReferenceOperation operation, EventContainer container) : base(container)
     {
       if (operation.Field.IsStatic)
       {
@@ -26,7 +26,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
         if (operation.Field.ContainingSymbol is INamedTypeSymbol)
         {
           // 外部ファイル参照イベント発行
-          RaiseEvents.RaiseOtherFileReferenced(operation.Syntax, operation.Field.ContainingSymbol);
+          RaiseOtherFileReferenced(operation.Syntax, operation.Field.ContainingSymbol);
         }
       }
       else

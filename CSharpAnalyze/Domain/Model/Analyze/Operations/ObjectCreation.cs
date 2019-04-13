@@ -20,7 +20,8 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
     /// コンストラクタ
     /// </summary>
     /// <param name="operation">IOperationインスタンス</param>
-    public ObjectCreation(IObjectCreationOperation operation)
+    /// <param name="container">イベントコンテナ</param>
+    public ObjectCreation(IObjectCreationOperation operation, EventContainer container) : base(container)
     {
       var node = operation.Syntax;
       var parts = operation.Type.ToDisplayParts(SymbolDisplayFormat.MinimallyQualifiedFormat);
@@ -40,7 +41,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
         if (part.Kind == SymbolDisplayPartKind.ClassName)
         {
           // 外部ファイル参照イベント発行
-          RaiseEvents.RaiseOtherFileReferenced(node, part.Symbol);
+          RaiseOtherFileReferenced(node, part.Symbol);
         }
 
         Expressions.Add(new Expression(name, type));
@@ -55,7 +56,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
         {
           Expressions.Add(new Expression(",", string.Empty));
         }
-        Expressions.AddRange(OperationFactory.GetExpressionList(param));
+        Expressions.AddRange(OperationFactory.GetExpressionList(param, container));
 
         isFirst = false;
       }

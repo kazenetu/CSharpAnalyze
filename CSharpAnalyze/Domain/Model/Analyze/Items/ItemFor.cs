@@ -45,9 +45,10 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// コンストラクタ
     /// </summary>
     /// <param name="node">対象Node</param>
-    /// <param name="target">対象ソースのsemanticModel</param>
+    /// <param name="semanticModel">対象ソースのsemanticModel</param>
     /// <param name="parent">親IAnalyzeItem</param>
-    public ItemFor(ForStatementSyntax node, SemanticModel semanticModel, IAnalyzeItem parent) : base(parent, node, semanticModel)
+    /// <param name="container">イベントコンテナ</param>
+    public ItemFor(ForStatementSyntax node, SemanticModel semanticModel, IAnalyzeItem parent, EventContainer container) : base(parent, node, semanticModel, container)
     {
       ItemType = ItemTypes.MethodStatement;
 
@@ -65,7 +66,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
           if (part.Kind == SymbolDisplayPartKind.ClassName)
           {
             // 外部ファイル参照イベント発行
-            RaiseEvents.RaiseOtherFileReferenced(node, part.Symbol);
+            RaiseOtherFileReferenced(node, part.Symbol);
           }
 
           Types.Add(new Expression(name, type));
@@ -75,7 +76,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         foreach (var variable in node.Declaration.Variables)
         {
           var declaration = semanticModel.GetOperation(variable);
-          Declarations.Add(OperationFactory.GetExpressionList(declaration));
+          Declarations.Add(OperationFactory.GetExpressionList(declaration, container));
         }
       }
       else if (node.Initializers != null)
@@ -84,7 +85,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         foreach (var initializer in node.Initializers)
         {
           var declaration = semanticModel.GetOperation(initializer);
-          Declarations.Add(OperationFactory.GetExpressionList(declaration));
+          Declarations.Add(OperationFactory.GetExpressionList(declaration, container));
         }
       }
 
@@ -92,18 +93,18 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       foreach (var increment in node.Incrementors)
       {
         var incrementOperator = semanticModel.GetOperation(increment);
-        Incrementors.Add(OperationFactory.GetExpressionList(incrementOperator));
+        Incrementors.Add(OperationFactory.GetExpressionList(incrementOperator, container));
       }
 
       // 条件部
       var condition = semanticModel.GetOperation(node.Condition);
-      Conditions.AddRange(OperationFactory.GetExpressionList(condition));
+      Conditions.AddRange(OperationFactory.GetExpressionList(condition, container));
 
       // 内部処理設定
       var block = node.Statement as BlockSyntax;
       foreach (var statement in block.Statements)
       {
-        Members.Add(ItemFactory.Create(statement, semanticModel, this));
+        Members.Add(ItemFactory.Create(statement, semanticModel, container, this));
       }
 
     }

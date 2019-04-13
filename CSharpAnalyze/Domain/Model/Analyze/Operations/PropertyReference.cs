@@ -14,7 +14,8 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
     /// コンストラクタ
     /// </summary>
     /// <param name="operation">IOperationインスタンス</param>
-    public PropertyReference(IPropertyReferenceOperation operation)
+    /// <param name="container">イベントコンテナ</param>
+    public PropertyReference(IPropertyReferenceOperation operation, EventContainer container) : base(container)
     {
       // プロパティ参照情報を追加
       if (!AddExpressions(operation.Instance))
@@ -65,14 +66,14 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
           if (prop.Property.ContainingSymbol is INamedTypeSymbol)
           {
             // 外部ファイル参照イベント発行
-            RaiseEvents.RaiseOtherFileReferenced(prop.Syntax, prop.Property.ContainingSymbol);
+            RaiseOtherFileReferenced(prop.Syntax, prop.Property.ContainingSymbol);
           }
         }
 
         // インスタンスプロパティの場合はthisを追加する
         if(prop.Instance is IInstanceReferenceOperation)
         {
-          Expressions.AddRange(OperationFactory.GetExpressionList(prop.Instance));
+          Expressions.AddRange(OperationFactory.GetExpressionList(prop.Instance, eventContainer));
           Expressions.Add(new Expression(".", string.Empty));
         }
 
@@ -81,7 +82,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
       }
       else
       {
-        Expressions.AddRange(OperationFactory.GetExpressionList(operation));
+        Expressions.AddRange(OperationFactory.GetExpressionList(operation, eventContainer));
       }
 
       return true;
@@ -98,7 +99,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
         if (propItem.IsIndexer)
         {
           // インデクサの場合
-          Expressions.AddRange(OperationFactory.GetExpressionList(prop.Instance));
+          Expressions.AddRange(OperationFactory.GetExpressionList(prop.Instance, eventContainer));
           Expressions.Add(new Expression("[", string.Empty));
           foreach (var arg in prop.Arguments)
           {
@@ -106,7 +107,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
             {
               Expressions.Add(new Expression(",", string.Empty));
             }
-            Expressions.AddRange(OperationFactory.GetExpressionList(arg));
+            Expressions.AddRange(OperationFactory.GetExpressionList(arg, eventContainer));
 
           }
           Expressions.Add(new Expression("]", string.Empty));

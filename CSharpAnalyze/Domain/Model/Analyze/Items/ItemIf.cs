@@ -1,4 +1,5 @@
-﻿using CSharpAnalyze.Domain.PublicInterfaces;
+﻿using CSharpAnalyze.Domain.Event;
+using CSharpAnalyze.Domain.PublicInterfaces;
 using CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -32,14 +33,15 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// コンストラクタ
     /// </summary>
     /// <param name="node">対象Node</param>
-    /// <param name="target">対象ソースのsemanticModel</param>
+    /// <param name="semanticModel">対象ソースのsemanticModel</param>
     /// <param name="parent">親IAnalyzeItem</param>
-    public ItemIf(IfStatementSyntax node, SemanticModel semanticModel, IAnalyzeItem parent) : base(parent, node, semanticModel)
+    /// <param name="container">イベントコンテナ</param>
+    public ItemIf(IfStatementSyntax node, SemanticModel semanticModel, IAnalyzeItem parent, EventContainer container) : base(parent, node, semanticModel, container)
     {
       ItemType = ItemTypes.MethodStatement;
 
       var condition = semanticModel.GetOperation(node.Condition);
-      Conditions.AddRange(OperationFactory.GetExpressionList(condition));
+      Conditions.AddRange(OperationFactory.GetExpressionList(condition, container));
 
       TrueBlock.AddRange(GetBlock(node.Statement, semanticModel));
       FalseBlocks.AddRange(GetElseBlock(node.Else));
@@ -53,7 +55,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
           return result;
         }
 
-        result.Add(ItemFactory.Create(elseNode, semanticModel, parent));
+        result.Add(ItemFactory.Create(elseNode, semanticModel, container, parent));
 
         // else ifの場合はさらに続ける
         if (elseNode.Statement is IfStatementSyntax ifNode)
@@ -69,7 +71,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// ブロック内処理を取得
     /// </summary>
     /// <param name="node">対象Node</param>
-    /// <param name="target">対象ソースのsemanticModel</param>
+    /// <param name="semanticModel)">対象ソースのsemanticModel</param>
     /// <returns>ブロック内処理(nullの場合は要素なし)</returns>
     private List<IAnalyzeItem> GetBlock(SyntaxNode node, SemanticModel semanticModel)
     {
@@ -87,7 +89,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
 
       foreach (var statement in block.Statements)
       {
-        result.Add(ItemFactory.Create(statement, semanticModel, this));
+        result.Add(ItemFactory.Create(statement, semanticModel, eventContainer, this));
       }
 
       return result;

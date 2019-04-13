@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.Operations;
+﻿using CSharpAnalyze.Domain.Event;
+using Microsoft.CodeAnalysis.Operations;
 
 namespace CSharpAnalyze.Domain.Model.Analyze.Operations
 {
@@ -11,10 +12,11 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
     /// コンストラクタ
     /// </summary>
     /// <param name="operation">IOperationインスタンス</param>
-    public CompoundAssignment(ICompoundAssignmentOperation operation)
+    /// <param name="container">イベントコンテナ</param>
+    public CompoundAssignment(ICompoundAssignmentOperation operation, EventContainer container) : base(container)
     {
       // 対象インスタンス
-      Expressions.AddRange(OperationFactory.GetExpressionList(operation.Target));
+      Expressions.AddRange(OperationFactory.GetExpressionList(operation.Target, container));
 
       var operatorName = string.Empty;
       switch (operation.OperatorKind)
@@ -71,7 +73,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
       }
 
       // 値
-      Expressions.AddRange(OperationFactory.GetExpressionList(operation.Value));
+      Expressions.AddRange(OperationFactory.GetExpressionList(operation.Value, container));
     }
   }
 }

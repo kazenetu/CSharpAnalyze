@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.Operations;
+﻿using CSharpAnalyze.Domain.Event;
+using Microsoft.CodeAnalysis.Operations;
 
 namespace CSharpAnalyze.Domain.Model.Analyze.Operations
 {
@@ -11,16 +12,17 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
     /// コンストラクタ
     /// </summary>
     /// <param name="operation">IOperationインスタンス</param>
-    public Binary(IBinaryOperation operation)
+    /// <param name="container">イベントコンテナ</param>
+    public Binary(IBinaryOperation operation, EventContainer container) : base(container)
     {
       // 左辺
-      Expressions.AddRange(OperationFactory.GetExpressionList(operation.LeftOperand));
+      Expressions.AddRange(OperationFactory.GetExpressionList(operation.LeftOperand, container));
 
       // 演算子
       Expressions.AddRange(Expression.GetOperationKindExpression(operation));
 
       // 右辺
-      Expressions.AddRange(OperationFactory.GetExpressionList(operation.RightOperand));
+      Expressions.AddRange(OperationFactory.GetExpressionList(operation.RightOperand, container));
     }
   }
 }

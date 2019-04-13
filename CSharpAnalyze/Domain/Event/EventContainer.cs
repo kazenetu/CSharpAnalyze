@@ -8,24 +8,24 @@ namespace CSharpAnalyze.Domain.Event
   /// <summary>
   /// イベントコンテナ
   /// </summary>
-  public static class EventContainer
+  public class EventContainer
   {
     /// <summary>
     /// イベントハンドラリスト
     /// </summary>
-    private static List<(object instance, Delegate callback)> Handles = new List<(object instance, Delegate callback)>();
+    private List<(object instance, Delegate callback)> Handles = new List<(object instance, Delegate callback)>();
 
     /// <summary>
     /// 排他ロック用オブジェクト
     /// </summary>
-    private static readonly object lockObject =  new object ();
+    private readonly object lockObject =  new object ();
 
     /// <summary>
     /// イベントの登録
     /// </summary>
     /// <param name="instance">登録対象のインスタンス</param>
     /// <param name="callback">イベントハンドラ</param>
-    public static void Register<T>(object instance, Action<T> callback) where T : IEvent
+    public void Register<T>(object instance, Action<T> callback) where T : IEvent
     {
       lock (lockObject)
       {
@@ -37,8 +37,7 @@ namespace CSharpAnalyze.Domain.Event
     /// イベントの削除
     /// </summary>
     /// <param name="instance">登録対象のインスタンス</param>
-    /// <param name="callback">イベントハンドラ</param>
-    public static void Unregister<T>(object instance) where T : IEvent
+    public void Unregister<T>(object instance) where T : IEvent
     {
       lock (lockObject)
       {
@@ -50,7 +49,7 @@ namespace CSharpAnalyze.Domain.Event
     /// <summary>
     /// イベントの全削除
     /// </summary>
-    public static void UnregisterAll()
+    public void UnregisterAll()
     {
       lock (lockObject)
       {
@@ -62,7 +61,7 @@ namespace CSharpAnalyze.Domain.Event
     /// イベント発行
     /// </summary>
     /// <param name="args">発行イベント</param>
-    public static void Raise<T>(T args)
+    public void Raise<T>(T args)
     {
       lock (lockObject)
       {

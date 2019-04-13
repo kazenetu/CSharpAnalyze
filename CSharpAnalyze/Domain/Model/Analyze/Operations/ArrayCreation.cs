@@ -19,7 +19,8 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
     /// コンストラクタ
     /// </summary>
     /// <param name="operation">IOperationインスタンス</param>
-    public ArrayCreation(IArrayCreationOperation operation)
+    /// <param name="container">イベントコンテナ</param>
+    public ArrayCreation(IArrayCreationOperation operation, EventContainer container) : base(container)
     {
       // newキーワード追加
       Expressions.Add(new Expression("new", NewKeywordTypeName));
@@ -34,7 +35,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
         if (part.Kind == SymbolDisplayPartKind.ClassName)
         {
           // 外部ファイル参照イベント発行
-          RaiseEvents.RaiseOtherFileReferenced(operation.Syntax, part.Symbol);
+          RaiseOtherFileReferenced(operation.Syntax, part.Symbol);
         }
 
         Expressions.Add(new Expression(name, type));
@@ -44,7 +45,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
       Expressions.Add(new Expression("[", string.Empty));
       for (var i = 0; i < operation.DimensionSizes.Length; i++)
       {
-        Expressions.AddRange(OperationFactory.GetExpressionList(operation.DimensionSizes[i]));
+        Expressions.AddRange(OperationFactory.GetExpressionList(operation.DimensionSizes[i], container));
         if (i >= 0 && i < operation.DimensionSizes.Length - 1)
         {
           Expressions.Add(new Expression(",", string.Empty));

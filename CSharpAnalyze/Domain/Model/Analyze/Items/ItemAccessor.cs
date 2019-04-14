@@ -35,13 +35,25 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       }
 
       // メンバ
-      var block = statement.First() as BlockSyntax;
-      foreach (var childSyntax in block.Statements)
+      var firstStatement = statement.First();
+      if(firstStatement is ArrowExpressionClauseSyntax)
       {
-        var memberResult = ItemFactory.Create(childSyntax, semanticModel, container, this);
+        var memberResult = ItemFactory.Create(firstStatement, semanticModel, container, this);
         if (memberResult != null)
         {
           Members.Add(memberResult);
+        }
+      }
+      else
+      {
+        var block = firstStatement as BlockSyntax;
+        foreach (var childSyntax in block.Statements)
+        {
+          var memberResult = ItemFactory.Create(childSyntax, semanticModel, container, this);
+          if (memberResult != null)
+          {
+            Members.Add(memberResult);
+          }
         }
       }
     }

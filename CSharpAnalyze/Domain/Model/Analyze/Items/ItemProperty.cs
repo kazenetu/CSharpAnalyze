@@ -58,7 +58,14 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       }
 
       // アクセサ設定
-      AccessorList.AddRange(node.AccessorList.Accessors.Select(accessor => ItemFactory.Create(accessor, semanticModel, container, this)));
+      if(node.AccessorList is null)
+      {
+        AccessorList.Add(ItemFactory.Create(node.ExpressionBody, semanticModel, container, this));
+      }
+      else
+      {
+        AccessorList.AddRange(node.AccessorList.Accessors.Select(accessor => ItemFactory.Create(accessor, semanticModel, container, this)));
+      }
 
       // デフォルト設定
       if (node.Initializer == null)

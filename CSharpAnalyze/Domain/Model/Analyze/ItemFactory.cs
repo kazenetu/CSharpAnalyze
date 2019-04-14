@@ -52,6 +52,11 @@ namespace CSharpAnalyze.Domain.Model.Analyze
 
         // ラムダ式
         case ArrowExpressionClauseSyntax targetNode:
+          if(parent is ItemProperty)
+          {
+            result = new ItemAccessor(targetNode, semanticModel, parent, container);
+          }
+          else
           {
             var op = semanticModel.GetOperation(targetNode).Children.First();
             switch (op)

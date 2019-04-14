@@ -20,7 +20,8 @@ namespace CSharpAnalyzeTest
       RefField,
       Static,
       ClassProperty,
-      Generic
+      Generic,
+      LamdaGet,
     }
 
     /// <summary>
@@ -88,6 +89,16 @@ namespace CSharpAnalyzeTest
           source.AppendLine("public class GenericTest");
           source.AppendLine("{");
           source.AppendLine("  public List<string> PropertyList{set; get;} = new List<string>();");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.LamdaGet:
+          filePath = "LamdaGet.cs";
+
+          source.AppendLine("public class GenericTest");
+          source.AppendLine("{");
+          source.AppendLine("  private string s;");
+          source.AppendLine("  public string S => s; ");
           source.AppendLine("}");
           break;
       }
@@ -229,6 +240,34 @@ namespace CSharpAnalyzeTest
         var expectedList = new List<(List<string> modifiers, string name, string type, Dictionary<string, List<string>> accessors, bool isInit, List<string> init)>
            {
              (new List<string>() { "public" }, "PropertyList", "List<string>",new Dictionary<string,List<string>>(){ { "set",new List<string>()  },{ "get", new List<string>() } } , true, new List<string>() { "new", "List","<","string",">", "(", ")" }),
+           };
+        Assert.Equal(expectedList.Count, GetMemberCount(itemClass, expectedList));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+
+    /// <summary>
+    /// 式形式のテスト:Get
+    /// </summary>
+    [Fact(DisplayName = "LamdaGet")]
+    public void LamdaGetTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.LamdaGet), (ev) =>
+      {
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "LamdaGet.cs");
+
+        // クラス内の要素の存在確認
+        var expectedList = new List<(List<string> modifiers, string name, string type, Dictionary<string, List<string>> accessors, bool isInit, List<string> init)>
+           {
+             (new List<string>() { "public" }, "S", "string",new Dictionary<string,List<string>>(){ { "get", new List<string>() { "return this.s;" } } } , true, new List<string>()),
            };
         Assert.Equal(expectedList.Count, GetMemberCount(itemClass, expectedList));
       });

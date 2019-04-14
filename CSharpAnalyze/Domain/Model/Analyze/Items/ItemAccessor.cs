@@ -3,6 +3,7 @@ using CSharpAnalyze.Domain.PublicInterfaces;
 using CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Operations;
 using System.Linq;
 using System.Text;
 
@@ -42,6 +43,32 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         {
           Members.Add(memberResult);
         }
+      }
+    }
+
+    /// <summary>
+    /// コンストラクタ
+    /// </summary>
+    /// <param name="node">対象Node</param>
+    /// <param name="semanticModel">対象ソースのsemanticModel</param>
+    /// <param name="parent">親IAnalyzeItem</param>
+    /// <param name="container">イベントコンテナ</param>
+    public ItemAccessor(ArrowExpressionClauseSyntax node, SemanticModel semanticModel, IAnalyzeItem parent, EventContainer container) : base(parent, node, semanticModel, container)
+    {
+      ItemType = ItemTypes.Accessor;
+
+      // メンバ
+      var memberResult = ItemFactory.Create(node, semanticModel, container, this);
+      Members.Add(memberResult);
+
+      // キーワード
+      if (memberResult is ItemReturn)
+      {
+        Name = "get";
+      }
+      else
+      {
+        Name = "set";
       }
     }
 

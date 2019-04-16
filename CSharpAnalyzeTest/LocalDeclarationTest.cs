@@ -9,7 +9,6 @@ using Xunit;
 
 namespace CSharpAnalyzeTest
 {
-  // HACK テスト実装
   [Trait("ローカル変数のテスト", nameof(LocalDeclarationTest))]
   public class LocalDeclarationTest : TestBase
   {
@@ -37,9 +36,8 @@ namespace CSharpAnalyzeTest
         case CreatePattern.Standard:
           filePath = "Standard.cs";
 
-          source.Add("void target()");
-          source.Add("{");
-          source.Add("}");
+          source.Add("string target;");
+          source.Add("int targetInt = 1;");
           break;
       }
 
@@ -69,7 +67,7 @@ namespace CSharpAnalyzeTest
     /// <summary>
     /// 基本的なテスト
     /// </summary>
-    //[Fact(DisplayName = "Standard")]
+    [Fact(DisplayName = "Standard")]
     public void StandardArgsTest()
     {
       // テストコードを追加
@@ -85,23 +83,16 @@ namespace CSharpAnalyzeTest
         Assert.Single(targetInstances);
         var targetParentInstance = targetInstances.First() as IItemMethod;
 
-        // 対象インスタンスを取得
-        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemLocalFunction;
-
-        // 型タイプの確認
-        Assert.Equal("void", GetExpressions(targetInstance.MethodTypes));
-
         // 外部参照の存在確認
         Assert.Empty(ev.FileRoot.OtherFiles);
 
         // パラメータの確認
-        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
+        var expectedArgs = new List<(string type, string name, string defaultValue)>()
         {
+          ("string", "target", null),
+          ("int", "targetInt", "1")
         };
-        Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedArgs));
-
-        // 内部処理の確認
-        Assert.Empty(targetInstance.Members);
+        Assert.Equal(expectedArgs.Count, GetMemberCount(targetParentInstance, expectedArgs));
       });
 
       // 解析実行
@@ -120,42 +111,39 @@ namespace CSharpAnalyzeTest
     }
 
     /// <summary>
-    /// 対象インスタンスの取得
-    /// </summary>
-    /// <param name="itemClass">対象のアイテムメソッド</param>
-    /// <returns>対象インスタンスリスト</returns>
-    private List<IItemLocalFunction> GetTargetInstances(IItemMethod itemMethod)
-    {
-      return itemMethod.Members.Where(member => member is IItemLocalFunction).
-              Select(member => member as IItemLocalFunction).ToList();
-    }
-
-    /// <summary>
     /// メンバー数を取得
     /// </summary>
-    /// <param name="targetInstance">対象のインスタンス</param>
-    /// <param name="expectedArgs">パラメータの期待値</param>
+    /// <param name="targetParentInstance">対象の親インスタンス</param>
+    /// <param name="expectedList">予想値リスト</param>
     /// <returns>条件が一致するメンバー数</returns>
-    private int GetMemberCount(IItemLocalFunction targetInstance, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)
+    private int GetMemberCount(IItemMethod targetParentInstance, List<(string type, string name, string defaultValue)> expectedList)
     {
-      // パラメータ数の確認
-      Assert.Equal(expectedArgs.Count, targetInstance.Args.Count);
-
-      // パラメータの確認
-      var argCount = 0;
-      foreach (var (name, expressions, refType, defaultValue) in expectedArgs)
+      var memberCount = 0;
+      foreach (var member in targetParentInstance.Members)
       {
-        var actualArgs = targetInstance.Args
-                        .Where(arg => arg.name == name)
-                        .Where(arg => GetExpressions(arg.expressions) == expressions)
-                        .Where(arg => string.Concat(arg.modifiers) == refType)
-                        .Where(arg => GetExpressions(arg.defaultValues) == defaultValue);
-        if (actualArgs.Any())
+        // 対象以外は次のmemberへ
+        if (!(member is IItemStatementLocalDeclaration targetMember)) continue;
+
+        // 型の一致確認
+        var expectedTargets = expectedList.Where(expected => expected.name == targetMember.Name && expected.type == GetExpressions(targetMember.Types));
+        if (!expectedTargets.Any()) continue;
+
+        // 予想値を取得
+        var expectedTarget = expectedTargets.First();
+
+        // 初期値の確認
+        if (expectedTarget.defaultValue is null)
         {
-          argCount++;
+          Assert.Empty(targetMember.DefaultValues);
         }
+        else
+        {
+          Assert.Equal(expectedTarget.defaultValue, GetExpressions(targetMember.DefaultValues));
+        }
+
+        memberCount++;
       }
-      return argCount;
+      return memberCount;
     }
 
     /// <summary>

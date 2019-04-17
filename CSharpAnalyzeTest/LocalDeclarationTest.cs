@@ -196,7 +196,27 @@ namespace CSharpAnalyzeTest
     /// <returns></returns>
     private string GetExpressions(List<IExpression> expressions)
     {
-      return string.Concat(expressions.Select(expression => expression.Name));
+      return string.Concat(expressions.Select(expression => spacer(expression.Name)));
+
+      // 単語の最後にスペースを入れるか確認し返す
+      string spacer(string src)
+      {
+        bool addSuffixSpace = false;
+
+        switch (src)
+        {
+          case "new":
+            addSuffixSpace = true;
+            break;
+        }
+
+        if (addSuffixSpace)
+        {
+          return src + " ";
+        }
+
+        return src;
+      }
     }
   }
 }

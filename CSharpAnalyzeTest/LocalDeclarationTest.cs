@@ -19,6 +19,7 @@ namespace CSharpAnalyzeTest
     {
       Standard,
       TypeInference,
+      Generics,
     }
 
     /// <summary>
@@ -46,6 +47,14 @@ namespace CSharpAnalyzeTest
 
           source.Add("var target = \"ABC\";");
           source.Add("var targetInt = 1;");
+          break;
+
+        case CreatePattern.Generics:
+          filePath = "Generics.cs";
+
+          source.Add("List<string> target;");
+          source.Add("var targetInt = new List<int>();");
+          source.Add("var targetIntDef = new List<int>(){1,2,3};");
           break;
       }
 
@@ -134,6 +143,44 @@ namespace CSharpAnalyzeTest
         {
           ("string", "target", "\"ABC\""),
           ("int", "targetInt", "1")
+        };
+        Assert.Equal(expectedArgs.Count, GetMemberCount(targetParentInstance, expectedArgs));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// ジェネリックのテスト
+    /// </summary>
+    [Fact(DisplayName = "Generics")]
+    public void GenericsTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.Generics), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "Generics.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 外部参照の存在確認
+        Assert.Single(ev.FileRoot.OtherFiles);
+        Assert.Equal("List", ev.FileRoot.OtherFiles.First().Key);
+        Assert.Equal(string.Empty, ev.FileRoot.OtherFiles.First().Value);
+
+        // パラメータの確認
+        var expectedArgs = new List<(string type, string name, string defaultValue)>()
+        {
+          ("List<string>", "target", null),
+          ("List<int>", "targetInt", "new List<int>()"),
+          ("List<int>", "targetIntDef", "new List<int>(){1,2,3}")
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetParentInstance, expectedArgs));
       });

@@ -61,6 +61,36 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
         isFirst = false;
       }
       Expressions.Add(new Expression(")", string.Empty));
+
+      // 初期値を追加
+      if (operation.Initializer != null)
+      {
+        isFirst = true;
+        Expressions.Add(new Expression("{", string.Empty));
+        foreach (var intializer in operation.Initializer.Initializers)
+        {
+          if (!isFirst)
+          {
+            Expressions.Add(new Expression(",", string.Empty));
+          }
+
+          switch (intializer)
+          {
+            case IInvocationOperation op:
+              Expressions.AddRange(OperationFactory.GetExpressionList(op.Arguments.First(), container));
+              break;
+
+            default:
+              Expressions.AddRange(OperationFactory.GetExpressionList(intializer, container));
+              break;
+          }
+
+
+          isFirst = false;
+        }
+        Expressions.Add(new Expression("}", string.Empty));
+      }
     }
+
   }
 }

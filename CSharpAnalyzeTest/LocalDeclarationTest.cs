@@ -18,6 +18,7 @@ namespace CSharpAnalyzeTest
     private enum CreatePattern
     {
       Standard,
+      TypeInference,
     }
 
     /// <summary>
@@ -38,6 +39,13 @@ namespace CSharpAnalyzeTest
 
           source.Add("string target;");
           source.Add("int targetInt = 1;");
+          break;
+
+        case CreatePattern.TypeInference:
+          filePath = "TypeInference.cs";
+
+          source.Add("var target = \"ABC\";");
+          source.Add("var targetInt = 1;");
           break;
       }
 
@@ -90,6 +98,41 @@ namespace CSharpAnalyzeTest
         var expectedArgs = new List<(string type, string name, string defaultValue)>()
         {
           ("string", "target", null),
+          ("int", "targetInt", "1")
+        };
+        Assert.Equal(expectedArgs.Count, GetMemberCount(targetParentInstance, expectedArgs));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 型推論のテスト
+    /// </summary>
+    [Fact(DisplayName = "TypeInference")]
+    public void TypeInferenceTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.TypeInference), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "TypeInference.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // パラメータの確認
+        var expectedArgs = new List<(string type, string name, string defaultValue)>()
+        {
+          ("string", "target", "\"ABC\""),
           ("int", "targetInt", "1")
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetParentInstance, expectedArgs));

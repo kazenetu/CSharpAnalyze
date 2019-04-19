@@ -55,6 +55,7 @@ namespace CSharpAnalyzeTest
           source.Add("List<string> target;");
           source.Add("var targetInt = new List<int>();");
           source.Add("var targetIntDef = new List<int>(){1,2,3};");
+          source.Add("var targetDictionary = new Dictionary<int,int>(){{1,2},{3,4}};");
           break;
       }
 
@@ -171,16 +172,25 @@ namespace CSharpAnalyzeTest
         var targetParentInstance = targetInstances.First() as IItemMethod;
 
         // 外部参照の存在確認
-        Assert.Single(ev.FileRoot.OtherFiles);
-        Assert.Equal("List", ev.FileRoot.OtherFiles.First().Key);
-        Assert.Equal(string.Empty, ev.FileRoot.OtherFiles.First().Value);
+        var expectedClassName = new List<string> { "List", "Dictionary" };
+        foreach(var fileInfo in ev.FileRoot.OtherFiles)
+        {
+          // クラス名が一致する場合は予想クラス名リストから対象クラス名を削除
+          if (expectedClassName.Contains(fileInfo.Key))
+          {
+            expectedClassName.Remove(fileInfo.Key);
+          }
+        }
+        // 予想クラス名リストがすべて削除されていることを確認
+        Assert.Empty(expectedClassName);
 
         // パラメータの確認
         var expectedArgs = new List<(string type, string name, string defaultValue)>()
         {
           ("List<string>", "target", null),
           ("List<int>", "targetInt", "new List<int>()"),
-          ("List<int>", "targetIntDef", "new List<int>(){1,2,3}")
+          ("List<int>", "targetIntDef", "new List<int>(){1,2,3}"),
+          ("Dictionary<int,int>", "targetDictionary", "new Dictionary<int,int>(){{1,2},{3,4}}"),
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetParentInstance, expectedArgs));
       });

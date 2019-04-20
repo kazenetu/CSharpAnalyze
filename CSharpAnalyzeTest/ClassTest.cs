@@ -20,7 +20,8 @@ namespace CSharpAnalyzeTest
       SubClass,
       InnerClass,
       AbstractClass,
-      GenericClass
+      GenericClass,
+      SubAndInterface
     }
 
     /// <summary>
@@ -79,6 +80,22 @@ namespace CSharpAnalyzeTest
           filePath = "GenericClass.cs";
 
           source.AppendLine("public class GenericClass<T> ");
+          source.AppendLine("{");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.SubAndInterface:
+          filePath = "SubAndInterface.cs";
+
+          source.AppendLine("public class SuperClass ");
+          source.AppendLine("{");
+          source.AppendLine("}");
+
+          source.AppendLine("public interface Inf ");
+          source.AppendLine("{");
+          source.AppendLine("}");
+
+          source.AppendLine("public class SubClass : SuperClass,Inf");
           source.AppendLine("{");
           source.AppendLine("}");
           break;
@@ -368,6 +385,59 @@ namespace CSharpAnalyzeTest
 
         // クラス内の要素の存在確認
         Assert.Empty(itemClass.Members);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// スーパークラス+インターフェースのテスト
+    /// </summary>
+    [Fact(DisplayName = "SubAndInterface")]
+    public void SubAndInterface()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.SubAndInterface), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "SubAndInterface.cs", 1);
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 解析結果の件数確認
+        Assert.True(ev.FileRoot.Members.Count == 2);
+
+        //ジェネリックの確認
+        Assert.Empty(itemClass.GenericTypes);
+
+        // スーパークラスの設定確認
+        Assert.Single(itemClass.SuperClass);
+        Assert.Equal("SuperClass", itemClass.SuperClass.First().Name);
+
+        // インターフェースの設定確認
+        Assert.Single(itemClass.Interfaces);
+        Assert.Equal("Inf", itemClass.Interfaces.First().First().Name);
+
+        // 親の存在確認
+        Assert.Null(itemClass.Parent);
+
+        // クラス名の確認
+        Assert.Equal("SubClass", itemClass.Name);
+
+        // スコープ修飾子の件数確認
+        Assert.Single(itemClass.Modifiers);
+
+        // スコープ修飾子の内容確認
+        Assert.Contains("public", itemClass.Modifiers);
+
+        // ItemTypeの確認
+        Assert.Equal(ItemTypes.Class, itemClass.ItemType);
+
+        // クラス内の要素の存在確認
+        Assert.Empty(itemClass.Members);
+
       });
 
       // 解析実行

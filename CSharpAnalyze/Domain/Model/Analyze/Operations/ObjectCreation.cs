@@ -36,6 +36,12 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
       // クラス生成
       foreach (var part in parts)
       {
+        // スペースの場合は型設定に含めない
+        if (part.Kind == SymbolDisplayPartKind.Space)
+        {
+          continue;
+        }
+
         var name = $"{part}";
         var type = Expression.GetSymbolTypeName(part.Symbol);
         if (part.Kind == SymbolDisplayPartKind.ClassName)
@@ -77,7 +83,25 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
           switch (intializer)
           {
             case IInvocationOperation op:
-              Expressions.AddRange(OperationFactory.GetExpressionList(op.Arguments.First(), container));
+              if(op.Arguments.Count() > 1)
+              {
+                Expressions.Add(new Expression("{", string.Empty));
+              }
+
+              foreach (var arg in op.Arguments)
+              {
+                if(op.Arguments.IndexOf(arg) > 0)
+                {
+                  Expressions.Add(new Expression(",", string.Empty));
+                }
+
+                Expressions.AddRange(OperationFactory.GetExpressionList(arg, container));
+              }
+
+              if (op.Arguments.Count() > 1)
+              {
+                Expressions.Add(new Expression("}", string.Empty));
+              }
               break;
 
             default:

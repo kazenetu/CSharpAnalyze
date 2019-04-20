@@ -53,6 +53,12 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         var argParts = param.Type.ToDisplayParts(SymbolDisplayFormat.MinimallyQualifiedFormat);
         foreach (var part in argParts)
         {
+          // スペースの場合は型設定に含めない
+          if (part.Kind == SymbolDisplayPartKind.Space)
+          {
+            continue;
+          }
+
           var name = $"{part}";
           var type = Expression.GetSymbolTypeName(part.Symbol);
           if (part.Kind == SymbolDisplayPartKind.ClassName)

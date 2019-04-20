@@ -30,6 +30,12 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
       var parts = arrayTypeSymbol?.ElementType.ToDisplayParts(SymbolDisplayFormat.MinimallyQualifiedFormat);
       foreach (var part in parts)
       {
+        // スペースの場合は型設定に含めない
+        if (part.Kind == SymbolDisplayPartKind.Space)
+        {
+          continue;
+        }
+
         var name = $"{part}";
         var type = Expression.GetSymbolTypeName(part.Symbol);
         if (part.Kind == SymbolDisplayPartKind.ClassName)

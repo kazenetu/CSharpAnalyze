@@ -22,6 +22,11 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     public List<IExpression> SuperClass { get; } = new List<IExpression>();
 
     /// <summary>
+    /// インタフェースリスト
+    /// </summary>
+    public List<List<IExpression>> Interfaces { get; } = new List<List<IExpression>>();
+
+    /// <summary>
     /// ジェネリックタイプリスト
     /// </summary>
     public List<string> GenericTypes { get; } = new List<string>();
@@ -39,36 +44,53 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
 
       var declaredClass = semanticModel.GetDeclaredSymbol(node);
 
-      // スーパークラス設定
+      // スーパークラス/インターフェース設定
       if (node.BaseList != null)
       {
-        var displayParts = declaredClass.BaseType.ToDisplayParts(SymbolDisplayFormat.MinimallyQualifiedFormat);
-        foreach (var part in displayParts)
+        // スーパークラス
+        SuperClass.AddRange(getExpressionList(declaredClass.BaseType));
+
+        // インターフェース
+        foreach(var interfaceInfo in declaredClass.AllInterfaces)
         {
-          // スペースの場合は型設定に含めない
-          if (part.Kind == SymbolDisplayPartKind.Space)
-          {
-            continue;
-          }
+          Interfaces.Add(getExpressionList(interfaceInfo));
+        }
 
-          var name = $"{part}";
-          var type = Expression.GetSymbolTypeName(part.Symbol);
-          if (part.Symbol != null)
+        // 対象をList<IExpression>に格納する
+        List<IExpression> getExpressionList(INamedTypeSymbol target)
+        {
+          var result = new List<IExpression>();
+
+          var displayParts = target.ToDisplayParts(SymbolDisplayFormat.MinimallyQualifiedFormat);
+          foreach (var part in displayParts)
           {
-            type = part.Symbol.GetType().Name;
-            if (!string.IsNullOrEmpty(part.Symbol.ContainingNamespace.Name))
+            // スペースの場合は型設定に含めない
+            if (part.Kind == SymbolDisplayPartKind.Space)
             {
-              name = $"{part.Symbol}".Replace($"{part.Symbol.ContainingNamespace}.", string.Empty, StringComparison.CurrentCulture);
+              continue;
             }
 
-            if (part.Kind == SymbolDisplayPartKind.ClassName)
+            var name = $"{part}";
+            var type = Expression.GetSymbolTypeName(part.Symbol);
+            if (part.Symbol != null)
             {
-              // 外部ファイル参照イベント発行
-              RaiseOtherFileReferenced(node, part.Symbol);
+              type = part.Symbol.GetType().Name;
+              if (!string.IsNullOrEmpty(part.Symbol.ContainingNamespace.Name))
+              {
+                name = $"{part.Symbol}".Replace($"{part.Symbol.ContainingNamespace}.", string.Empty, StringComparison.CurrentCulture);
+              }
+
+              if (part.Kind == SymbolDisplayPartKind.ClassName || part.Kind == SymbolDisplayPartKind.InterfaceName)
+              {
+                // 外部ファイル参照イベント発行
+                RaiseOtherFileReferenced(node, part.Symbol);
+              }
             }
+
+            result.Add(new Expression(name, type));
           }
 
-          SuperClass.Add(new Expression(name, type));
+          return result;
         }
       }
 

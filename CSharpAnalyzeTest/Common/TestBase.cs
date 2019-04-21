@@ -1,8 +1,11 @@
 ﻿using CSharpAnalyze.ApplicationService;
+using CSharpAnalyze.Domain.PublicInterfaces;
 using CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems;
 using CSharpAnalyze.Domain.PublicInterfaces.Events;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using Xunit;
 
@@ -89,7 +92,7 @@ namespace CSharpAnalyzeTest.Common
 
     #endregion
 
-    #region クラスインターフェースインスタンス取得
+    #region ユーティリティ
 
     /// <summary>
     /// クラスインターフェースインスタンスの取得
@@ -116,6 +119,37 @@ namespace CSharpAnalyzeTest.Common
       return ev.FileRoot.Members[classIndex] as IItemClass;
     }
 
+    /// <summary>
+    /// Expressionリストを文字列に変換する
+    /// </summary>
+    /// <param name="expressions">Expressionリスト</param>
+    /// <returns></returns>
+    protected string GetExpressionsToString(List<IExpression> expressions)
+    {
+      return string.Concat(expressions.Select(expression => spacer(expression.Name)));
+
+      // 単語の最後にスペースを入れるか確認し返す
+      string spacer(string src)
+      {
+        bool addSuffixSpace = false;
+
+        switch (src)
+        {
+          case "new":
+            addSuffixSpace = true;
+            break;
+        }
+
+        if (addSuffixSpace)
+        {
+          return src + " ";
+        }
+
+        return src;
+      }
+    }
+
     #endregion
+
   }
 }

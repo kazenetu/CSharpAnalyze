@@ -181,7 +181,7 @@ namespace CSharpAnalyzeTest
 
            // スーパークラスの設定確認
            Assert.Single(itemClass.SuperClass);
-           Assert.Equal("ClassTest", itemClass.SuperClass.First().Name);
+           Assert.Equal("ClassTest", GetExpressionsToString(itemClass.SuperClass));
 
            // 親の存在確認
            Assert.Null(itemClass.Parent);
@@ -253,7 +253,7 @@ namespace CSharpAnalyzeTest
 
         // スーパークラスの設定確認
         Assert.Single(itemSubClass.SuperClass);
-        Assert.Equal("AbstractClass", itemSubClass.SuperClass.First().Name);
+        Assert.Equal("AbstractClass", GetExpressionsToString(itemSubClass.SuperClass));
 
         // 親の存在確認
         Assert.Null(itemSubClass.Parent);
@@ -414,11 +414,11 @@ namespace CSharpAnalyzeTest
 
         // スーパークラスの設定確認
         Assert.Single(itemClass.SuperClass);
-        Assert.Equal("SuperClass", itemClass.SuperClass.First().Name);
+        Assert.Equal("SuperClass", GetExpressionsToString(itemClass.SuperClass));
 
         // インターフェースの設定確認
         Assert.Single(itemClass.Interfaces);
-        Assert.Equal("Inf", itemClass.Interfaces.First().First().Name);
+        Assert.Equal("Inf", GetExpressionsToString(itemClass.Interfaces.First()));
 
         // 親の存在確認
         Assert.Null(itemClass.Parent);

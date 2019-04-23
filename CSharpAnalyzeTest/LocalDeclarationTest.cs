@@ -225,7 +225,7 @@ namespace CSharpAnalyzeTest
         if (!(member is IItemStatementLocalDeclaration targetMember)) continue;
 
         // 型の一致確認
-        var expectedTargets = expectedList.Where(expected => expected.name == targetMember.Name && expected.type == GetExpressions(targetMember.Types));
+        var expectedTargets = expectedList.Where(expected => expected.name == targetMember.Name && expected.type == GetExpressionsToString(targetMember.Types));
         if (!expectedTargets.Any()) continue;
 
         // 予想値を取得
@@ -238,7 +238,7 @@ namespace CSharpAnalyzeTest
         }
         else
         {
-          Assert.Equal(expectedTarget.defaultValue, GetExpressions(targetMember.DefaultValues));
+          Assert.Equal(expectedTarget.defaultValue, GetExpressionsToString(targetMember.DefaultValues));
         }
 
         memberCount++;
@@ -246,34 +246,5 @@ namespace CSharpAnalyzeTest
       return memberCount;
     }
 
-    /// <summary>
-    /// パラメーターリストを文字列に変換する
-    /// </summary>
-    /// <param name="expressions">パラメータリスト</param>
-    /// <returns></returns>
-    private string GetExpressions(List<IExpression> expressions)
-    {
-      return string.Concat(expressions.Select(expression => spacer(expression.Name)));
-
-      // 単語の最後にスペースを入れるか確認し返す
-      string spacer(string src)
-      {
-        bool addSuffixSpace = false;
-
-        switch (src)
-        {
-          case "new":
-            addSuffixSpace = true;
-            break;
-        }
-
-        if (addSuffixSpace)
-        {
-          return src + " ";
-        }
-
-        return src;
-      }
-    }
   }
 }

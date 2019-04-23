@@ -567,25 +567,15 @@ namespace CSharpAnalyzeTest
       {
         var actualArgs = itemConstructor.Args
                         .Where(arg => arg.name == name)
-                        .Where(arg => GetExpressions(arg.expressions) == expressions)
+                        .Where(arg => GetExpressionsToString(arg.expressions) == expressions)
                         .Where(arg => string.Concat(arg.modifiers) == refType)
-                        .Where(arg => GetExpressions(arg.defaultValues) == defaultValue);
+                        .Where(arg => GetExpressionsToString(arg.defaultValues) == defaultValue);
         if (actualArgs.Any())
         {
           argCount++;
         }
       }
       return argCount;
-    }
-
-    /// <summary>
-    /// パラメーターリストを文字列に変換する
-    /// </summary>
-    /// <param name="expressions">パラメータリスト</param>
-    /// <returns></returns>
-    private string GetExpressions(List<IExpression> expressions)
-    {
-      return string.Concat(expressions.Select(expression => expression.Name));
     }
 
   }

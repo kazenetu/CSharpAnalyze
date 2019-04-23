@@ -328,12 +328,8 @@ namespace CSharpAnalyzeTest
         // 対象以外は次のmemberへ
         if (!(member is IItemProperty memberProperty)) continue;
 
-        // 型の取得
-        var memberFieldType = new StringBuilder();
-        memberProperty.PropertyTypes.ForEach(item => memberFieldType.Append(item.Name));
-
         // 型の一致確認
-        var targetProperties = expectedList.Where(field => field.name == memberProperty.Name && field.type == memberFieldType.ToString());
+        var targetProperties = expectedList.Where(field => field.name == memberProperty.Name && field.type == GetExpressionsToString(memberProperty.PropertyTypes));
         if (!targetProperties.Any()) continue;
 
         // 条件取得

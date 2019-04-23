@@ -182,12 +182,8 @@ namespace CSharpAnalyzeTest
         // フィールド以外は次のmemberへ
         if (!(member is IItemField memberField)) continue;
 
-        // 型の取得
-        var memberFieldType = new StringBuilder();
-        memberField.FieldTypes.ForEach(item => memberFieldType.Append(item.Name));
-
         // 型の一致確認
-        var targetFileds = expectedList.Where(field => field.name == memberField.Name && field.type == memberFieldType.ToString());
+        var targetFileds = expectedList.Where(field => field.name == memberField.Name && field.type == GetExpressionsToString(memberField.FieldTypes));
         if (!targetFileds.Any()) continue;
 
         // 条件取得

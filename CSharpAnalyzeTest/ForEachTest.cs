@@ -89,7 +89,7 @@ namespace CSharpAnalyzeTest
         var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemLocalFunction;
 
         // 型タイプの確認
-        Assert.Equal("void", GetExpressions(targetInstance.MethodTypes));
+        Assert.Equal("void", GetExpressionsToString(targetInstance.MethodTypes));
 
         // 外部参照の存在確認
         Assert.Empty(ev.FileRoot.OtherFiles);
@@ -147,9 +147,9 @@ namespace CSharpAnalyzeTest
       {
         var actualArgs = targetInstance.Args
                         .Where(arg => arg.name == name)
-                        .Where(arg => GetExpressions(arg.expressions) == expressions)
+                        .Where(arg => GetExpressionsToString(arg.expressions) == expressions)
                         .Where(arg => string.Concat(arg.modifiers) == refType)
-                        .Where(arg => GetExpressions(arg.defaultValues) == defaultValue);
+                        .Where(arg => GetExpressionsToString(arg.defaultValues) == defaultValue);
         if (actualArgs.Any())
         {
           argCount++;
@@ -158,14 +158,5 @@ namespace CSharpAnalyzeTest
       return argCount;
     }
 
-    /// <summary>
-    /// パラメーターリストを文字列に変換する
-    /// </summary>
-    /// <param name="expressions">パラメータリスト</param>
-    /// <returns></returns>
-    private string GetExpressions(List<IExpression> expressions)
-    {
-      return string.Concat(expressions.Select(expression => expression.Name));
-    }
   }
 }

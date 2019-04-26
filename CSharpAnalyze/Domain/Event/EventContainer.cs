@@ -8,7 +8,7 @@ namespace CSharpAnalyze.Domain.Event
   /// <summary>
   /// イベントコンテナ
   /// </summary>
-  public class EventContainer
+  internal class EventContainer
   {
     /// <summary>
     /// イベントハンドラリスト

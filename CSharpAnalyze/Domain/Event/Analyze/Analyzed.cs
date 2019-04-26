@@ -8,7 +8,14 @@ namespace CSharpAnalyze.Domain.Event.Analyze.Events
   /// </summary>
   internal class Analyzed : IAnalyzed
   {
+    /// <summary>
+    /// ファイルパス
+    /// </summary>
     public string FilePath { get; }
+
+    /// <summary>
+    /// ファイル解析結果
+    /// </summary>
     public IFileRoot FileRoot { get; } = null;
 
     /// <summary>

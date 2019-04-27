@@ -54,6 +54,7 @@ namespace CSharpAnalyze.Domain.PublicInterfaces
     [Obsolete]
     Root,
     Class,
+    Interface,
     Enum,
     Field,
     Property,

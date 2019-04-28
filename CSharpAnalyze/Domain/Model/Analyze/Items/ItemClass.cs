@@ -157,9 +157,23 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         result.Append(" : ");
         SuperClass.ForEach(item => {
           result.Append(item.Name);
-          if (SuperClass.IndexOf(item) > 0) result.Append(", ");
         });
       }
+      if (Interfaces.Any())
+      {
+        if (SuperClass.Any())
+        {
+          result.Append(", ");
+        }
+        Interfaces.ForEach(item => {
+          if (Interfaces.IndexOf(item) > 0) result.Append(", ");
+          item.ForEach(expression =>
+          {
+            result.Append(expression.Name);
+          });
+        });
+      }
+
       result.AppendLine();
       result.Append(indexSpace);
       result.AppendLine("{");

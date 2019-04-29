@@ -401,13 +401,13 @@ namespace CSharpAnalyzeTest
       CreateFileData(CreateSource(CreatePattern.SubAndInterface), (ev) =>
       {
         // IItemClassインスタンスを取得
-        var itemClass = GetClassInstance(ev, "SubAndInterface.cs", 1);
+        var itemClass = GetClassInstance(ev, "SubAndInterface.cs", 2);
 
         // 外部参照の存在確認
         Assert.Empty(ev.FileRoot.OtherFiles);
 
         // 解析結果の件数確認
-        Assert.True(ev.FileRoot.Members.Count == 2);
+        Assert.True(ev.FileRoot.Members.Count == 3);
 
         //ジェネリックの確認
         Assert.Empty(itemClass.GenericTypes);

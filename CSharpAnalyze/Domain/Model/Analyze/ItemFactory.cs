@@ -32,7 +32,12 @@ namespace CSharpAnalyze.Domain.Model.Analyze
         case ClassDeclarationSyntax targetNode:
           result = new ItemClass(targetNode, semanticModel, parent, container);
           break;
-        
+
+        // インターフェース
+        case InterfaceDeclarationSyntax targetNode:
+          result = new ItemInterface(targetNode, semanticModel, parent, container);
+          break;
+
         // クラス要素定義
         case PropertyDeclarationSyntax targetNode:
           result = new ItemProperty(targetNode, semanticModel, parent, container);

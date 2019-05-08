@@ -18,6 +18,7 @@ namespace CSharpAnalyzeTest
     private enum CreatePattern
     {
       Standard,
+      StandardExistMembers,
     }
 
     /// <summary>
@@ -38,6 +39,17 @@ namespace CSharpAnalyzeTest
 
           source.AppendLine("public interface Inf ");
           source.AppendLine("{");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.StandardExistMembers:
+          filePath = "StandardExistMembers.cs";
+
+          source.AppendLine("public interface Inf ");
+          source.AppendLine("{");
+          source.AppendLine("  string PropertyString{set; get;}");
+          source.AppendLine("  int PropertydInt{get;}");
+          source.AppendLine("  void TestMethod(int integer=10,string str=\"ABC\");");
           source.AppendLine("}");
           break;
       }
@@ -78,6 +90,55 @@ namespace CSharpAnalyzeTest
         // インターフェースのメンバ確認
         var expectedMethodList = new List<(string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>();
         var expectedPropertyList = new List<(string name, string type, Dictionary<string, List<string>> accessors)>();
+
+        var expectedCount = expectedMethodList.Count + expectedPropertyList.Count;
+        var actualCount = GetMemberCount(target, expectedMethodList) + GetMemberCount(target, expectedPropertyList);
+
+        Assert.Equal(expectedCount, actualCount);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 基本的なテスト:メンバーあり
+    /// </summary>
+    [Fact(DisplayName = "StandardExistMembers")]
+    public void StandardExistMembersTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.StandardExistMembers), (ev) =>
+      {
+        // ItemInterfaceインスタンスを取得
+        var targets = GetIItemInterfaces(ev, "StandardExistMembers.cs");
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 対象件数の確認
+        Assert.Single(targets);
+
+        // インターフェースの継承確認
+        var target = targets.First();
+        Assert.Empty(target.Interfaces);
+
+        // インターフェースのメンバ確認
+        var expectedMethodList = new List<(string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>
+        {
+          ("TestMethod","void",
+            new List<(string name, string expressions, string refType, string defaultValue)>
+            {
+              ( "integer","int","","10"),
+              ( "str","string","","\"ABC\""),
+            }
+          ),
+        };
+        var expectedPropertyList = new List<(string name, string type, Dictionary<string, List<string>> accessors)>
+        { 
+            ("PropertyString", "string", new Dictionary<string, List<string>>() { { "set", new List<string>() }, { "get", new List<string>() } }),
+            ("PropertydInt", "int", new Dictionary<string, List<string>>() { { "get", new List<string>() } }),
+        };
 
         var expectedCount = expectedMethodList.Count + expectedPropertyList.Count;
         var actualCount = GetMemberCount(target, expectedMethodList) + GetMemberCount(target, expectedPropertyList);

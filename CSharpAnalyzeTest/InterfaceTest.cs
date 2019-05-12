@@ -22,6 +22,7 @@ namespace CSharpAnalyzeTest
       StandardMethodOverLoad,
       SubInterface,
       MultiInterface,
+      AnyInterface,
     }
 
     /// <summary>
@@ -82,6 +83,14 @@ namespace CSharpAnalyzeTest
           source.AppendLine("}");
 
           source.AppendLine("public interface Inf2");
+          source.AppendLine("{");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.AnyInterface:
+          filePath = "AnyInterface.cs";
+
+          source.AppendLine("public interface AnyInf : SubInf");
           source.AppendLine("{");
           source.AppendLine("}");
           break;
@@ -310,6 +319,60 @@ namespace CSharpAnalyzeTest
         };
         var actualInterfaceNames = target.Interfaces.Select(item => GetExpressionsToString(item));
         Assert.Equal(expectedInterfaceNames, actualInterfaceNames);
+
+        // インターフェースのメンバ確認
+        var expectedMethodList = new List<(string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>();
+        var expectedPropertyList = new List<(string name, string type, Dictionary<string, List<string>> accessors)>();
+
+        var expectedCount = expectedMethodList.Count + expectedPropertyList.Count;
+        var actualCount = GetMemberCount(target, expectedMethodList) + GetMemberCount(target, expectedPropertyList);
+
+        Assert.Equal(expectedCount, actualCount);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// インタフェースの継承テスト：多重継承
+    /// </summary>
+    [Fact(DisplayName = "AnyInterface")]
+    public void AnyInterfaceTest()
+    {
+      // スーパーインタフェースを追加
+      CreateFileData(CreateSource(CreatePattern.Standard), null);
+
+      // スーパーインタフェースを追加
+      CreateFileData(CreateSource(CreatePattern.SubInterface), null);
+
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.AnyInterface), (ev) =>
+      {
+        // ItemInterfaceインスタンスを取得
+        var targets = GetIItemInterfaces(ev, "AnyInterface.cs");
+
+        // 外部参照の存在確認
+        Assert.True(ev.FileRoot.OtherFiles.Count == 2);
+        var expectedOtherFileNames = new List<string>
+        {
+          "Inf","SubInf"
+        };
+        Assert.Equal(expectedOtherFileNames.OrderBy(item=>item), ev.FileRoot.OtherFiles.Select(item=>item.Key).OrderBy(item => item));
+        
+
+        // 対象件数の確認
+        Assert.Single(targets);
+
+        // インターフェースの継承確認
+        var target = targets.Where(item => item.Name == "AnyInf").First();
+        Assert.True(target.Interfaces.Count == 2);
+        var expectedInterfaceNames = new List<string>
+        {
+          "Inf","SubInf"
+        };
+        var actualInterfaceNames = target.Interfaces.Select(item => GetExpressionsToString(item));
+        Assert.Equal(expectedInterfaceNames.OrderBy(item => item), actualInterfaceNames.OrderBy(item => item));
 
         // インターフェースのメンバ確認
         var expectedMethodList = new List<(string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>();

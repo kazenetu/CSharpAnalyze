@@ -20,6 +20,7 @@ namespace CSharpAnalyzeTest
       Standard,
       StandardExistMembers,
       StandardMethodOverLoad,
+      SubInterface,
     }
 
     /// <summary>
@@ -61,6 +62,14 @@ namespace CSharpAnalyzeTest
           source.AppendLine("{");
           source.AppendLine("  void TestMethod(decimal decimalValue);");
           source.AppendLine("  void TestMethod(int integer=10,string str=\"ABC\");");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.SubInterface:
+          filePath = "SubInterface.cs";
+
+          source.AppendLine("public interface SubInf : Inf");
+          source.AppendLine("{");
           source.AppendLine("}");
           break;
       }
@@ -200,6 +209,48 @@ namespace CSharpAnalyzeTest
             }
           ),
         };
+        var expectedPropertyList = new List<(string name, string type, Dictionary<string, List<string>> accessors)>();
+
+        var expectedCount = expectedMethodList.Count + expectedPropertyList.Count;
+        var actualCount = GetMemberCount(target, expectedMethodList) + GetMemberCount(target, expectedPropertyList);
+
+        Assert.Equal(expectedCount, actualCount);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// インタフェースの継承テスト
+    /// </summary>
+    [Fact(DisplayName = "SubInterface")]
+    public void SubInterfaceTest()
+    {
+      // スーパーインタフェースを追加
+      CreateFileData(CreateSource(CreatePattern.Standard), null);
+
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.SubInterface), (ev) =>
+      {
+        // ItemInterfaceインスタンスを取得
+        var targets = GetIItemInterfaces(ev, "SubInterface.cs");
+
+        // 外部参照の存在確認
+        Assert.Single(ev.FileRoot.OtherFiles);
+        Assert.Equal("Inf",ev.FileRoot.OtherFiles.First().Key);
+
+        // 対象件数の確認
+        Assert.Single(targets);
+
+        // インターフェースの継承確認
+        var target = targets.First();
+        Assert.Single(target.Interfaces);
+        Assert.Equal("Inf", GetExpressionsToString(target.Interfaces.First()));
+
+
+        // インターフェースのメンバ確認
+        var expectedMethodList = new List<(string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>();
         var expectedPropertyList = new List<(string name, string type, Dictionary<string, List<string>> accessors)>();
 
         var expectedCount = expectedMethodList.Count + expectedPropertyList.Count;

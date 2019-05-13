@@ -23,6 +23,7 @@ namespace CSharpAnalyzeTest
       SubInterface,
       MultiInterface,
       AnyInterface,
+      SubInterfaceMethodOverLoad,
     }
 
     /// <summary>
@@ -92,6 +93,15 @@ namespace CSharpAnalyzeTest
 
           source.AppendLine("public interface AnyInf : SubInf");
           source.AppendLine("{");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.SubInterfaceMethodOverLoad:
+          filePath = "SubInterfaceMethodOverLoad.cs";
+
+          source.AppendLine("public interface SubInf : Inf");
+          source.AppendLine("{");
+          source.AppendLine("  void TestMethod(decimal decimalValue);");
           source.AppendLine("}");
           break;
       }
@@ -389,11 +399,75 @@ namespace CSharpAnalyzeTest
     }
 
     /// <summary>
-    /// インターフェースインスタンスの取得
+    /// インタフェースの継承テスト：メソッドのオーバーロード
     /// </summary>
-    /// <param name="ev">解析結果イベントインスタンス</param>
-    /// <param name="filePath">ファイル名</param>
-    /// <returns>インターフェースインスタンスリスト</returns>
+    [Fact(DisplayName = "SubInterfaceMethodOverLoad")]
+    public void SubInterfaceMethodOverLoadTest()
+    {
+      // スーパーインタフェースを追加
+      CreateFileData(CreateSource(CreatePattern.StandardExistMembers), null);
+
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.SubInterfaceMethodOverLoad), (ev) =>
+      {
+        // ItemInterfaceインスタンスを取得
+        var targets = GetIItemInterfaces(ev, "SubInterfaceMethodOverLoad.cs");
+
+        // 外部参照の存在確認
+        Assert.Single(ev.FileRoot.OtherFiles);
+        Assert.Equal("Inf", ev.FileRoot.OtherFiles.First().Key);
+
+        // 対象件数の確認
+        Assert.Single(targets);
+
+        // インターフェースの継承確認
+        var target = targets.First();
+        var expectedInterfaceNames = new List<string>
+        {
+          "Inf"
+        };
+        var actualInterfaceNames = target.Interfaces.Select(item => GetExpressionsToString(item));
+        Assert.Equal(expectedInterfaceNames.OrderBy(item => item), actualInterfaceNames.OrderBy(item => item));
+
+        // インターフェースのメンバ確認
+        var expectedMethodList = new List<(string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>
+        {
+          ("TestMethod","void",
+            new List<(string name, string expressions, string refType, string defaultValue)>
+            {
+              ( "integer","int","","10"),
+              ( "str","string","","\"ABC\""),
+            }
+          ),
+          ("TestMethod","void",
+            new List<(string name, string expressions, string refType, string defaultValue)>
+            {
+              ( "decimalValue","decimal","",""),
+            }
+          ),
+        };
+        var expectedPropertyList = new List<(string name, string type, Dictionary<string, List<string>> accessors)>
+        {
+            ("PropertyString", "string", new Dictionary<string, List<string>>() { { "set", new List<string>() }, { "get", new List<string>() } }),
+            ("PropertydInt", "int", new Dictionary<string, List<string>>() { { "get", new List<string>() } }),
+        };
+
+        var expectedCount = expectedMethodList.Count + expectedPropertyList.Count;
+        var actualCount = GetMemberCount(target, expectedMethodList) + GetMemberCount(target, expectedPropertyList);
+
+        Assert.Equal(expectedCount, actualCount);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+    
+    /// <summary>
+         /// インターフェースインスタンスの取得
+         /// </summary>
+         /// <param name="ev">解析結果イベントインスタンス</param>
+         /// <param name="filePath">ファイル名</param>
+         /// <returns>インターフェースインスタンスリスト</returns>
     private List<IItemInterface> GetIItemInterfaces(IAnalyzed ev, string filePath)
     {
       // ファイル名の確認

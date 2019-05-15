@@ -187,7 +187,7 @@ namespace CSharpAnalyzeTest
           ),
         };
         var expectedPropertyList = new List<(string name, string type, Dictionary<string, List<string>> accessors)>
-        { 
+        {
             ("PropertyString", "string", new Dictionary<string, List<string>>() { { "set", new List<string>() }, { "get", new List<string>() } }),
             ("PropertydInt", "int", new Dictionary<string, List<string>>() { { "get", new List<string>() } }),
         };
@@ -270,7 +270,7 @@ namespace CSharpAnalyzeTest
 
         // 外部参照の存在確認
         Assert.Single(ev.FileRoot.OtherFiles);
-        Assert.Equal("Inf",ev.FileRoot.OtherFiles.First().Key);
+        Assert.Equal("Inf", ev.FileRoot.OtherFiles.First().Key);
 
         // 対象件数の確認
         Assert.Single(targets);
@@ -321,7 +321,7 @@ namespace CSharpAnalyzeTest
         Assert.True(targets.Count == 2);
 
         // インターフェースの継承確認
-        var target = targets.Where(item=>item.Name == "ManyInf").First();
+        var target = targets.Where(item => item.Name == "ManyInf").First();
         Assert.True(target.Interfaces.Count == 2);
         var expectedInterfaceNames = new List<string>
         {
@@ -368,8 +368,8 @@ namespace CSharpAnalyzeTest
         {
           "Inf","SubInf"
         };
-        Assert.Equal(expectedOtherFileNames.OrderBy(item=>item), ev.FileRoot.OtherFiles.Select(item=>item.Key).OrderBy(item => item));
-        
+        Assert.Equal(expectedOtherFileNames.OrderBy(item => item), ev.FileRoot.OtherFiles.Select(item => item.Key).OrderBy(item => item));
+
 
         // 対象件数の確認
         Assert.Single(targets);
@@ -461,13 +461,13 @@ namespace CSharpAnalyzeTest
       // 解析実行
       CSAnalyze.Analyze(string.Empty, Files);
     }
-    
+
     /// <summary>
-         /// インターフェースインスタンスの取得
-         /// </summary>
-         /// <param name="ev">解析結果イベントインスタンス</param>
-         /// <param name="filePath">ファイル名</param>
-         /// <returns>インターフェースインスタンスリスト</returns>
+    /// インターフェースインスタンスの取得
+    /// </summary>
+    /// <param name="ev">解析結果イベントインスタンス</param>
+    /// <param name="filePath">ファイル名</param>
+    /// <returns>インターフェースインスタンスリスト</returns>
     private List<IItemInterface> GetIItemInterfaces(IAnalyzed ev, string filePath)
     {
       // ファイル名の確認

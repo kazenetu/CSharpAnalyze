@@ -11,5 +11,17 @@ namespace CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems
     /// インタフェースリスト
     /// </summary>
     List<List<IExpression>> Interfaces { get; }
+
+    /// <summary>
+    /// 継承元のプロパティリスト
+    /// </summary>
+    /// <remarks>参考情報</remarks>
+    List<string> BaseProperties { get; }
+
+    /// <summary>
+    /// 継承元のメソッドリスト
+    /// </summary>
+    /// <remarks>参考情報</remarks>
+    List<string> BaseMethods { get; }
   }
 }

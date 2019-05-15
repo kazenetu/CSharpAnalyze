@@ -22,6 +22,18 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     public List<List<IExpression>> Interfaces { get; } = new List<List<IExpression>>();
 
     /// <summary>
+    /// 継承元のプロパティリスト
+    /// </summary>
+    /// <remarks>参考情報</remarks>
+    public List<string> BaseProperties { get; } = new List<string>();
+
+    /// <summary>
+    /// 継承元のメソッドリスト
+    /// </summary>
+    /// <remarks>参考情報</remarks>
+    public List<string> BaseMethods { get; } = new List<string>();
+
+    /// <summary>
     /// コンストラクタ
     /// </summary>
     /// <param name="node">対象Node</param>
@@ -41,6 +53,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         foreach (var interfaceInfo in declaredSymbol.AllInterfaces)
         {
           Interfaces.Add(getExpressionList(interfaceInfo));
+
+          // スーパーインタフェースのメンバーを追加する
+          SetBaseMembers(interfaceInfo);
         }
 
         // 対象をList<IExpression>に格納する
@@ -90,6 +105,71 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
           Members.Add(memberResult);
         }
       }
+    }
+
+    /// <summary>
+    /// 継承元のメンバーを追加する
+    /// </summary>
+    /// <param name="target">インスタンス</param>
+    private void SetBaseMembers(INamedTypeSymbol target)
+    {
+      // ソースファイル以外はそのまま終了
+      if(!string.IsNullOrEmpty(target.ContainingAssembly.MetadataName)){
+        return;
+      }
+
+      var targetName = target.Name;
+
+      // 継承元からメンバを追加
+      foreach (var interfaceInfo in target.AllInterfaces)
+      {
+        SetBaseMembers(interfaceInfo);
+      }
+
+      // メンバを追加
+      foreach (var memberName in target.MemberNames)
+      {
+        var targetMembers = target.GetMembers(memberName);
+        if (!targetMembers.Any())
+        {
+          continue;
+        }
+
+        foreach (var targetMember in targetMembers) 
+        {
+          var memberValue = targetMember.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+          memberValue = memberValue.Replace($"{targetName}.", string.Empty, StringComparison.CurrentCulture);
+          switch (targetMember.Kind)
+          {
+            case SymbolKind.Property:
+              var prop = targetMember as IPropertySymbol;
+              var accessorList = new List<string>();
+              if (prop.SetMethod != null){
+                accessorList.Add("set;");
+              }
+              if (prop.GetMethod != null)
+              {
+                accessorList.Add("get;");
+              }
+              if(memberValue.Any())
+              {
+                memberValue += "{";
+                foreach(var accessor in accessorList)
+                {
+                  memberValue += accessor;
+                }
+                memberValue += "}";
+              }
+
+              BaseProperties.Add(memberValue);
+              break;
+            case SymbolKind.Method:
+              BaseMethods.Add(memberValue);
+              break;
+          }
+        }
+      }
+
     }
 
     #region 基本インターフェース実装：メソッド

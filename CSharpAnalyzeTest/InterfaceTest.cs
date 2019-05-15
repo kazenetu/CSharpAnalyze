@@ -537,6 +537,49 @@ namespace CSharpAnalyzeTest
         memberCount++;
       }
 
+      // 参考情報：継承元のメソッドを確認
+      foreach (var baseMethod in targetInstance.BaseMethods)
+      {
+        // 予想リストから同じ名前のメソッドを取得する
+        var expectedMethods = expectedList.Where(item => baseMethod.StartsWith($"{item.methodTypes} {item.methodName}(", StringComparison.CurrentCulture));
+        if (!expectedMethods.Any()) continue;
+
+        foreach (var expectedMethod in expectedMethods)
+        {
+          var expectedResult = new StringBuilder();
+          expectedResult.Append($"{expectedMethod.methodTypes} {expectedMethod.methodName}(");
+
+          // パラメータ取得
+          var expectedArgs = expectedMethod.expectedArgs;
+
+          // 文字列にパラメータを追加
+          var isFirst = true;
+          foreach (var (name, expressions, refType, defaultValue) in expectedArgs)
+          {
+            if (!isFirst)
+            {
+              expectedResult.Append(", ");
+            }
+            expectedResult.Append($"{expressions} {name}");
+
+            // デフォルト値がある場合は設定
+            if (!string.IsNullOrEmpty(defaultValue))
+            {
+              expectedResult.Append($" = {defaultValue}");
+            }
+
+            isFirst = false;
+          }
+          expectedResult.Append(")");
+
+          // 参考情報と一致確認
+          if (expectedResult.ToString() == baseMethod)
+          {
+            memberCount++;
+          }
+        }
+      }
+
       return memberCount;
     }
 
@@ -591,6 +634,41 @@ namespace CSharpAnalyzeTest
         memberCount++;
       }
 
+      // 参考情報：継承元のメソッドを確認
+      foreach (var baseProperty in targetInstance.BaseProperties)
+      {
+        // 予想リストから同じ名前のメソッドを取得する
+        var targetProperties = expectedList.Where(item => baseProperty.StartsWith($"{item.type} {item.name}", StringComparison.CurrentCulture));
+        if (!targetProperties.Any()) continue;
+
+        foreach (var expectedProperty in targetProperties)
+        {
+          var expectedResult = new StringBuilder();
+          expectedResult.Append($"{expectedProperty.type} {expectedProperty.name}");
+
+          if (expectedProperty.accessors.Any())
+          {
+            expectedResult.Append("{");
+            // 文字列にアクセサを追加
+            foreach (var expectedItem in expectedProperty.accessors)
+            {
+              expectedResult.Append($"{expectedItem.Key};");
+            }
+            expectedResult.Append("}");
+          }
+          else
+          {
+            // アクセサがない場合はセミコロンを追加
+            expectedResult.Append(";");
+          }
+
+          // 参考情報と一致確認
+          if (expectedResult.ToString() == baseProperty)
+          {
+            memberCount++;
+          }
+        }
+      }
       return memberCount;
     }
   }

@@ -13,6 +13,11 @@ namespace CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems
     List<List<IExpression>> Interfaces { get; }
 
     /// <summary>
+    /// ジェネリックタイプリスト
+    /// </summary>
+    List<string> GenericTypes { get; }
+
+    /// <summary>
     /// 継承元のプロパティリスト
     /// </summary>
     /// <remarks>参考情報</remarks>

@@ -22,6 +22,11 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     public List<List<IExpression>> Interfaces { get; } = new List<List<IExpression>>();
 
     /// <summary>
+    /// ジェネリックタイプリスト
+    /// </summary>
+    public List<string> GenericTypes { get; } = new List<string>();
+
+    /// <summary>
     /// 継承元のプロパティリスト
     /// </summary>
     /// <remarks>参考情報</remarks>
@@ -94,6 +99,13 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
 
           return result;
         }
+      }
+
+      // ジェネリックタイプ
+      if (declaredSymbol.TypeParameters.Any())
+      {
+        var types = declaredSymbol.TypeParameters.Select(item => item.Name);
+        GenericTypes.AddRange(types);
       }
 
       // メンバ

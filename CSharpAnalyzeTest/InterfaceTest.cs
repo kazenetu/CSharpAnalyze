@@ -24,6 +24,7 @@ namespace CSharpAnalyzeTest
       MultiInterface,
       AnyInterface,
       SubInterfaceMethodOverLoad,
+      GenericInterface,
     }
 
     /// <summary>
@@ -104,6 +105,14 @@ namespace CSharpAnalyzeTest
           source.AppendLine("  void TestMethod(decimal decimalValue);");
           source.AppendLine("}");
           break;
+
+        case CreatePattern.GenericInterface:
+          filePath = "GenericInterface.cs";
+
+          source.AppendLine("public interface Inf<T,U> ");
+          source.AppendLine("{");
+          source.AppendLine("}");
+          break;
       }
 
       return new FileData(filePath, usingList.ToString(), source.ToString());
@@ -138,6 +147,9 @@ namespace CSharpAnalyzeTest
         // インターフェースの継承確認
         var target = targets.First();
         Assert.Empty(target.Interfaces);
+
+        // ジェネリクスの確認
+        Assert.Empty(target.GenericTypes);
 
         // インターフェースのメンバ確認
         var expectedMethodList = new List<(string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>();
@@ -174,6 +186,9 @@ namespace CSharpAnalyzeTest
         // インターフェースの継承確認
         var target = targets.First();
         Assert.Empty(target.Interfaces);
+
+        // ジェネリクスの確認
+        Assert.Empty(target.GenericTypes);
 
         // インターフェースのメンバ確認
         var expectedMethodList = new List<(string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>
@@ -223,6 +238,9 @@ namespace CSharpAnalyzeTest
         // インターフェースの継承確認
         var target = targets.First();
         Assert.Empty(target.Interfaces);
+
+        // ジェネリクスの確認
+        Assert.Empty(target.GenericTypes);
 
         // インターフェースのメンバ確認
         var expectedMethodList = new List<(string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>
@@ -280,6 +298,8 @@ namespace CSharpAnalyzeTest
         Assert.Single(target.Interfaces);
         Assert.Equal("Inf", GetExpressionsToString(target.Interfaces.First()));
 
+        // ジェネリクスの確認
+        Assert.Empty(target.GenericTypes);
 
         // インターフェースのメンバ確認
         var expectedMethodList = new List<(string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>();
@@ -329,6 +349,9 @@ namespace CSharpAnalyzeTest
         };
         var actualInterfaceNames = target.Interfaces.Select(item => GetExpressionsToString(item));
         Assert.Equal(expectedInterfaceNames, actualInterfaceNames);
+
+        // ジェネリクスの確認
+        Assert.Empty(target.GenericTypes);
 
         // インターフェースのメンバ確認
         var expectedMethodList = new List<(string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>();
@@ -384,6 +407,9 @@ namespace CSharpAnalyzeTest
         var actualInterfaceNames = target.Interfaces.Select(item => GetExpressionsToString(item));
         Assert.Equal(expectedInterfaceNames.OrderBy(item => item), actualInterfaceNames.OrderBy(item => item));
 
+        // ジェネリクスの確認
+        Assert.Empty(target.GenericTypes);
+
         // インターフェースのメンバ確認
         var expectedMethodList = new List<(string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>();
         var expectedPropertyList = new List<(string name, string type, Dictionary<string, List<string>> accessors)>();
@@ -429,6 +455,9 @@ namespace CSharpAnalyzeTest
         var actualInterfaceNames = target.Interfaces.Select(item => GetExpressionsToString(item));
         Assert.Equal(expectedInterfaceNames.OrderBy(item => item), actualInterfaceNames.OrderBy(item => item));
 
+        // ジェネリクスの確認
+        Assert.Empty(target.GenericTypes);
+
         // インターフェースのメンバ確認
         var expectedMethodList = new List<(string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>
         {
@@ -451,6 +480,49 @@ namespace CSharpAnalyzeTest
             ("PropertyString", "string", new Dictionary<string, List<string>>() { { "set", new List<string>() }, { "get", new List<string>() } }),
             ("PropertydInt", "int", new Dictionary<string, List<string>>() { { "get", new List<string>() } }),
         };
+
+        var expectedCount = expectedMethodList.Count + expectedPropertyList.Count;
+        var actualCount = GetMemberCount(target, expectedMethodList) + GetMemberCount(target, expectedPropertyList);
+
+        Assert.Equal(expectedCount, actualCount);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// インタフェースのジェネリクステスト
+    /// </summary>
+    [Fact(DisplayName = "GenericInterface")]
+    public void GenericInterfaceTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.GenericInterface), (ev) =>
+      {
+        // ItemInterfaceインスタンスを取得
+        var targets = GetIItemInterfaces(ev, "GenericInterface.cs");
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 対象件数の確認
+        Assert.Single(targets);
+
+        // インターフェースの継承確認
+        var target = targets.First();
+        Assert.Empty(target.Interfaces);
+
+        // ジェネリクスの確認
+        var expectedGenericsList = new List<string>
+        {
+          "T","U"
+        };
+        Assert.Equal(expectedGenericsList.OrderBy(item => item), target.GenericTypes.OrderBy(item => item));
+
+        // インターフェースのメンバ確認
+        var expectedMethodList = new List<(string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>();
+        var expectedPropertyList = new List<(string name, string type, Dictionary<string, List<string>> accessors)>();
 
         var expectedCount = expectedMethodList.Count + expectedPropertyList.Count;
         var actualCount = GetMemberCount(target, expectedMethodList) + GetMemberCount(target, expectedPropertyList);

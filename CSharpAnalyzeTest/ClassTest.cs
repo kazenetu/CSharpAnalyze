@@ -2,6 +2,7 @@
 using CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems;
 using CSharpAnalyzeTest.Common;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Xunit;
@@ -21,7 +22,8 @@ namespace CSharpAnalyzeTest
       InnerClass,
       AbstractClass,
       GenericClass,
-      SubAndInterface
+      SubAndInterface,
+      SubClassMemberOverLoad,
     }
 
     /// <summary>
@@ -97,6 +99,22 @@ namespace CSharpAnalyzeTest
 
           source.AppendLine("public class SubClass : SuperClass,Inf");
           source.AppendLine("{");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.SubClassMemberOverLoad:
+          filePath = "SubClassMemberOverLoad.cs";
+
+          source.AppendLine("public class SuperClass ");
+          source.AppendLine("{");
+          source.AppendLine("  public int PropPublic{set;get;}");
+          source.AppendLine("  protected int PropProtected{get;}");
+          source.AppendLine("  private int PropPrivate{set;}");
+          source.AppendLine("}");
+
+          source.AppendLine("public class SubClass : SuperClass");
+          source.AppendLine("{");
+          source.AppendLine("  private int PropSubPrivate{set;}");
           source.AppendLine("}");
           break;
       }
@@ -444,5 +462,299 @@ namespace CSharpAnalyzeTest
       CSAnalyze.Analyze(string.Empty, Files);
     }
 
+    /// <summary>
+    /// スーパークラスのメンバ―のテスト
+    /// </summary>
+    [Fact(DisplayName = "SubClassMemberOverLoad")]
+    public void SubClassMemberOverLoadTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.SubClassMemberOverLoad), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "SubClassMemberOverLoad.cs", 1);
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 解析結果の件数確認
+        Assert.True(ev.FileRoot.Members.Count == 2);
+
+        //ジェネリックの確認
+        Assert.Empty(itemClass.GenericTypes);
+
+        // スーパークラスの設定確認
+        Assert.Single(itemClass.SuperClass);
+        Assert.Equal("SuperClass", GetExpressionsToString(itemClass.SuperClass));
+
+        // インターフェースの設定確認
+        Assert.Empty(itemClass.Interfaces);
+
+        // 親の存在確認
+        Assert.Null(itemClass.Parent);
+
+        // クラス名の確認
+        Assert.Equal("SubClass", itemClass.Name);
+
+        // スコープ修飾子の件数確認
+        Assert.Single(itemClass.Modifiers);
+
+        // スコープ修飾子の内容確認
+        Assert.Contains("public", itemClass.Modifiers);
+
+        // ItemTypeの確認
+        Assert.Equal(ItemTypes.Class, itemClass.ItemType);
+
+        // クラス内の要素の存在確認
+        var expectedMethodList = new List<(List<string> modifiers, string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>
+        {
+          //("TestMethod","void",
+          //  new List<(string name, string expressions, string refType, string defaultValue)>
+          //  {
+          //    ( "integer","int","","10"),
+          //    ( "str","string","","\"ABC\""),
+          //  }
+          //),
+          //("TestMethod","void",
+          //  new List<(string name, string expressions, string refType, string defaultValue)>
+          //  {
+          //    ( "decimalValue","decimal","",""),
+          //  }
+          //),
+        };
+        var expectedPropertyList = new List<(List<string> modifiers, string name, string type, Dictionary<string, List<string>> accessors, bool isInit, List<string> init)>
+        {
+            (new List<string>{"public" },"PropPublic", "int", new Dictionary<string, List<string>>() { { "set", new List<string>() }, { "get", new List<string>() }}, false, null),
+            (new List<string>{"protected" },"PropProtected", "int", new Dictionary<string, List<string>>() { { "get", new List<string>() } }, true, new List<string>{ "1"}),
+            (new List<string>{"private" },"PropSubPrivate", "int", new Dictionary<string, List<string>>() { { "set", new List<string>() } }, false, null),
+        };
+
+        // 期待値数と一致要素数の確認
+        var expectedCount = expectedMethodList.Count + expectedPropertyList.Count;
+        var actualCount = GetMemberCount(itemClass, expectedMethodList) + GetMemberCount(itemClass, expectedPropertyList);
+        Assert.Equal(expectedCount, actualCount);
+
+        // 実際の要素数との一致確認
+        var actualMemberCount = itemClass.Members.Count + itemClass.BaseMethods.Count + itemClass.BaseProperties.Count;
+        Assert.Equal(expectedCount, actualMemberCount);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    #region メンバー数取得
+    /// <summary>
+    /// メンバー数を取得:メソッド用
+    /// </summary>
+    /// <param name="targetInstance">対象のインスタンス</param>
+    /// <param name="expectedList">メソッド名とパラメータの期待値</param>
+    /// <returns>条件が一致するメンバー数</returns>
+    private int GetMemberCount(IItemClass targetInstance, List<(List<string> modifiers, string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)> expectedList)
+    {
+      var memberCount = 0;
+      foreach (var member in targetInstance.Members)
+      {
+        // 対象以外は次のmemberへ
+        if (!(member is IItemMethod memberMethod)) continue;
+
+        // 予想リストから同じ名前のメソッドを取得する
+        var expectedMethods = expectedList.Where(item => item.methodName == member.Name);
+        if (!expectedMethods.Any()) continue;
+
+        // 予想リスト結果から対象が存在するか確認する
+        foreach (var expectedMethod in expectedMethods)
+        {
+          // アクセス修飾子の確認
+          if (string.Join(" ", expectedMethod.modifiers.OrderBy(item=>item)) == string.Join(" ", memberMethod.Modifiers.OrderBy(item => item)))
+            continue;
+
+          // 型タイプの確認
+          if (expectedMethod.methodTypes != GetExpressionsToString(memberMethod.MethodTypes))
+            continue;
+
+          // パラメータ取得
+          var expectedArgs = expectedMethod.expectedArgs;
+
+          // パラメータ数の確認
+          if (expectedArgs.Count != memberMethod.Args.Count) continue;
+
+          // パラメータの確認
+          var argCount = 0;
+          foreach (var (name, expressions, refType, defaultValue) in expectedArgs)
+          {
+            var actualArgs = memberMethod.Args
+                            .Where(arg => arg.name == name)
+                            .Where(arg => GetExpressionsToString(arg.expressions) == expressions)
+                            .Where(arg => string.Concat(arg.modifiers) == refType)
+                            .Where(arg => GetExpressionsToString(arg.defaultValues) == defaultValue);
+            if (actualArgs.Any())
+            {
+              argCount++;
+            }
+          }
+
+          // 一致パラメータ数の確認
+          Assert.Equal(expectedArgs.Count, argCount);
+        }
+
+        memberCount++;
+      }
+
+      // 参考情報：継承元のメソッドを確認
+      foreach (var baseMethod in targetInstance.BaseMethods)
+      {
+        // 予想リストから同じ名前のメソッドを取得する
+        var expectedMethods = expectedList.Where(item => baseMethod.StartsWith($"{string.Join(" ", item.modifiers)} {item.methodTypes} {item.methodName}(", StringComparison.CurrentCulture));
+        if (!expectedMethods.Any()) continue;
+
+        foreach (var expectedMethod in expectedMethods)
+        {
+          var expectedResult = new StringBuilder();
+          expectedResult.Append($"{string.Join(" ", expectedMethod.modifiers)} {expectedMethod.methodTypes} {expectedMethod.methodName}(");
+
+          // パラメータ取得
+          var expectedArgs = expectedMethod.expectedArgs;
+
+          // 文字列にパラメータを追加
+          var isFirst = true;
+          foreach (var (name, expressions, refType, defaultValue) in expectedArgs)
+          {
+            if (!isFirst)
+            {
+              expectedResult.Append(", ");
+            }
+            expectedResult.Append($"{expressions} {name}");
+
+            // デフォルト値がある場合は設定
+            if (!string.IsNullOrEmpty(defaultValue))
+            {
+              expectedResult.Append($" = {defaultValue}");
+            }
+
+            isFirst = false;
+          }
+          expectedResult.Append(")");
+
+          // 参考情報と一致確認
+          if (expectedResult.ToString() == baseMethod)
+          {
+            memberCount++;
+          }
+        }
+      }
+
+      return memberCount;
+    }
+
+    /// <summary>
+    /// メンバー数を取得：プロパティ
+    /// </summary>
+    /// <param name="targetInstance">対象のインスタンス</param>
+    /// <param name="expectedList">予想値リスト</param>
+    /// <returns>条件が一致するメンバー数</returns>
+    private int GetMemberCount(IItemClass itemClass, List<(List<string> modifiers, string name, string type, Dictionary<string, List<string>> accessors, bool isInit, List<string> init)> expectedList)
+    {
+      var memberCount = 0;
+      foreach (var member in itemClass.Members)
+      {
+        // 対象以外は次のmemberへ
+        if (!(member is IItemProperty memberProperty)) continue;
+
+        // 型の一致確認
+        var targetProperties = expectedList.Where(field => field.name == memberProperty.Name && field.type == GetExpressionsToString(memberProperty.PropertyTypes));
+        if (!targetProperties.Any()) continue;
+
+        // 条件取得
+        var (modifiers, name, type, accessors, isInit, init) = targetProperties.First();
+
+        // アクセサの一致確認
+        var accessorCount = 0;
+        foreach (var expectedItem in accessors)
+        {
+          // 対象のアクセサの存在確認
+          var targets = memberProperty.AccessorList.Where(accessor => accessor.Name == expectedItem.Key);
+          Assert.Single(targets);
+
+          // 対象を取得
+          var target = targets.First();
+
+          // コード数の一致確認
+          Assert.Equal(expectedItem.Value.Count, target.Members.Count);
+
+          // コードの確認
+          var accessorMemberCount = 0;
+          foreach (var expectedMember in expectedItem.Value)
+          {
+            Assert.Equal(expectedMember, target.Members[accessorMemberCount].ToString());
+            accessorMemberCount++;
+          }
+
+          accessorCount++;
+        }
+        // 確認済アクセサ数の一致確認
+        Assert.Equal(accessorCount, memberProperty.AccessorList.Count);
+
+        // アクセス修飾子の確認
+        Assert.Equal(modifiers, memberProperty.Modifiers);
+
+        // 初期値が設定されている
+        if (isInit)
+        {
+          // 初期値の数が一致しない場合は次のmemberへ
+          if (memberProperty.DefaultValues.Count != init.Count) continue;
+
+          // 初期値のコレクションと条件のコレクションの一致確認
+          var defaultValues = memberProperty.DefaultValues.Select(value => value.Name).ToList();
+          Assert.Equal(init, defaultValues);
+        }
+        else
+        {
+          Assert.Empty(memberProperty.DefaultValues);
+        }
+
+        memberCount++;
+      }
+
+      // 参考情報：継承元を確認
+      foreach (var baseProperty in itemClass.BaseProperties)
+      {
+        // 予想リストから同じ名前のプロパティを取得する
+        var targetProperties = expectedList.Where(item => baseProperty.StartsWith($"{string.Join(" " ,item.modifiers)} {item.type} {item.name}", StringComparison.CurrentCulture));
+        if (!targetProperties.Any()) continue;
+
+        foreach (var expectedProperty in targetProperties)
+        {
+          var expectedResult = new StringBuilder();
+          expectedResult.Append($"{string.Join(" ", expectedProperty.modifiers)} {expectedProperty.type} {expectedProperty.name}");
+
+          if (expectedProperty.accessors.Any())
+          {
+            expectedResult.Append("{");
+            // 文字列にアクセサを追加
+            foreach (var expectedItem in expectedProperty.accessors)
+            {
+              expectedResult.Append($"{expectedItem.Key};");
+            }
+            expectedResult.Append("}");
+          }
+          else
+          {
+            // アクセサがない場合はセミコロンを追加
+            expectedResult.Append(";");
+          }
+
+          // 参考情報と一致確認
+          if (expectedResult.ToString() == baseProperty)
+          {
+            memberCount++;
+          }
+        }
+      }
+
+      return memberCount;
+    }
+
+    #endregion 
   }
 }

@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -167,6 +168,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
 
           var memberValue = targetMember.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
           memberValue = memberValue.Replace($"{targetName}.", string.Empty, StringComparison.CurrentCulture);
+          memberValue = $"{targetMember.DeclaredAccessibility} ".ToLower(CultureInfo.CurrentCulture) + memberValue;
           switch (targetMember.Kind)
           {
             case SymbolKind.Property:

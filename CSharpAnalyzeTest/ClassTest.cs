@@ -110,11 +110,16 @@ namespace CSharpAnalyzeTest
           source.AppendLine("  public int PropPublic{set;get;}");
           source.AppendLine("  protected int PropProtected{get;}");
           source.AppendLine("  private int PropPrivate{set;}");
+
+          source.AppendLine("  public void MethodPublic(){}");
+          source.AppendLine("  protected void MethodProtected(){}");
+          source.AppendLine("  private void MethodPrivate(){}");
           source.AppendLine("}");
 
           source.AppendLine("public class SubClass : SuperClass");
           source.AppendLine("{");
           source.AppendLine("  private int PropSubPrivate{set;}");
+          source.AppendLine("  private void MethodSubPrivate(){}");
           source.AppendLine("}");
           break;
       }
@@ -508,24 +513,34 @@ namespace CSharpAnalyzeTest
         // クラス内の要素の存在確認
         var expectedMethodList = new List<(List<string> modifiers, string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>
         {
-          //("TestMethod","void",
+          (new List<string>{"public" }, "MethodPublic","void",
+            new List<(string name, string expressions, string refType, string defaultValue)>
+            {
+            }
+          ),
+          (new List<string>{"protected" }, "MethodProtected","void",
+            new List<(string name, string expressions, string refType, string defaultValue)>
+            {
+            }
+          ),
+          // スーパークラスのprivateスコープは継承対象外
+          //(new List<string>{"private" }, "MethodPrivate","void",
           //  new List<(string name, string expressions, string refType, string defaultValue)>
           //  {
-          //    ( "integer","int","","10"),
-          //    ( "str","string","","\"ABC\""),
           //  }
           //),
-          //("TestMethod","void",
-          //  new List<(string name, string expressions, string refType, string defaultValue)>
-          //  {
-          //    ( "decimalValue","decimal","",""),
-          //  }
-          //),
+          (new List<string>{"private" }, "MethodSubPrivate","void",
+            new List<(string name, string expressions, string refType, string defaultValue)>
+            {
+            }
+          ),
         };
         var expectedPropertyList = new List<(List<string> modifiers, string name, string type, Dictionary<string, List<string>> accessors, bool isInit, List<string> init)>
         {
             (new List<string>{"public" },"PropPublic", "int", new Dictionary<string, List<string>>() { { "set", new List<string>() }, { "get", new List<string>() }}, false, null),
             (new List<string>{"protected" },"PropProtected", "int", new Dictionary<string, List<string>>() { { "get", new List<string>() } }, true, new List<string>{ "1"}),
+            // スーパークラスのprivateスコープは継承対象外
+            //(new List<string>{"private " },"PropPrivate", "int", new Dictionary<string, List<string>>() { { "set", new List<string>() } }, false, null),
             (new List<string>{"private" },"PropSubPrivate", "int", new Dictionary<string, List<string>>() { { "set", new List<string>() } }, false, null),
         };
 

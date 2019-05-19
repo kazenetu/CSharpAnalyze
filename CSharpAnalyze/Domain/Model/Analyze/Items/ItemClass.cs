@@ -32,6 +32,18 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     public List<string> GenericTypes { get; } = new List<string>();
 
     /// <summary>
+    /// 継承元のプロパティリスト
+    /// </summary>
+    /// <remarks>参考情報</remarks>
+    public List<string> BaseProperties { get; } = new List<string>();
+
+    /// <summary>
+    /// 継承元のメソッドリスト
+    /// </summary>
+    /// <remarks>参考情報</remarks>
+    public List<string> BaseMethods { get; } = new List<string>();
+
+    /// <summary>
     /// コンストラクタ
     /// </summary>
     /// <param name="node">対象Node</param>
@@ -50,8 +62,11 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         // スーパークラス
         SuperClass.AddRange(getExpressionList(declaredClass.BaseType));
 
+        // スーパークラスのメンバーを追加する
+        SetBaseMembers(declaredClass.BaseType);
+
         // インターフェース
-        foreach(var interfaceInfo in declaredClass.AllInterfaces)
+        foreach (var interfaceInfo in declaredClass.AllInterfaces)
         {
           Interfaces.Add(getExpressionList(interfaceInfo));
         }
@@ -111,6 +126,78 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         }
       }
 
+    }
+
+    /// <summary>
+    /// 継承元のメンバーを追加する
+    /// </summary>
+    /// <param name="target">インスタンス</param>
+    private void SetBaseMembers(INamedTypeSymbol target)
+    {
+      // ソースファイル以外はそのまま終了
+      if (!string.IsNullOrEmpty(target.ContainingAssembly.MetadataName))
+      {
+        return;
+      }
+
+      var targetName = target.Name;
+
+      // スーパークラスからメンバを追加
+      if(target.BaseType != null)
+      {
+        SetBaseMembers(target.BaseType);
+      }
+
+      // メンバを追加
+      foreach (var memberName in target.MemberNames)
+      {
+        var targetMembers = target.GetMembers(memberName);
+        if (!targetMembers.Any())
+        {
+          continue;
+        }
+
+        foreach (var targetMember in targetMembers)
+        {
+          // privateスコープは継承対象外
+          if (targetMember.DeclaredAccessibility == Accessibility.Private)
+          {
+            continue;
+          }
+
+          var memberValue = targetMember.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+          memberValue = memberValue.Replace($"{targetName}.", string.Empty, StringComparison.CurrentCulture);
+          switch (targetMember.Kind)
+          {
+            case SymbolKind.Property:
+              var prop = targetMember as IPropertySymbol;
+              var accessorList = new List<string>();
+              if (prop.SetMethod != null)
+              {
+                accessorList.Add("set;");
+              }
+              if (prop.GetMethod != null)
+              {
+                accessorList.Add("get;");
+              }
+              if (memberValue.Any())
+              {
+                memberValue += "{";
+                foreach (var accessor in accessorList)
+                {
+                  memberValue += accessor;
+                }
+                memberValue += "}";
+              }
+
+              BaseProperties.Add(memberValue);
+              break;
+            case SymbolKind.Method:
+              BaseMethods.Add(memberValue);
+              break;
+          }
+        }
+      }
     }
 
     #region 基本インターフェース実装：メソッド

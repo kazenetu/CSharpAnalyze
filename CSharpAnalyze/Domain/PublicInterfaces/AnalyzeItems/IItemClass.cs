@@ -23,6 +23,12 @@ namespace CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems
     List<string> GenericTypes { get; }
 
     /// <summary>
+    /// 継承元のフィールドリスト
+    /// </summary>
+    /// <remarks>参考情報</remarks>
+    List<string> BaseFields { get; }
+
+    /// <summary>
     /// 継承元のプロパティリスト
     /// </summary>
     /// <remarks>参考情報</remarks>

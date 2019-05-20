@@ -33,6 +33,12 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     public List<string> GenericTypes { get; } = new List<string>();
 
     /// <summary>
+    /// 継承元のフィールドリスト
+    /// </summary>
+    /// <remarks>参考情報</remarks>
+    public List<string> BaseFields { get; } = new List<string>();
+
+    /// <summary>
     /// 継承元のプロパティリスト
     /// </summary>
     /// <remarks>参考情報</remarks>
@@ -171,6 +177,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
           memberValue = $"{targetMember.DeclaredAccessibility} ".ToLower(CultureInfo.CurrentCulture) + memberValue;
           switch (targetMember.Kind)
           {
+            case SymbolKind.Field:
+              BaseFields.Add($"{memberValue};");
+              break;
             case SymbolKind.Property:
               var prop = targetMember as IPropertySymbol;
               var accessorList = new List<string>();

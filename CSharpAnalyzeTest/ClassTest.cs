@@ -107,6 +107,10 @@ namespace CSharpAnalyzeTest
 
           source.AppendLine("public class SuperClass ");
           source.AppendLine("{");
+          source.AppendLine("  public int FieldPublic;");
+          source.AppendLine("  protected int FieldProtected;");
+          source.AppendLine("  private int FieldPrivate;");
+
           source.AppendLine("  public int PropPublic{set;get;}");
           source.AppendLine("  protected int PropProtected{get;}");
           source.AppendLine("  private int PropPrivate{set;}");
@@ -118,6 +122,7 @@ namespace CSharpAnalyzeTest
 
           source.AppendLine("public class SubClass : SuperClass");
           source.AppendLine("{");
+          source.AppendLine("  private int FieldSubPrivate;");
           source.AppendLine("  private int PropSubPrivate{set;}");
           source.AppendLine("  private void MethodSubPrivate(){}");
           source.AppendLine("}");
@@ -543,14 +548,22 @@ namespace CSharpAnalyzeTest
             //(new List<string>{"private " },"PropPrivate", "int", new Dictionary<string, List<string>>() { { "set", new List<string>() } }, false, null),
             (new List<string>{"private" },"PropSubPrivate", "int", new Dictionary<string, List<string>>() { { "set", new List<string>() } }, false, null),
         };
+        var expectedFieldList = new List<(List<string> modifiers, string name, string type, bool isInit, List<string> init)>
+        {
+          (new List<string>() { "public" }, "FieldPublic", "int", false, null),
+          (new List<string>() { "protected" }, "FieldProtected", "int", false, null),
+          // スーパークラスのprivateスコープは継承対象外
+          //(new List<string>() { "private" }, "FieldPrivate", "int", false, null),
+          (new List<string>() { "private" }, "FieldSubPrivate", "int", false, null),
+        };
 
         // 期待値数と一致要素数の確認
-        var expectedCount = expectedMethodList.Count + expectedPropertyList.Count;
-        var actualCount = GetMemberCount(itemClass, expectedMethodList) + GetMemberCount(itemClass, expectedPropertyList);
+        var expectedCount = expectedMethodList.Count + expectedPropertyList.Count+ expectedFieldList.Count;
+        var actualCount = GetMemberCount(itemClass, expectedMethodList) + GetMemberCount(itemClass, expectedPropertyList) + GetMemberCount(itemClass, expectedFieldList);
         Assert.Equal(expectedCount, actualCount);
 
         // 実際の要素数との一致確認
-        var actualMemberCount = itemClass.Members.Count + itemClass.BaseMethods.Count + itemClass.BaseProperties.Count;
+        var actualMemberCount = itemClass.Members.Count + itemClass.BaseMethods.Count + itemClass.BaseProperties.Count + itemClass.BaseFields.Count;
         Assert.Equal(expectedCount, actualMemberCount);
       });
 
@@ -761,6 +774,71 @@ namespace CSharpAnalyzeTest
 
           // 参考情報と一致確認
           if (expectedResult.ToString() == baseProperty)
+          {
+            memberCount++;
+          }
+        }
+      }
+
+      return memberCount;
+    }
+
+    /// <summary>
+    /// メンバー数を取得：フィールド
+    /// </summary>
+    /// <param name="itemClass">対象のアイテムクラス</param>
+    /// <param name="expectedList">予想値リスト</param>
+    /// <returns>条件が一致するメンバー数</returns>
+    private int GetMemberCount(IItemClass itemClass, List<(List<string> modifiers, string name, string type, bool isInit, List<string> init)> expectedList)
+    {
+      var memberCount = 0;
+      foreach (var member in itemClass.Members)
+      {
+        // フィールド以外は次のmemberへ
+        if (!(member is IItemField memberField)) continue;
+
+        // 型の一致確認
+        var targetFileds = expectedList.Where(field => field.name == memberField.Name && field.type == GetExpressionsToString(memberField.FieldTypes));
+        if (!targetFileds.Any()) continue;
+
+        // 条件取得
+        var (modifiers, name, type, isInit, init) = targetFileds.First();
+
+        // アクセス修飾子の確認
+        Assert.Equal(modifiers, memberField.Modifiers);
+
+        // 初期値が設定されている
+        if (isInit)
+        {
+          // 初期値の数が一致しない場合は次のmemberへ
+          if (memberField.DefaultValues.Count != init.Count) continue;
+
+          // 初期値のコレクションと条件のコレクションの一致確認
+          var defaultValues = memberField.DefaultValues.Select(value => value.Name).ToList();
+          Assert.Equal(init, defaultValues);
+        }
+        else
+        {
+          Assert.Empty(memberField.DefaultValues);
+        }
+
+        memberCount++;
+      }
+
+      // 参考情報：継承元を確認
+      foreach (var baseField in itemClass.BaseFields)
+      {
+        // 予想リストから同じ名前のプロパティを取得する
+        var targetFilds = expectedList.Where(item => baseField.StartsWith($"{string.Join(" ", item.modifiers)} {item.type} {item.name}", StringComparison.CurrentCulture));
+        if (!targetFilds.Any()) continue;
+
+        foreach (var expectedField in targetFilds)
+        {
+          var expectedResult = new StringBuilder();
+          expectedResult.Append($"{string.Join(" ", expectedField.modifiers)} {expectedField.type} {expectedField.name};");
+
+          // 参考情報と一致確認
+          if (expectedResult.ToString() == baseField)
           {
             memberCount++;
           }

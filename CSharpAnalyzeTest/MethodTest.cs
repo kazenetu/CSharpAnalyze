@@ -197,7 +197,10 @@ namespace CSharpAnalyzeTest
           ( "f","float","",""),
           ( "d","decimal","",""),
         };
+        // 期待値数と一致要素数の確認
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedModifiers, expectedArgs));
+        // 実際の要素数との一致確認
+        Assert.Equal(expectedArgs.Count, targetInstance.Args.Count);
 
         // 内部処理の確認
         Assert.Empty(targetInstance.Members);
@@ -242,7 +245,10 @@ namespace CSharpAnalyzeTest
         {
           ( "instance","Standard","",""),
         };
+        // 期待値数と一致要素数の確認
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedModifiers, expectedArgs));
+        // 実際の要素数との一致確認
+        Assert.Equal(expectedArgs.Count, targetInstance.Args.Count);
 
         // 内部処理の確認
         Assert.Empty(targetInstance.Members);
@@ -285,7 +291,10 @@ namespace CSharpAnalyzeTest
         {
           ( "list","List<string>","",""),
         };
+        // 期待値数と一致要素数の確認
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedModifiers, expectedArgs));
+        // 実際の要素数との一致確認
+        Assert.Equal(expectedArgs.Count, targetInstance.Args.Count);
 
         // 内部処理の確認
         Assert.Empty(targetInstance.Members);
@@ -341,7 +350,10 @@ namespace CSharpAnalyzeTest
           // パラメータの確認
           var expectedModifiers = expectedModifiersList[expectedIndex];
           var expectedArgs = expectedArgsList[expectedIndex];
+          // 期待値数と一致要素数の確認
           Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedModifiers, expectedArgs));
+          // 実際の要素数との一致確認
+          Assert.Equal(expectedArgs.Count, targetInstance.Args.Count);
 
           // 内部処理の確認
           Assert.Empty(targetInstance.Members);
@@ -384,7 +396,10 @@ namespace CSharpAnalyzeTest
           ( "str","string","in",""),
           ( "output","decimal","out",""),
         };
+        // 期待値数と一致要素数の確認
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedModifiers, expectedArgs));
+        // 実際の要素数との一致確認
+        Assert.Equal(expectedArgs.Count, targetInstance.Args.Count);
 
         // 内部処理の確認
         Assert.Empty(targetInstance.Members);
@@ -423,7 +438,10 @@ namespace CSharpAnalyzeTest
           ( "integer","int","","10"),
           ( "str","string","","\"ABC\""),
         };
+        // 期待値数と一致要素数の確認
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedModifiers, expectedArgs));
+        // 実際の要素数との一致確認
+        Assert.Equal(expectedArgs.Count, targetInstance.Args.Count);
 
         // 内部処理の確認
         Assert.Empty(targetInstance.Members);
@@ -458,7 +476,10 @@ namespace CSharpAnalyzeTest
         // パラメータの確認
         var expectedModifiers = new List<string>() { "public" };
         var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>();
+        // 期待値数と一致要素数の確認
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedModifiers, expectedArgs));
+        // 実際の要素数との一致確認
+        Assert.Equal(expectedArgs.Count, targetInstance.Args.Count);
 
         // 内部処理の確認
         Assert.Single(targetInstance.Members);
@@ -493,7 +514,10 @@ namespace CSharpAnalyzeTest
         // パラメータの確認
         var expectedModifiers = new List<string>() { "public" };
         var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>();
+        // 期待値数と一致要素数の確認
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedModifiers, expectedArgs));
+        // 実際の要素数との一致確認
+        Assert.Equal(expectedArgs.Count, targetInstance.Args.Count);
 
         // 内部処理の確認
         Assert.Single(targetInstance.Members);
@@ -528,7 +552,10 @@ namespace CSharpAnalyzeTest
         // パラメータの確認
         var expectedModifiers = new List<string>() { "public" };
         var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>();
+        // 期待値数と一致要素数の確認
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedModifiers, expectedArgs));
+        // 実際の要素数との一致確認
+        Assert.Equal(expectedArgs.Count, targetInstance.Args.Count);
 
         // 内部処理の確認
         Assert.Single(targetInstance.Members);

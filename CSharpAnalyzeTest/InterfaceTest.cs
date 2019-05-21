@@ -155,10 +155,14 @@ namespace CSharpAnalyzeTest
         var expectedMethodList = new List<(string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>();
         var expectedPropertyList = new List<(string name, string type, Dictionary<string, List<string>> accessors)>();
 
+        // 期待値数と一致要素数の確認
         var expectedCount = expectedMethodList.Count + expectedPropertyList.Count;
         var actualCount = GetMemberCount(target, expectedMethodList) + GetMemberCount(target, expectedPropertyList);
-
         Assert.Equal(expectedCount, actualCount);
+
+        // 実際の要素数との一致確認
+        var actualMemberCount = target.Members.Count + target.BaseMethods.Count + target.BaseProperties.Count;
+        Assert.Equal(expectedCount, actualMemberCount);
       });
 
       // 解析実行
@@ -207,10 +211,14 @@ namespace CSharpAnalyzeTest
             ("PropertydInt", "int", new Dictionary<string, List<string>>() { { "get", new List<string>() } }),
         };
 
+        // 期待値数と一致要素数の確認
         var expectedCount = expectedMethodList.Count + expectedPropertyList.Count;
         var actualCount = GetMemberCount(target, expectedMethodList) + GetMemberCount(target, expectedPropertyList);
-
         Assert.Equal(expectedCount, actualCount);
+
+        // 実際の要素数との一致確認
+        var actualMemberCount = target.Members.Count + target.BaseMethods.Count + target.BaseProperties.Count;
+        Assert.Equal(expectedCount, actualMemberCount);
       });
 
       // 解析実行
@@ -261,10 +269,14 @@ namespace CSharpAnalyzeTest
         };
         var expectedPropertyList = new List<(string name, string type, Dictionary<string, List<string>> accessors)>();
 
+        // 期待値数と一致要素数の確認
         var expectedCount = expectedMethodList.Count + expectedPropertyList.Count;
         var actualCount = GetMemberCount(target, expectedMethodList) + GetMemberCount(target, expectedPropertyList);
-
         Assert.Equal(expectedCount, actualCount);
+
+        // 実際の要素数との一致確認
+        var actualMemberCount = target.Members.Count + target.BaseMethods.Count + target.BaseProperties.Count;
+        Assert.Equal(expectedCount, actualMemberCount);
       });
 
       // 解析実行
@@ -305,10 +317,14 @@ namespace CSharpAnalyzeTest
         var expectedMethodList = new List<(string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>();
         var expectedPropertyList = new List<(string name, string type, Dictionary<string, List<string>> accessors)>();
 
+        // 期待値数と一致要素数の確認
         var expectedCount = expectedMethodList.Count + expectedPropertyList.Count;
         var actualCount = GetMemberCount(target, expectedMethodList) + GetMemberCount(target, expectedPropertyList);
-
         Assert.Equal(expectedCount, actualCount);
+
+        // 実際の要素数との一致確認
+        var actualMemberCount = target.Members.Count + target.BaseMethods.Count + target.BaseProperties.Count;
+        Assert.Equal(expectedCount, actualMemberCount);
       });
 
       // 解析実行
@@ -357,10 +373,14 @@ namespace CSharpAnalyzeTest
         var expectedMethodList = new List<(string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>();
         var expectedPropertyList = new List<(string name, string type, Dictionary<string, List<string>> accessors)>();
 
+        // 期待値数と一致要素数の確認
         var expectedCount = expectedMethodList.Count + expectedPropertyList.Count;
         var actualCount = GetMemberCount(target, expectedMethodList) + GetMemberCount(target, expectedPropertyList);
-
         Assert.Equal(expectedCount, actualCount);
+
+        // 実際の要素数との一致確認
+        var actualMemberCount = target.Members.Count + target.BaseMethods.Count + target.BaseProperties.Count;
+        Assert.Equal(expectedCount, actualMemberCount);
       });
 
       // 解析実行
@@ -414,10 +434,14 @@ namespace CSharpAnalyzeTest
         var expectedMethodList = new List<(string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>();
         var expectedPropertyList = new List<(string name, string type, Dictionary<string, List<string>> accessors)>();
 
+        // 期待値数と一致要素数の確認
         var expectedCount = expectedMethodList.Count + expectedPropertyList.Count;
         var actualCount = GetMemberCount(target, expectedMethodList) + GetMemberCount(target, expectedPropertyList);
-
         Assert.Equal(expectedCount, actualCount);
+
+        // 実際の要素数との一致確認
+        var actualMemberCount = target.Members.Count + target.BaseMethods.Count + target.BaseProperties.Count;
+        Assert.Equal(expectedCount, actualMemberCount);
       });
 
       // 解析実行
@@ -481,10 +505,14 @@ namespace CSharpAnalyzeTest
             ("PropertydInt", "int", new Dictionary<string, List<string>>() { { "get", new List<string>() } }),
         };
 
+        // 期待値数と一致要素数の確認
         var expectedCount = expectedMethodList.Count + expectedPropertyList.Count;
         var actualCount = GetMemberCount(target, expectedMethodList) + GetMemberCount(target, expectedPropertyList);
-
         Assert.Equal(expectedCount, actualCount);
+
+        // 実際の要素数との一致確認
+        var actualMemberCount = target.Members.Count + target.BaseMethods.Count + target.BaseProperties.Count;
+        Assert.Equal(expectedCount, actualMemberCount);
       });
 
       // 解析実行
@@ -524,10 +552,14 @@ namespace CSharpAnalyzeTest
         var expectedMethodList = new List<(string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>();
         var expectedPropertyList = new List<(string name, string type, Dictionary<string, List<string>> accessors)>();
 
+        // 期待値数と一致要素数の確認
         var expectedCount = expectedMethodList.Count + expectedPropertyList.Count;
         var actualCount = GetMemberCount(target, expectedMethodList) + GetMemberCount(target, expectedPropertyList);
-
         Assert.Equal(expectedCount, actualCount);
+
+        // 実際の要素数との一致確認
+        var actualMemberCount = target.Members.Count + target.BaseMethods.Count + target.BaseProperties.Count;
+        Assert.Equal(expectedCount, actualMemberCount);
       });
 
       // 解析実行

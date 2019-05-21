@@ -97,7 +97,10 @@ namespace CSharpAnalyzeTest
              (new List<string>() { "public" }, "FieldInt", "int", true, new List<string>() { "1" }),
              (new List<string>() { "private","const" }, "Const", "string", true, new List<string>() { "\"123\"" })
            };
+           // 期待値数と一致要素数の確認
            Assert.Equal(expectedList.Count, GetMemberCount(itemClass, expectedList));
+           // 実際の要素数との一致確認
+           Assert.Equal(expectedList.Count, itemClass.Members.Count);
          });
 
       // 解析実行
@@ -131,7 +134,10 @@ namespace CSharpAnalyzeTest
              (new List<string>() { "protected" }, "fieldClass2", "ClassTest", true, new List<string>() { "new", "ClassTest", "(", ")" }),
              (new List<string>() { "private", "static" }, "fieldClass3", "ClassTest", true, new List<string>() { "null" })
            };
-           Assert.Equal(expectedList.Count , GetMemberCount(itemClass, expectedList));
+           // 期待値数と一致要素数の確認
+           Assert.Equal(expectedList.Count, GetMemberCount(itemClass, expectedList));
+           // 実際の要素数との一致確認
+           Assert.Equal(expectedList.Count, itemClass.Members.Count);
          });
 
       // 解析実行
@@ -161,7 +167,10 @@ namespace CSharpAnalyzeTest
              (new List<string>() { "private" }, "field1", "List<string>", false, null),
              (new List<string>() { "private" }, "field2", "List<string>", true, new List<string>() { "new", "List","<","string",">", "(", ")" })
            };
-           Assert.Equal(expectedList.Count , GetMemberCount(itemClass, expectedList));
+           // 期待値数と一致要素数の確認
+           Assert.Equal(expectedList.Count, GetMemberCount(itemClass, expectedList));
+           // 実際の要素数との一致確認
+           Assert.Equal(expectedList.Count, itemClass.Members.Count);
          });
 
       // 解析実行

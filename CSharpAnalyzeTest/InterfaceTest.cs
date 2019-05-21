@@ -566,6 +566,7 @@ namespace CSharpAnalyzeTest
       CSAnalyze.Analyze(string.Empty, Files);
     }
 
+    #region ユーティリティメソッド
     /// <summary>
     /// インターフェースインスタンスの取得
     /// </summary>
@@ -588,6 +589,7 @@ namespace CSharpAnalyzeTest
       return targets.Select(item => item as IItemInterface).ToList();
     }
 
+    #region メンバー数取得
     /// <summary>
     /// メンバー数を取得:メソッド用
     /// </summary>
@@ -775,5 +777,8 @@ namespace CSharpAnalyzeTest
       }
       return memberCount;
     }
+    #endregion
+    #endregion
+
   }
 }

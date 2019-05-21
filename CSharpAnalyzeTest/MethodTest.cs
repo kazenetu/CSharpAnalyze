@@ -565,6 +565,7 @@ namespace CSharpAnalyzeTest
       CSAnalyze.Analyze(string.Empty, Files);
     }
 
+    #region ユーティリティメソッド
     /// <summary>
     /// 対象インスタンスの取得
     /// </summary>
@@ -607,6 +608,7 @@ namespace CSharpAnalyzeTest
       }
       return argCount;
     }
+    #endregion
 
   }
 }

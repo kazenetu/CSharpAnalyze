@@ -177,6 +177,7 @@ namespace CSharpAnalyzeTest
       CSAnalyze.Analyze(string.Empty, Files);
     }
 
+    #region ユーティリティメソッド
     /// <summary>
     /// メンバー数を取得
     /// </summary>
@@ -221,6 +222,7 @@ namespace CSharpAnalyzeTest
 
       return memberCount;
     }
+    #endregion
 
   }
 }

@@ -174,7 +174,18 @@ namespace CSharpAnalyzeTest
            Assert.Equal(ItemTypes.Class, itemClass.ItemType );
 
            // クラス内の要素の存在確認
-           Assert.Empty(itemClass.Members);
+           var expectedMethodList = new List<(List<string> modifiers, string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>();
+           var expectedPropertyList = new List<(List<string> modifiers, string name, string type, Dictionary<string, List<string>> accessors, bool isInit, List<string> init)>();
+           var expectedFieldList = new List<(List<string> modifiers, string name, string type, bool isInit, List<string> init)>();
+
+           // 期待値数と一致要素数の確認
+           var expectedCount = expectedMethodList.Count + expectedPropertyList.Count + expectedFieldList.Count;
+           var actualCount = GetMemberCount(itemClass, expectedMethodList) + GetMemberCount(itemClass, expectedPropertyList) + GetMemberCount(itemClass, expectedFieldList);
+           Assert.Equal(expectedCount, actualCount);
+
+           // 実際の要素数との一致確認
+           var actualMemberCount = itemClass.Members.Count + itemClass.BaseMethods.Count + itemClass.BaseProperties.Count + itemClass.BaseFields.Count;
+           Assert.Equal(expectedCount, actualMemberCount);
          });
 
       // 解析実行
@@ -227,7 +238,18 @@ namespace CSharpAnalyzeTest
            Assert.Equal(ItemTypes.Class, itemClass.ItemType);
 
            // クラス内の要素の存在確認
-           Assert.Empty(itemClass.Members);
+           var expectedMethodList = new List<(List<string> modifiers, string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>();
+           var expectedPropertyList = new List<(List<string> modifiers, string name, string type, Dictionary<string, List<string>> accessors, bool isInit, List<string> init)>();
+           var expectedFieldList = new List<(List<string> modifiers, string name, string type, bool isInit, List<string> init)>();
+
+           // 期待値数と一致要素数の確認
+           var expectedCount = expectedMethodList.Count + expectedPropertyList.Count + expectedFieldList.Count;
+           var actualCount = GetMemberCount(itemClass, expectedMethodList) + GetMemberCount(itemClass, expectedPropertyList) + GetMemberCount(itemClass, expectedFieldList);
+           Assert.Equal(expectedCount, actualCount);
+
+           // 実際の要素数との一致確認
+           var actualMemberCount = itemClass.Members.Count + itemClass.BaseMethods.Count + itemClass.BaseProperties.Count + itemClass.BaseFields.Count;
+           Assert.Equal(expectedCount, actualMemberCount);
          });
 
       // 解析実行
@@ -246,58 +268,82 @@ namespace CSharpAnalyzeTest
         // IItemClassインスタンスを取得
         var itemAbstractClass = GetClassInstance(ev, "AbstractClass.cs", 0);
 
-        // 外部参照の存在確認
-        Assert.Empty(ev.FileRoot.OtherFiles);
+        {
+          // 外部参照の存在確認
+          Assert.Empty(ev.FileRoot.OtherFiles);
 
-        //ジェネリックの確認
-        Assert.Empty(itemAbstractClass.GenericTypes);
+          //ジェネリックの確認
+          Assert.Empty(itemAbstractClass.GenericTypes);
 
-        // スーパークラスの設定確認
-        Assert.Empty(itemAbstractClass.SuperClass);
+          // スーパークラスの設定確認
+          Assert.Empty(itemAbstractClass.SuperClass);
 
-        // 親の存在確認
-        Assert.Null(itemAbstractClass.Parent);
+          // 親の存在確認
+          Assert.Null(itemAbstractClass.Parent);
 
-        // スコープ修飾子の件数確認
-        Assert.Equal(2, itemAbstractClass.Modifiers.Count);
+          // スコープ修飾子の件数確認
+          Assert.Equal(2, itemAbstractClass.Modifiers.Count);
 
-        // スコープ修飾子の内容確認
-        Assert.Contains("public", itemAbstractClass.Modifiers);
-        Assert.Contains("abstract", itemAbstractClass.Modifiers);
+          // スコープ修飾子の内容確認
+          Assert.Contains("public", itemAbstractClass.Modifiers);
+          Assert.Contains("abstract", itemAbstractClass.Modifiers);
 
-        // ItemTypeの確認
-        Assert.Equal(ItemTypes.Class, itemAbstractClass.ItemType);
+          // ItemTypeの確認
+          Assert.Equal(ItemTypes.Class, itemAbstractClass.ItemType);
 
-        // クラス内の要素の存在確認
-        Assert.Empty(itemAbstractClass.Members);
+          // クラス内の要素の存在確認
+          var expectedMethodList = new List<(List<string> modifiers, string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>();
+          var expectedPropertyList = new List<(List<string> modifiers, string name, string type, Dictionary<string, List<string>> accessors, bool isInit, List<string> init)>();
+          var expectedFieldList = new List<(List<string> modifiers, string name, string type, bool isInit, List<string> init)>();
+
+          // 期待値数と一致要素数の確認
+          var expectedCount = expectedMethodList.Count + expectedPropertyList.Count + expectedFieldList.Count;
+          var actualCount = GetMemberCount(itemAbstractClass, expectedMethodList) + GetMemberCount(itemAbstractClass, expectedPropertyList) + GetMemberCount(itemAbstractClass, expectedFieldList);
+          Assert.Equal(expectedCount, actualCount);
+
+          // 実際の要素数との一致確認
+          var actualMemberCount = itemAbstractClass.Members.Count + itemAbstractClass.BaseMethods.Count + itemAbstractClass.BaseProperties.Count + itemAbstractClass.BaseFields.Count;
+          Assert.Equal(expectedCount, actualMemberCount);
+        }
 
         #region サブクラスの確認
+        {
+          // サブインスタンスを取得
+          var itemSubClass = GetClassInstance(ev, "AbstractClass.cs", 1);
 
-        // サブインスタンスを取得
-        var itemSubClass = GetClassInstance(ev, "AbstractClass.cs", 1);
+          //ジェネリックの確認
+          Assert.Empty(itemSubClass.GenericTypes);
 
-        //ジェネリックの確認
-        Assert.Empty(itemSubClass.GenericTypes);
+          // スーパークラスの設定確認
+          Assert.Single(itemSubClass.SuperClass);
+          Assert.Equal("AbstractClass", GetExpressionsToString(itemSubClass.SuperClass));
 
-        // スーパークラスの設定確認
-        Assert.Single(itemSubClass.SuperClass);
-        Assert.Equal("AbstractClass", GetExpressionsToString(itemSubClass.SuperClass));
+          // 親の存在確認
+          Assert.Null(itemSubClass.Parent);
 
-        // 親の存在確認
-        Assert.Null(itemSubClass.Parent);
+          // スコープ修飾子の件数確認
+          Assert.Single(itemSubClass.Modifiers);
 
-        // スコープ修飾子の件数確認
-        Assert.Single(itemSubClass.Modifiers);
+          // スコープ修飾子の内容確認
+          Assert.Contains("public", itemAbstractClass.Modifiers);
 
-        // スコープ修飾子の内容確認
-        Assert.Contains("public", itemAbstractClass.Modifiers);
+          // ItemTypeの確認
+          Assert.Equal(ItemTypes.Class, itemSubClass.ItemType);
 
-        // ItemTypeの確認
-        Assert.Equal(ItemTypes.Class, itemSubClass.ItemType);
+          // クラス内の要素の存在確認
+          var expectedMethodList = new List<(List<string> modifiers, string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>();
+          var expectedPropertyList = new List<(List<string> modifiers, string name, string type, Dictionary<string, List<string>> accessors, bool isInit, List<string> init)>();
+          var expectedFieldList = new List<(List<string> modifiers, string name, string type, bool isInit, List<string> init)>();
 
-        // クラス内の要素の存在確認
-        Assert.Empty(itemSubClass.Members);
+          // 期待値数と一致要素数の確認
+          var expectedCount = expectedMethodList.Count + expectedPropertyList.Count + expectedFieldList.Count;
+          var actualCount = GetMemberCount(itemSubClass, expectedMethodList) + GetMemberCount(itemSubClass, expectedPropertyList) + GetMemberCount(itemSubClass, expectedFieldList);
+          Assert.Equal(expectedCount, actualCount);
 
+          // 実際の要素数との一致確認
+          var actualMemberCount = itemSubClass.Members.Count + itemSubClass.BaseMethods.Count + itemSubClass.BaseProperties.Count + itemSubClass.BaseFields.Count;
+          Assert.Equal(expectedCount, actualMemberCount);
+        }
         #endregion
       });
 
@@ -370,6 +416,20 @@ namespace CSharpAnalyzeTest
         // クラス内の要素の存在確認
         Assert.Empty(innerClass.Members);
 
+        // クラス内の要素の存在確認
+        var expectedMethodList = new List<(List<string> modifiers, string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>();
+        var expectedPropertyList = new List<(List<string> modifiers, string name, string type, Dictionary<string, List<string>> accessors, bool isInit, List<string> init)>();
+        var expectedFieldList = new List<(List<string> modifiers, string name, string type, bool isInit, List<string> init)>();
+
+        // 期待値数と一致要素数の確認
+        var expectedCount = expectedMethodList.Count + expectedPropertyList.Count + expectedFieldList.Count;
+        var actualCount = GetMemberCount(innerClass, expectedMethodList) + GetMemberCount(innerClass, expectedPropertyList) + GetMemberCount(innerClass, expectedFieldList);
+        Assert.Equal(expectedCount, actualCount);
+
+        // 実際の要素数との一致確認
+        var actualMemberCount = innerClass.Members.Count + innerClass.BaseMethods.Count + innerClass.BaseProperties.Count + innerClass.BaseFields.Count;
+        Assert.Equal(expectedCount, actualMemberCount);
+
         #endregion
       });
 
@@ -412,7 +472,18 @@ namespace CSharpAnalyzeTest
         Assert.Equal(ItemTypes.Class, itemClass.ItemType);
 
         // クラス内の要素の存在確認
-        Assert.Empty(itemClass.Members);
+        var expectedMethodList = new List<(List<string> modifiers, string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>();
+        var expectedPropertyList = new List<(List<string> modifiers, string name, string type, Dictionary<string, List<string>> accessors, bool isInit, List<string> init)>();
+        var expectedFieldList = new List<(List<string> modifiers, string name, string type, bool isInit, List<string> init)>();
+
+        // 期待値数と一致要素数の確認
+        var expectedCount = expectedMethodList.Count + expectedPropertyList.Count + expectedFieldList.Count;
+        var actualCount = GetMemberCount(itemClass, expectedMethodList) + GetMemberCount(itemClass, expectedPropertyList) + GetMemberCount(itemClass, expectedFieldList);
+        Assert.Equal(expectedCount, actualCount);
+
+        // 実際の要素数との一致確認
+        var actualMemberCount = itemClass.Members.Count + itemClass.BaseMethods.Count + itemClass.BaseProperties.Count + itemClass.BaseFields.Count;
+        Assert.Equal(expectedCount, actualMemberCount);
       });
 
       // 解析実行
@@ -464,7 +535,18 @@ namespace CSharpAnalyzeTest
         Assert.Equal(ItemTypes.Class, itemClass.ItemType);
 
         // クラス内の要素の存在確認
-        Assert.Empty(itemClass.Members);
+        var expectedMethodList = new List<(List<string> modifiers, string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>();
+        var expectedPropertyList = new List<(List<string> modifiers, string name, string type, Dictionary<string, List<string>> accessors, bool isInit, List<string> init)>();
+        var expectedFieldList = new List<(List<string> modifiers, string name, string type, bool isInit, List<string> init)>();
+
+        // 期待値数と一致要素数の確認
+        var expectedCount = expectedMethodList.Count + expectedPropertyList.Count + expectedFieldList.Count;
+        var actualCount = GetMemberCount(itemClass, expectedMethodList) + GetMemberCount(itemClass, expectedPropertyList) + GetMemberCount(itemClass, expectedFieldList);
+        Assert.Equal(expectedCount, actualCount);
+
+        // 実際の要素数との一致確認
+        var actualMemberCount = itemClass.Members.Count + itemClass.BaseMethods.Count + itemClass.BaseProperties.Count + itemClass.BaseFields.Count;
+        Assert.Equal(expectedCount, actualMemberCount);
 
       });
 

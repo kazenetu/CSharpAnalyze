@@ -178,7 +178,10 @@ namespace CSharpAnalyzeTest
         // パラメータの確認
         var expectedModifiers = new List<string>() { "public" };
         var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>();
+        // 期待値数と一致要素数の確認
         Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
+        // 実際の要素数との一致確認
+        Assert.Equal(expectedArgs.Count, constructor.Args.Count);
 
         // スーパークラスのコンストラクタ呼び出し確認
         var expectedBaseArgs = new List<string>();
@@ -220,7 +223,10 @@ namespace CSharpAnalyzeTest
           ( "f","float","",""),
           ( "d","decimal","",""),
         };
+        // 期待値数と一致要素数の確認
         Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
+        // 実際の要素数との一致確認
+        Assert.Equal(expectedArgs.Count, constructor.Args.Count);
 
         // パラメータの確認
         var expectedBaseArgs = new List<string>();
@@ -263,7 +269,10 @@ namespace CSharpAnalyzeTest
         {
           ( "instance","Standard","",""),
         };
+        // 期待値数と一致要素数の確認
         Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
+        // 実際の要素数との一致確認
+        Assert.Equal(expectedArgs.Count, constructor.Args.Count);
 
         // スーパークラスのコンストラクタ呼び出し確認
         var expectedBaseArgs = new List<string>();
@@ -304,7 +313,10 @@ namespace CSharpAnalyzeTest
         {
           ( "list","List<string>","",""),
         };
+        // 期待値数と一致要素数の確認
         Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
+        // 実際の要素数との一致確認
+        Assert.Equal(expectedArgs.Count, constructor.Args.Count);
 
         // スーパークラスのコンストラクタ呼び出し確認
         var expectedBaseArgs = new List<string>();
@@ -351,7 +363,10 @@ namespace CSharpAnalyzeTest
           ( "d1","decimal","",""),
           ( "integer2","int","",""),
         };
+        // 期待値数と一致要素数の確認
         Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
+        // 実際の要素数との一致確認
+        Assert.Equal(expectedArgs.Count, constructor.Args.Count);
 
         // スーパークラスのコンストラクタ呼び出し確認
         var expectedBaseArgs = new List<string>()
@@ -411,7 +426,10 @@ namespace CSharpAnalyzeTest
           // パラメータの確認
           var expectedModifiers = expectedModifiersList[expectedIndex];
           var expectedArgs = expectedArgsList[expectedIndex];
+          // 期待値数と一致要素数の確認
           Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
+          // 実際の要素数との一致確認
+          Assert.Equal(expectedArgs.Count, constructor.Args.Count);
 
           // スーパークラスのコンストラクタ呼び出し確認
           Assert.Equal(new List<string>(), constructor.BaseArgs);
@@ -451,7 +469,10 @@ namespace CSharpAnalyzeTest
           ( "str","string","in",""),
           ( "output","decimal","out",""),
         };
+        // 期待値数と一致要素数の確認
         Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
+        // 実際の要素数との一致確認
+        Assert.Equal(expectedArgs.Count, constructor.Args.Count);
 
         // スーパークラスのコンストラクタ呼び出し確認
         var expectedBaseArgs = new List<string>();
@@ -488,7 +509,10 @@ namespace CSharpAnalyzeTest
           ( "integer","int","","10"),
           ( "str","string","","\"ABC\""),
         };
+        // 期待値数と一致要素数の確認
         Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
+        // 実際の要素数との一致確認
+        Assert.Equal(expectedArgs.Count, constructor.Args.Count);
 
         // スーパークラスのコンストラクタ呼び出し確認
         var expectedBaseArgs = new List<string>();
@@ -523,7 +547,10 @@ namespace CSharpAnalyzeTest
         var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
         {
         };
+        // 期待値数と一致要素数の確認
         Assert.Equal(expectedArgs.Count, GetMemberCount(constructor, expectedModifiers, expectedArgs));
+        // 実際の要素数との一致確認
+        Assert.Equal(expectedArgs.Count, constructor.Args.Count);
 
         // スーパークラスのコンストラクタ呼び出し確認
         var expectedBaseArgs = new List<string>();

@@ -8,7 +8,6 @@ using Xunit;
 
 namespace CSharpAnalyzeTest
 {
-  // HACK テスト実装
   [Trait("Returnのテスト", nameof(ReturnTest))]
   public class ReturnTest : TestBase
   {
@@ -17,7 +16,7 @@ namespace CSharpAnalyzeTest
     /// </summary>
     private enum CreatePattern
     {
-      Standard,
+      ReturnVoid,
     }
 
     /// <summary>
@@ -28,33 +27,25 @@ namespace CSharpAnalyzeTest
     private FileData CreateSource(CreatePattern pattern)
     {
       var usingList = new StringBuilder();
-      var source = new List<string>();
+      var source = new StringBuilder();
       var filePath = string.Empty;
 
       switch (pattern)
       {
-        case CreatePattern.Standard:
-          filePath = "Standard.cs";
+        case CreatePattern.ReturnVoid:
+          filePath = "ReturnVoid.cs";
 
-          source.Add("void target()");
-          source.Add("{");
-          source.Add("}");
+          source.AppendLine("public class ReturnValue");
+          source.AppendLine("{");
+          source.AppendLine("  public void TestMethod()");
+          source.AppendLine("  {");
+          source.AppendLine("    return;");
+          source.AppendLine("  }");
+          source.AppendLine("}");
           break;
       }
 
-      // ソースコード作成
-      var targetSource = new StringBuilder();
-      targetSource.AppendLine("public class Standard");
-      targetSource.AppendLine("{");
-      targetSource.AppendLine("  public void TestMethod()");
-      targetSource.AppendLine("  {");
-
-      source.ForEach(line => targetSource.AppendLine($"    {line }"));
-
-      targetSource.AppendLine("  }");
-      targetSource.AppendLine("}");
-
-      return new FileData(filePath, usingList.ToString(), targetSource.ToString());
+      return new FileData(filePath, usingList.ToString(), source.ToString());
     }
 
     /// <summary>
@@ -66,16 +57,16 @@ namespace CSharpAnalyzeTest
     }
 
     /// <summary>
-    /// 基本的なテスト
+    /// 値を返さないテスト
     /// </summary>
-    //[Fact(DisplayName = "Standard")]
+    [Fact(DisplayName = "ReturnVoid")]
     public void StandardArgsTest()
     {
       // テストコードを追加
-      CreateFileData(CreateSource(CreatePattern.Standard), (ev) =>
+      CreateFileData(CreateSource(CreatePattern.ReturnVoid), (ev) =>
       {
         // IItemClassインスタンスを取得
-        var itemClass = GetClassInstance(ev, "Standard.cs");
+        var itemClass = GetClassInstance(ev, "ReturnVoid.cs");
 
         // 対象インスタンスのリストを取得
         var targetInstances = GetTargetInstances(itemClass);
@@ -84,23 +75,15 @@ namespace CSharpAnalyzeTest
         Assert.Single(targetInstances);
         var targetParentInstance = targetInstances.First() as IItemMethod;
 
-        // 対象インスタンスを取得
-        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemLocalFunction;
-
-        // 型タイプの確認
-        Assert.Equal("void", GetExpressionsToString(targetInstance.MethodTypes));
-
         // 外部参照の存在確認
         Assert.Empty(ev.FileRoot.OtherFiles);
 
-        // パラメータの確認
-        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
-        {
-        };
-        Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedArgs));
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).FirstOrDefault();
+        Assert.NotNull(targetInstance);
 
-        // 内部処理の確認
-        Assert.Empty(targetInstance.Members);
+        // 戻り値の確認
+        Assert.Equal("", GetExpressionsToString(targetInstance.ReturnValue));
       });
 
       // 解析実行
@@ -123,39 +106,10 @@ namespace CSharpAnalyzeTest
     /// </summary>
     /// <param name="itemClass">対象のアイテムメソッド</param>
     /// <returns>対象インスタンスリスト</returns>
-    private List<IItemLocalFunction> GetTargetInstances(IItemMethod itemMethod)
+    private List<IItemReturn> GetTargetInstances(IItemMethod itemMethod)
     {
-      return itemMethod.Members.Where(member => member is IItemLocalFunction).
-              Select(member => member as IItemLocalFunction).ToList();
+      return itemMethod.Members.Where(member => member is IItemReturn).
+              Select(member => member as IItemReturn).ToList();
     }
-
-    /// <summary>
-    /// メンバー数を取得
-    /// </summary>
-    /// <param name="targetInstance">対象のインスタンス</param>
-    /// <param name="expectedArgs">パラメータの期待値</param>
-    /// <returns>条件が一致するメンバー数</returns>
-    private int GetMemberCount(IItemLocalFunction targetInstance, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)
-    {
-      // パラメータ数の確認
-      Assert.Equal(expectedArgs.Count, targetInstance.Args.Count);
-
-      // パラメータの確認
-      var argCount = 0;
-      foreach (var (name, expressions, refType, defaultValue) in expectedArgs)
-      {
-        var actualArgs = targetInstance.Args
-                        .Where(arg => arg.name == name)
-                        .Where(arg => GetExpressionsToString(arg.expressions) == expressions)
-                        .Where(arg => string.Concat(arg.modifiers) == refType)
-                        .Where(arg => GetExpressionsToString(arg.defaultValues) == defaultValue);
-        if (actualArgs.Any())
-        {
-          argCount++;
-        }
-      }
-      return argCount;
-    }
-
   }
 }

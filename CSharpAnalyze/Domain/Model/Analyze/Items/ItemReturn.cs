@@ -59,7 +59,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       // 戻り値設定
       if (operation is IReturnOperation returnOperation)
       {
-        ReturnValue.AddRange(OperationFactory.GetExpressionList(returnOperation.ReturnedValue, eventContainer));
+        if(returnOperation.ReturnedValue != null){
+          ReturnValue.AddRange(OperationFactory.GetExpressionList(returnOperation.ReturnedValue, eventContainer));
+        }
         return;
       }
       ReturnValue.AddRange(OperationFactory.GetExpressionList(operation, eventContainer));

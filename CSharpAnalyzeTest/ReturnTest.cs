@@ -17,6 +17,10 @@ namespace CSharpAnalyzeTest
     private enum CreatePattern
     {
       ReturnVoid,
+      ReturnInt,
+      ReturnString,
+      ReturnInstance,
+      ReturnGenericInstance,
     }
 
     /// <summary>

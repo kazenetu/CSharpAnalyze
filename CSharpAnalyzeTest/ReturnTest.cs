@@ -76,7 +76,7 @@ namespace CSharpAnalyzeTest
     /// 値を返さないテスト
     /// </summary>
     [Fact(DisplayName = "ReturnVoid")]
-    public void StandardArgsTest()
+    public void ReturnVoidTest()
     {
       // テストコードを追加
       CreateFileData(CreateSource(CreatePattern.ReturnVoid), (ev) =>

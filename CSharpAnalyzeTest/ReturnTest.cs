@@ -140,6 +140,8 @@ namespace CSharpAnalyzeTest
       CSAnalyze.Analyze(string.Empty, Files);
     }
 
+    #region ユーティリティメソッド
+
     /// <summary>
     /// 対象インスタンスの取得
     /// </summary>
@@ -161,5 +163,7 @@ namespace CSharpAnalyzeTest
       return itemMethod.Members.Where(member => member is IItemReturn).
               Select(member => member as IItemReturn).ToList();
     }
+
+    #endregion
   }
 }

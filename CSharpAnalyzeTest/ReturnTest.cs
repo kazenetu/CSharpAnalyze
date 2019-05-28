@@ -59,6 +59,18 @@ namespace CSharpAnalyzeTest
           source.AppendLine("  }");
           source.AppendLine("}");
           break;
+
+        case CreatePattern.ReturnString:
+          filePath = "ReturnString.cs";
+
+          source.AppendLine("public class ReturnValue");
+          source.AppendLine("{");
+          source.AppendLine("  public string TestMethod()");
+          source.AppendLine("  {");
+          source.AppendLine("    return \"ABC\";");
+          source.AppendLine("  }");
+          source.AppendLine("}");
+          break;
       }
 
       return new FileData(filePath, usingList.ToString(), source.ToString());
@@ -134,6 +146,40 @@ namespace CSharpAnalyzeTest
 
         // 戻り値の確認
         Assert.Equal("10", GetExpressionsToString(targetInstance.ReturnValue));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// string値を返すテスト
+    /// </summary>
+    [Fact(DisplayName = "ReturnString")]
+    public void ReturnStringTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.ReturnString), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "ReturnString.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).FirstOrDefault();
+        Assert.NotNull(targetInstance);
+
+        // 戻り値の確認
+        Assert.Equal("\"ABC\"", GetExpressionsToString(targetInstance.ReturnValue));
       });
 
       // 解析実行

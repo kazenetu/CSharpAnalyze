@@ -24,6 +24,8 @@ namespace CSharpAnalyzeTest
       ReturnLocalDeclaration,
       ReturnLocalFunction,
       ReturnMethod,
+      ReturnStaticMethod,
+      ReturnExpression,
     }
 
     /// <summary>

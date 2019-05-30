@@ -25,6 +25,7 @@ namespace CSharpAnalyzeTest
       ReturnLocalFunction,
       ReturnMethod,
       ReturnClassMethod,
+      ReturnClassProperty,
       ReturnExpression,
     }
 

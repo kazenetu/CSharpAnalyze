@@ -18,9 +18,10 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
     {
       if(operation.Instance is null)
       {
-        // 組み込み
-        //Expressions.Add(new Expression(operation.Type.Name,Expression.GetSymbolTypeName(operation.Type)));
-        Expressions.Add(new Expression($"{operation.TargetMethod.ConstructedFrom.ContainingType}", string.Empty));
+        // 組み込み・クラスメンバ
+        var nameSpace = $"{operation.TargetMethod.ContainingNamespace.Name}.";
+        var className = $"{operation.TargetMethod.ContainingType}".Replace(nameSpace, string.Empty, System.StringComparison.CurrentCulture);
+        Expressions.Add(new Expression(className, string.Empty));
       }
       else
       {

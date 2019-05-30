@@ -130,6 +130,23 @@ namespace CSharpAnalyzeTest
           source.AppendLine("  }");
           source.AppendLine("}");
           break;
+
+        case CreatePattern.ReturnMethod:
+          filePath = "ReturnMethod.cs";
+
+          source.AppendLine("public class ReturnValue");
+          source.AppendLine("{");
+          source.AppendLine("  public int TestMethod()");
+          source.AppendLine("  {");
+          source.AppendLine("    return Target(1);");
+          source.AppendLine("  }");
+          source.AppendLine("");
+          source.AppendLine("  public int Target(int value)");
+          source.AppendLine("  {");
+          source.AppendLine("    return value;");
+          source.AppendLine("  }");
+          source.AppendLine("}");
+          break;
       }
 
       return new FileData(filePath, usingList.ToString(), source.ToString());
@@ -377,6 +394,40 @@ namespace CSharpAnalyzeTest
 
         // 戻り値の確認
         Assert.Equal("target()", GetExpressionsToString(targetInstance.ReturnValue));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// メソッドの戻り値を返すテスト
+    /// </summary>
+    [Fact(DisplayName = "ReturnMethod")]
+    public void ReturnMethodTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.ReturnMethod), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "ReturnMethod.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Equal(2, targetInstances.Count);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).FirstOrDefault();
+        Assert.NotNull(targetInstance);
+
+        // 戻り値の確認
+        Assert.Equal("this.Target(1)", GetExpressionsToString(targetInstance.ReturnValue));
       });
 
       // 解析実行

@@ -21,6 +21,9 @@ namespace CSharpAnalyzeTest
       ReturnString,
       ReturnInstance,
       ReturnGenericInstance,
+      ReturnLocalDeclaration,
+      ReturnLocalFunction,
+      ReturnMethod,
     }
 
     /// <summary>

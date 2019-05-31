@@ -182,6 +182,26 @@ namespace CSharpAnalyzeTest
           source.AppendLine("  public static int Target{get;} = 10:");
           source.AppendLine("}");
           break;
+
+        case CreatePattern.ReturnInnerClassMethod:
+          filePath = "ReturnInnerClassMethod.cs";
+
+          source.AppendLine("public class ReturnValue");
+          source.AppendLine("{");
+          source.AppendLine("  public int TestMethod()");
+          source.AppendLine("  {");
+          source.AppendLine("    return InnerClass.Target(1);");
+          source.AppendLine("  }");
+          source.AppendLine("");
+          source.AppendLine("  public class InnerClass");
+          source.AppendLine("  {");
+          source.AppendLine("    public static int Target(int value)");
+          source.AppendLine("    {");
+          source.AppendLine("      return value;");
+          source.AppendLine("    }");
+          source.AppendLine("  }");
+          source.AppendLine("}");
+          break;
       }
 
       return new FileData(filePath, usingList.ToString(), source.ToString());
@@ -531,6 +551,40 @@ namespace CSharpAnalyzeTest
 
         // 戻り値の確認
         Assert.Equal("ReturnValue.Target", GetExpressionsToString(targetInstance.ReturnValue));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 内部クラスのクラスメソッドの戻り値を返すテスト
+    /// </summary>
+    [Fact(DisplayName = "ReturnInnerClassMethod")]
+    public void ReturnInnerClassMethodTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.ReturnInnerClassMethod), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "ReturnInnerClassMethod.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).FirstOrDefault();
+        Assert.NotNull(targetInstance);
+
+        // 戻り値の確認
+        Assert.Equal("ReturnValue.InnerClass.Target(1)", GetExpressionsToString(targetInstance.ReturnValue));
       });
 
       // 解析実行

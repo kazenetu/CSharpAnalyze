@@ -17,6 +17,14 @@ namespace CSharpAnalyzeTest
     private enum CreatePattern
     {
       SimpleAssignment,
+      Invocation,
+      PropertyReference,
+      LocalReference,
+      Literal,
+      FieldReference,
+      InstanceReference,
+      CompoundAssignment,
+      IncrementOrDecrement,
     }
 
     /// <summary>

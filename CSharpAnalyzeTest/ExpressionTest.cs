@@ -71,7 +71,25 @@ namespace CSharpAnalyzeTest
           addSource.AppendLine("{");
           addSource.AppendLine("  public static void Test(){};");
           addSource.AppendLine("}");
+          break;
 
+        case CreatePattern.PropertyReference:
+          filePath = "PropertyReference.cs";
+
+          source.Add("prop;");
+          source.Add("AddClass.Prop;");
+          source.Add("DateTime.Now;");
+
+          // 追加メンバー
+          addMember.Add("private int prop{get}=10;");
+          addMember.Add("{");
+          addMember.Add("}");
+
+          // 追加クラス
+          addSource.AppendLine("public class AddClass");
+          addSource.AppendLine("{");
+          addSource.AppendLine("  public static int Prop{get}=1;");
+          addSource.AppendLine("}");
           break;
       }
 
@@ -162,6 +180,44 @@ namespace CSharpAnalyzeTest
           ("", "", "this.AddMethod()"),
           ("", "", "AddClass.Test()"),
           ("", "", "target()"),
+        };
+        Assert.Equal(expectedArgs.Count, GetMemberCount(targetParentInstance, expectedArgs));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// プロパティ参照のテスト
+    /// </summary>
+    [Fact(DisplayName = "PropertyReference")]
+    public void PropertyReferenceTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.PropertyReference), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "PropertyReference.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.NotEmpty(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 外部参照の存在確認
+        Assert.Single(ev.FileRoot.OtherFiles);
+        Assert.Equal("DateTime", ev.FileRoot.OtherFiles.Keys.First());
+        Assert.Equal(string.Empty, ev.FileRoot.OtherFiles.Values.First());
+
+        // パラメータの確認
+        var expectedArgs = new List<(string left, string operatorToken, string right)>()
+        {
+          ("", "", "this.prop"),
+          ("", "", "AddClass.Prop"),
+          ("", "", "DateTime.Now"),
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetParentInstance, expectedArgs));
       });

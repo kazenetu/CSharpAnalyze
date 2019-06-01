@@ -8,7 +8,6 @@ using Xunit;
 
 namespace CSharpAnalyzeTest
 {
-  // HACK テスト実装
   [Trait("式のテスト", nameof(ExpressionTest))]
   public class ExpressionTest : TestBase
   {
@@ -17,7 +16,7 @@ namespace CSharpAnalyzeTest
     /// </summary>
     private enum CreatePattern
     {
-      Standard,
+      SimpleAssignment,
     }
 
     /// <summary>
@@ -33,12 +32,11 @@ namespace CSharpAnalyzeTest
 
       switch (pattern)
       {
-        case CreatePattern.Standard:
-          filePath = "Standard.cs";
+        case CreatePattern.SimpleAssignment:
+          filePath = "SimpleAssignment.cs";
 
-          source.Add("void target()");
-          source.Add("{");
-          source.Add("}");
+          source.Add("int a;");
+          source.Add("a=1;");
           break;
       }
 
@@ -66,47 +64,41 @@ namespace CSharpAnalyzeTest
     }
 
     /// <summary>
-    /// 基本的なテスト
+    /// 代入式のテスト
     /// </summary>
-    //[Fact(DisplayName = "Standard")]
-    public void StandardArgsTest()
+    [Fact(DisplayName = "SimpleAssignment")]
+    public void SimpleAssignmentTest()
     {
       // テストコードを追加
-      CreateFileData(CreateSource(CreatePattern.Standard), (ev) =>
+      CreateFileData(CreateSource(CreatePattern.SimpleAssignment), (ev) =>
       {
         // IItemClassインスタンスを取得
-        var itemClass = GetClassInstance(ev, "Standard.cs");
+        var itemClass = GetClassInstance(ev, "SimpleAssignment.cs");
 
         // 対象インスタンスのリストを取得
         var targetInstances = GetTargetInstances(itemClass);
+        Assert.Single(targetInstances);
 
         // 対象の親インスタンスを取得
         Assert.Single(targetInstances);
         var targetParentInstance = targetInstances.First() as IItemMethod;
 
-        // 対象インスタンスを取得
-        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemLocalFunction;
-
-        // 型タイプの確認
-        Assert.Equal("void", GetExpressionsToString(targetInstance.MethodTypes));
-
         // 外部参照の存在確認
         Assert.Empty(ev.FileRoot.OtherFiles);
 
         // パラメータの確認
-        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
+        var expectedArgs = new List<(string left, string operatorToken, string right)>()
         {
+          ("a", "=", "1"),
         };
-        Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedArgs));
-
-        // 内部処理の確認
-        Assert.Empty(targetInstance.Members);
+        Assert.Equal(expectedArgs.Count, GetMemberCount(targetParentInstance, expectedArgs));
       });
 
       // 解析実行
       CSAnalyze.Analyze(string.Empty, Files);
     }
 
+    #region ユーティリティメソッド
     /// <summary>
     /// 対象インスタンスの取得
     /// </summary>
@@ -119,43 +111,31 @@ namespace CSharpAnalyzeTest
     }
 
     /// <summary>
-    /// 対象インスタンスの取得
-    /// </summary>
-    /// <param name="itemClass">対象のアイテムメソッド</param>
-    /// <returns>対象インスタンスリスト</returns>
-    private List<IItemLocalFunction> GetTargetInstances(IItemMethod itemMethod)
-    {
-      return itemMethod.Members.Where(member => member is IItemLocalFunction).
-              Select(member => member as IItemLocalFunction).ToList();
-    }
-
-    /// <summary>
     /// メンバー数を取得
     /// </summary>
-    /// <param name="targetInstance">対象のインスタンス</param>
-    /// <param name="expectedArgs">パラメータの期待値</param>
+    /// <param name="targetParentInstance">対象の親インスタンス</param>
+    /// <param name="expectedList">予想値リスト</param>
     /// <returns>条件が一致するメンバー数</returns>
-    private int GetMemberCount(IItemLocalFunction targetInstance, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)
+    private int GetMemberCount(IItemMethod targetParentInstance, List<(string left, string operatorToken, string right)> expectedList)
     {
-      // パラメータ数の確認
-      Assert.Equal(expectedArgs.Count, targetInstance.Args.Count);
-
-      // パラメータの確認
-      var argCount = 0;
-      foreach (var (name, expressions, refType, defaultValue) in expectedArgs)
+      var memberCount = 0;
+      foreach (var member in targetParentInstance.Members)
       {
-        var actualArgs = targetInstance.Args
-                        .Where(arg => arg.name == name)
-                        .Where(arg => GetExpressionsToString(arg.expressions) == expressions)
-                        .Where(arg => string.Concat(arg.modifiers) == refType)
-                        .Where(arg => GetExpressionsToString(arg.defaultValues) == defaultValue);
-        if (actualArgs.Any())
-        {
-          argCount++;
-        }
+        // 対象以外は次のmemberへ
+        if (!(member is IItemStatementExpression targetMember)) continue;
+
+        // 対象取得
+        var expectedTargets = 
+            expectedList.Where(expected => expected.left == GetExpressionsToString(targetMember.LeftSideList))
+                        .Where(expected => expected.operatorToken == targetMember.AssignmentOperator)
+                        .Where(expected => expected.right == GetExpressionsToString(targetMember.RightSideList));
+        if (!expectedTargets.Any()) continue;
+
+        memberCount++;
       }
-      return argCount;
+      return memberCount;
     }
+    #endregion
 
   }
 }

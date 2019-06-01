@@ -37,6 +37,8 @@ namespace CSharpAnalyzeTest
       var usingList = new StringBuilder();
       var source = new List<string>();
       var filePath = string.Empty;
+      var addMember = new List<string>();
+      var addSource = new StringBuilder();
 
       switch (pattern)
       {
@@ -46,6 +48,31 @@ namespace CSharpAnalyzeTest
           source.Add("int a;");
           source.Add("a=1;");
           break;
+
+        case CreatePattern.Invocation:
+          filePath = "Invocation.cs";
+
+          source.Add("int.Parse(\"1\");");
+          source.Add("AddMethod();");
+          source.Add("AddClass.Test();");
+          source.Add("target();");
+
+          source.Add("void target()");
+          source.Add("{");
+          source.Add("}");
+
+          // 追加メンバー
+          addMember.Add("private void AddMethod()");
+          addMember.Add("{");
+          addMember.Add("}");
+
+          // 追加クラス
+          addSource.AppendLine("public class AddClass");
+          addSource.AppendLine("{");
+          addSource.AppendLine("  public static void Test(){};");
+          addSource.AppendLine("}");
+
+          break;
       }
 
       // ソースコード作成
@@ -54,11 +81,12 @@ namespace CSharpAnalyzeTest
       targetSource.AppendLine("{");
       targetSource.AppendLine("  public void TestMethod()");
       targetSource.AppendLine("  {");
-
       source.ForEach(line => targetSource.AppendLine($"    {line }"));
-
       targetSource.AppendLine("  }");
+
+      addMember.ForEach(line => targetSource.AppendLine($"  {line }"));
       targetSource.AppendLine("}");
+      targetSource.AppendLine(addSource.ToString());
 
       return new FileData(filePath, usingList.ToString(), targetSource.ToString());
     }
@@ -85,10 +113,9 @@ namespace CSharpAnalyzeTest
 
         // 対象インスタンスのリストを取得
         var targetInstances = GetTargetInstances(itemClass);
-        Assert.Single(targetInstances);
 
         // 対象の親インスタンスを取得
-        Assert.Single(targetInstances);
+        Assert.NotEmpty(targetInstances);
         var targetParentInstance = targetInstances.First() as IItemMethod;
 
         // 外部参照の存在確認
@@ -98,6 +125,43 @@ namespace CSharpAnalyzeTest
         var expectedArgs = new List<(string left, string operatorToken, string right)>()
         {
           ("a", "=", "1"),
+        };
+        Assert.Equal(expectedArgs.Count, GetMemberCount(targetParentInstance, expectedArgs));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// メソッド参照のテスト
+    /// </summary>
+    [Fact(DisplayName = "Invocation")]
+    public void InvocationTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.Invocation), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "Invocation.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.NotEmpty(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // パラメータの確認
+        var expectedArgs = new List<(string left, string operatorToken, string right)>()
+        {
+          ("", "", "int.Parse(\"1\")"),
+          ("", "", "this.AddMethod()"),
+          ("", "", "AddClass.Test()"),
+          ("", "", "target()"),
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetParentInstance, expectedArgs));
       });

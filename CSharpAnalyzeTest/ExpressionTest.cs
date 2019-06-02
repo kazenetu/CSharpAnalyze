@@ -91,6 +91,13 @@ namespace CSharpAnalyzeTest
           addSource.AppendLine("  public static int Prop{get}=1;");
           addSource.AppendLine("}");
           break;
+
+        case CreatePattern.LocalReference:
+          filePath = "LocalReference.cs";
+
+          source.Add("var local = 10;");
+          source.Add("local;");
+          break;
       }
 
       // ソースコード作成
@@ -218,6 +225,40 @@ namespace CSharpAnalyzeTest
           ("", "", "this.prop"),
           ("", "", "AddClass.Prop"),
           ("", "", "DateTime.Now"),
+        };
+        Assert.Equal(expectedArgs.Count, GetMemberCount(targetParentInstance, expectedArgs));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// ローカルフィールド参照のテスト
+    /// </summary>
+    [Fact(DisplayName = "LocalReference")]
+    public void LocalReferenceTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.LocalReference), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "LocalReference.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.NotEmpty(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // パラメータの確認
+        var expectedArgs = new List<(string left, string operatorToken, string right)>()
+        {
+          ("", "", "local"),
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetParentInstance, expectedArgs));
       });

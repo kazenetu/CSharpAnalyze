@@ -82,8 +82,6 @@ namespace CSharpAnalyzeTest
 
           // 追加メンバー
           addMember.Add("private int prop{get}=10;");
-          addMember.Add("{");
-          addMember.Add("}");
 
           // 追加クラス
           addSource.AppendLine("public class AddClass");

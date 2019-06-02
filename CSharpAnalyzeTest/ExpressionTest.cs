@@ -98,6 +98,13 @@ namespace CSharpAnalyzeTest
           source.Add("var local = 10;");
           source.Add("local;");
           break;
+
+        case CreatePattern.Literal:
+          filePath = "Literal.cs";
+
+          source.Add("10;");
+          source.Add("\"20\";");
+          break;
       }
 
       // ソースコード作成
@@ -259,6 +266,41 @@ namespace CSharpAnalyzeTest
         var expectedArgs = new List<(string left, string operatorToken, string right)>()
         {
           ("", "", "local"),
+        };
+        Assert.Equal(expectedArgs.Count, GetMemberCount(targetParentInstance, expectedArgs));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// リテラルのテスト
+    /// </summary>
+    [Fact(DisplayName = "Literal")]
+    public void LiteralTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.Literal), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "Literal.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.NotEmpty(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // パラメータの確認
+        var expectedArgs = new List<(string left, string operatorToken, string right)>()
+        {
+          ("", "", "10"),
+          ("", "", "\"20\""),
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetParentInstance, expectedArgs));
       });

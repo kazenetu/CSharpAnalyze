@@ -105,6 +105,23 @@ namespace CSharpAnalyzeTest
           source.Add("10;");
           source.Add("\"20\";");
           break;
+
+        case CreatePattern.FieldReference:
+          filePath = "FieldReference.cs";
+
+          source.Add("field;");
+          source.Add("AddClass.Field;");
+          source.Add("int.MaxValue;");
+
+          // 追加メンバー
+          addMember.Add("private int field=10;");
+
+          // 追加クラス
+          addSource.AppendLine("public class AddClass");
+          addSource.AppendLine("{");
+          addSource.AppendLine("  public static int Field=1;");
+          addSource.AppendLine("}");
+          break;
       }
 
       // ソースコード作成
@@ -301,6 +318,44 @@ namespace CSharpAnalyzeTest
         {
           ("", "", "10"),
           ("", "", "\"20\""),
+        };
+        Assert.Equal(expectedArgs.Count, GetMemberCount(targetParentInstance, expectedArgs));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// フィールド参照のテスト
+    /// </summary>
+    [Fact(DisplayName = "FieldReference")]
+    public void FieldReferenceTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.FieldReference), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "FieldReference.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.NotEmpty(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 外部参照の存在確認
+        Assert.Single(ev.FileRoot.OtherFiles);
+        Assert.Equal("Int32", ev.FileRoot.OtherFiles.Keys.First());
+        Assert.Equal(string.Empty, ev.FileRoot.OtherFiles.Values.First());
+
+        // パラメータの確認
+        var expectedArgs = new List<(string left, string operatorToken, string right)>()
+        {
+          ("", "", "this.field"),
+          ("", "", "AddClass.Field"),
+          ("", "", "int.MaxValue"),
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetParentInstance, expectedArgs));
       });

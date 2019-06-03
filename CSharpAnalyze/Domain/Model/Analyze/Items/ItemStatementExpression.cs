@@ -107,7 +107,11 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
           RightSideList.AddRange(OperationFactory.GetExpressionList(param.Value, eventContainer));
           break;
         case IIncrementOrDecrementOperation param:
-          RightSideList.AddRange(OperationFactory.GetExpressionList(param.Target, eventContainer));
+          var target = OperationFactory.GetExpressionList(param.Target, eventContainer);
+
+          if(param.IsPostfix){
+            RightSideList.AddRange(target);
+          }
           switch (param.Kind)
           {
             case OperationKind.Increment:
@@ -116,6 +120,10 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
             case OperationKind.Decrement:
               RightSideList.Add(new Expression("--", string.Empty));
               break;
+          }
+          if (!param.IsPostfix)
+          {
+            RightSideList.AddRange(target);
           }
           break;
         default:

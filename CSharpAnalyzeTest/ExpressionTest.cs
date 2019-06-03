@@ -120,6 +120,12 @@ namespace CSharpAnalyzeTest
           addSource.AppendLine("  public static int Field=1;");
           addSource.AppendLine("}");
           break;
+
+        case CreatePattern.InstanceReference:
+          filePath = "InstanceReference.cs";
+
+          source.Add("this;");
+          break;
       }
 
       // ソースコード作成
@@ -354,6 +360,40 @@ namespace CSharpAnalyzeTest
           ("", "", "this.field"),
           ("", "", "AddClass.Field"),
           ("", "", "int.MaxValue"),
+        };
+        Assert.Equal(expectedArgs.Count, GetMemberCount(targetParentInstance, expectedArgs));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// インスタンス参照のテスト
+    /// </summary>
+    [Fact(DisplayName = "InstanceReference")]
+    public void InstanceReferenceTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.InstanceReference), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "InstanceReference.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.NotEmpty(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // パラメータの確認
+        var expectedArgs = new List<(string left, string operatorToken, string right)>()
+        {
+          ("", "", "this"),
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetParentInstance, expectedArgs));
       });

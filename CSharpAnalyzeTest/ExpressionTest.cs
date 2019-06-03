@@ -524,6 +524,7 @@ namespace CSharpAnalyzeTest
     /// <returns>条件が一致するメンバー数</returns>
     private int GetMemberCount(IItemMethod targetParentInstance, List<(string left, string operatorToken, string right)> expectedList)
     {
+      var checkedExpectedList = new List<(string left, string operatorToken, string right)>();
       var memberCount = 0;
       foreach (var member in targetParentInstance.Members)
       {
@@ -536,6 +537,16 @@ namespace CSharpAnalyzeTest
                         .Where(expected => expected.operatorToken == targetMember.AssignmentOperator)
                         .Where(expected => expected.right == GetExpressionsToString(targetMember.RightSideList));
         if (!expectedTargets.Any()) continue;
+
+        // チェック済み確認
+        var checkCount = expectedTargets.Count();
+        foreach (var expectedTarget in expectedTargets){
+          if (checkedExpectedList.Contains(expectedTarget)){
+            checkCount--;
+          }
+        }
+        if (checkCount <= 0) continue;
+        checkedExpectedList.AddRange(expectedTargets);
 
         memberCount++;
       }

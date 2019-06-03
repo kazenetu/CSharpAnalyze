@@ -140,6 +140,16 @@ namespace CSharpAnalyzeTest
           source.Add("a*=2*3;");
           source.Add("a/=2*4;");
           break;
+
+        case CreatePattern.IncrementOrDecrement:
+          filePath = "IncrementOrDecrement.cs";
+
+          source.Add("int a=2;");
+          source.Add("a++;");
+          source.Add("a--;");
+          source.Add("++a;");
+          source.Add("--a;");
+          break;
       }
 
       // ソースコード作成
@@ -449,6 +459,43 @@ namespace CSharpAnalyzeTest
           ("a", "-=", "2*2"),
           ("a", "*=", "2*3"),
           ("a", "/=", "2*4"),
+        };
+        Assert.Equal(expectedArgs.Count, GetMemberCount(targetParentInstance, expectedArgs));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// インクリメント・デクリメントのテスト
+    /// </summary>
+    [Fact(DisplayName = "IncrementOrDecrement")]
+    public void IncrementOrDecrementTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.IncrementOrDecrement), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "IncrementOrDecrement.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.NotEmpty(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // パラメータの確認
+        var expectedArgs = new List<(string left, string operatorToken, string right)>()
+        {
+          ("", "", "a++"),
+          ("", "", "a--"),
+          ("", "", "++a"),
+          ("", "", "--a"),
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetParentInstance, expectedArgs));
       });

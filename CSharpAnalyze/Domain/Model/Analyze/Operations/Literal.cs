@@ -1,5 +1,6 @@
 ﻿using CSharpAnalyze.Domain.Event;
 using Microsoft.CodeAnalysis.Operations;
+using System.Globalization;
 
 namespace CSharpAnalyze.Domain.Model.Analyze.Operations
 {
@@ -20,7 +21,11 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
       {
         literalValue = $"\"{literalValue}\"";
       }
-      if(literalValue is null)
+      if (literalValue is bool)
+      {
+        literalValue = $"{literalValue}".ToLower(CultureInfo.CurrentCulture);
+      }
+      if (literalValue is null)
       {
         var type = "null";
         Expressions.Add(new Expression(type, type));

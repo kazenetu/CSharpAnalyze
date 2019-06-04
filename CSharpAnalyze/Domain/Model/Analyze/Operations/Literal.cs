@@ -17,6 +17,16 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
     public Literal(ILiteralOperation operation, EventContainer container) : base(container)
     {
       var literalValue = operation.ConstantValue.Value;
+
+      // nullの場合はその情報を格納して終了
+      if (literalValue is null)
+      {
+        var type = "null";
+        Expressions.Add(new Expression(type, type));
+        return;
+      }
+
+      // 各Typeごとの加工処理
       if (literalValue is string)
       {
         literalValue = $"\"{literalValue}\"";
@@ -25,15 +35,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
       {
         literalValue = $"{literalValue}".ToLower(CultureInfo.CurrentCulture);
       }
-      if (literalValue is null)
-      {
-        var type = "null";
-        Expressions.Add(new Expression(type, type));
-      }
-      else
-      {
-        Expressions.Add(new Expression(literalValue.ToString(), Expression.GetSymbolTypeName(operation.Type)));
-      }
+
+      // 情報格納
+      Expressions.Add(new Expression(literalValue.ToString(), Expression.GetSymbolTypeName(operation.Type)));
     }
   }
 }

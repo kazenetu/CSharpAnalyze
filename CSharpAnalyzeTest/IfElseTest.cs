@@ -8,7 +8,6 @@ using Xunit;
 
 namespace CSharpAnalyzeTest
 {
-  // HACK テスト実装
   [Trait("If Elseのテスト", nameof(IfElseTest))]
   public class IfElseTest : TestBase
   {
@@ -36,7 +35,7 @@ namespace CSharpAnalyzeTest
         case CreatePattern.Standard:
           filePath = "Standard.cs";
 
-          source.Add("void target()");
+          source.Add("if(true)");
           source.Add("{");
           source.Add("}");
           break;
@@ -68,7 +67,7 @@ namespace CSharpAnalyzeTest
     /// <summary>
     /// 基本的なテスト
     /// </summary>
-    //[Fact(DisplayName = "Standard")]
+    [Fact(DisplayName = "Standard")]
     public void StandardArgsTest()
     {
       // テストコードを追加
@@ -76,6 +75,9 @@ namespace CSharpAnalyzeTest
       {
         // IItemClassインスタンスを取得
         var itemClass = GetClassInstance(ev, "Standard.cs");
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
 
         // 対象インスタンスのリストを取得
         var targetInstances = GetTargetInstances(itemClass);
@@ -85,28 +87,20 @@ namespace CSharpAnalyzeTest
         var targetParentInstance = targetInstances.First() as IItemMethod;
 
         // 対象インスタンスを取得
-        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemLocalFunction;
+        var targetInstance = GetTargetInstances(targetParentInstance).FirstOrDefault() as IItemIf;
 
-        // 型タイプの確認
-        Assert.Equal("void", GetExpressionsToString(targetInstance.MethodTypes));
+        // 対象インスタンスの存在確認
+        Assert.NotNull(targetInstance);
 
-        // 外部参照の存在確認
-        Assert.Empty(ev.FileRoot.OtherFiles);
-
-        // パラメータの確認
-        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
-        {
-        };
-        Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedArgs));
-
-        // 内部処理の確認
-        Assert.Empty(targetInstance.Members);
+        // 分岐構造の確認
+        checkIf(targetInstance, "true", 0);
       });
 
       // 解析実行
       CSAnalyze.Analyze(string.Empty, Files);
     }
 
+    #region ユーティリティメソッド
     /// <summary>
     /// 対象インスタンスの取得
     /// </summary>
@@ -123,39 +117,69 @@ namespace CSharpAnalyzeTest
     /// </summary>
     /// <param name="itemClass">対象のアイテムメソッド</param>
     /// <returns>対象インスタンスリスト</returns>
-    private List<IItemLocalFunction> GetTargetInstances(IItemMethod itemMethod)
+    private List<IItemIf> GetTargetInstances(IItemMethod itemMethod)
     {
-      return itemMethod.Members.Where(member => member is IItemLocalFunction).
-              Select(member => member as IItemLocalFunction).ToList();
+      return itemMethod.Members.Where(member => member is IItemIf).
+        Select(member => member as IItemIf).ToList();
     }
 
     /// <summary>
-    /// メンバー数を取得
+    /// IFステートメントの確認
     /// </summary>
-    /// <param name="targetInstance">対象のインスタンス</param>
-    /// <param name="expectedArgs">パラメータの期待値</param>
-    /// <returns>条件が一致するメンバー数</returns>
-    private int GetMemberCount(IItemLocalFunction targetInstance, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)
+    /// <param name="target">対象インスタンス</param>
+    /// <param name="condition">条件式</param>
+    /// <param name="existElseBlock">else数</param>
+    /// <returns></returns>
+    private bool checkIf(IItemIf target,string condition,int elseBlockCount)
     {
-      // パラメータ数の確認
-      Assert.Equal(expectedArgs.Count, targetInstance.Args.Count);
+      Assert.NotNull(target);
+      Assert.Equal(condition, GetExpressionsToString(target.Conditions));
+      Assert.Equal(elseBlockCount, target.FalseBlocks.Count);
 
-      // パラメータの確認
-      var argCount = 0;
-      foreach (var (name, expressions, refType, defaultValue) in expectedArgs)
-      {
-        var actualArgs = targetInstance.Args
-                        .Where(arg => arg.name == name)
-                        .Where(arg => GetExpressionsToString(arg.expressions) == expressions)
-                        .Where(arg => string.Concat(arg.modifiers) == refType)
-                        .Where(arg => GetExpressionsToString(arg.defaultValues) == defaultValue);
-        if (actualArgs.Any())
-        {
-          argCount++;
-        }
-      }
-      return argCount;
+      return true;
     }
+
+    /// <summary>
+    /// ELSEステートメントの確認
+    /// </summary>
+    /// <param name="target">対象インスタンス</param>
+    /// <param name="condition">条件式</param>
+    private bool checkElse(IItemElseClause target, string condition)
+    {
+      Assert.NotNull(target);
+      Assert.Equal(condition, GetExpressionsToString(target.Conditions));
+
+      return true;
+    }
+
+    ///// <summary>
+    ///// メンバー数を取得
+    ///// </summary>
+    ///// <param name="targetInstance">対象のインスタンス</param>
+    ///// <param name="expectedArgs">パラメータの期待値</param>
+    ///// <returns>条件が一致するメンバー数</returns>
+    //private int GetMemberCount(IAnalyzeItem targetInstance, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)
+    //{
+    //  // パラメータ数の確認
+    //  Assert.Equal(expectedArgs.Count, targetInstance.Args.Count);
+
+    //  // パラメータの確認
+    //  var argCount = 0;
+    //  foreach (var (name, expressions, refType, defaultValue) in expectedArgs)
+    //  {
+    //    var actualArgs = targetInstance.Args
+    //                    .Where(arg => arg.name == name)
+    //                    .Where(arg => GetExpressionsToString(arg.expressions) == expressions)
+    //                    .Where(arg => string.Concat(arg.modifiers) == refType)
+    //                    .Where(arg => GetExpressionsToString(arg.defaultValues) == defaultValue);
+    //    if (actualArgs.Any())
+    //    {
+    //      argCount++;
+    //    }
+    //  }
+    //  return argCount;
+    //}
+    #endregion
 
   }
 }

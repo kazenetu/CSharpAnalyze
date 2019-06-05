@@ -19,6 +19,7 @@ namespace CSharpAnalyzeTest
       Standard,
       ExistsElse,
       ExistsManyElse,
+      NestIfElse,
     }
 
     /// <summary>
@@ -64,6 +65,20 @@ namespace CSharpAnalyzeTest
           source.Add("}");
           source.Add("else");
           source.Add("{");
+          source.Add("}");
+          break;
+
+        case CreatePattern.NestIfElse:
+          filePath = "NestIfElse.cs";
+
+          source.Add("if(true)");
+          source.Add("{");
+          source.Add("  if(1==1)");
+          source.Add("  {");
+          source.Add("  }");
+          source.Add("  else");
+          source.Add("  {");
+          source.Add("  }");
           source.Add("}");
           break;
       }
@@ -209,6 +224,50 @@ namespace CSharpAnalyzeTest
           elseConditionIndex++;
         }
         Assert.True(targetInstance.FalseBlocks.Count == elseConditionIndex);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// IfElseのネスト
+    /// </summary>
+    [Fact(DisplayName = "NestIfElse")]
+    public void NestIfElseTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.NestIfElse), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "NestIfElse.cs");
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).FirstOrDefault() as IItemIf;
+
+        // 対象インスタンスの存在確認
+        Assert.NotNull(targetInstance);
+
+        // 分岐構造の確認
+        checkIf(targetInstance, "true", 0);
+
+        // 内部の分岐構造の確認
+        Assert.NotEmpty(targetInstance.TrueBlock);
+        var innerItemIf = targetInstance.TrueBlock.First() as IItemIf;
+        checkIf(innerItemIf, "1==1", 1);
+
+        Assert.NotEmpty(innerItemIf.FalseBlocks);
+        checkElse(innerItemIf.FalseBlocks.First() as IItemElseClause, "");
       });
 
       // 解析実行

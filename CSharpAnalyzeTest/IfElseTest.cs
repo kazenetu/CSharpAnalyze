@@ -18,6 +18,7 @@ namespace CSharpAnalyzeTest
     {
       Standard,
       ExistsElse,
+      ExistsManyElse,
     }
 
     /// <summary>
@@ -45,6 +46,20 @@ namespace CSharpAnalyzeTest
           filePath = "ExistsElse.cs";
 
           source.Add("if(true)");
+          source.Add("{");
+          source.Add("}");
+          source.Add("else");
+          source.Add("{");
+          source.Add("}");
+          break;
+
+        case CreatePattern.ExistsManyElse:
+          filePath = "ExistsManyElse.cs";
+
+          source.Add("if(true)");
+          source.Add("{");
+          source.Add("}");
+          source.Add("else if(1==1)");
           source.Add("{");
           source.Add("}");
           source.Add("else");
@@ -146,6 +161,54 @@ namespace CSharpAnalyzeTest
         Assert.Single(targetInstance.FalseBlocks);
         checkElse(targetInstance.FalseBlocks.First() as IItemElseClause, "");
 
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// Else付き：複数条件
+    /// </summary>
+    [Fact(DisplayName = "ExistsManyElse")]
+    public void ExistsManyElseTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.ExistsManyElse), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "ExistsManyElse.cs");
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).FirstOrDefault() as IItemIf;
+
+        // 対象インスタンスの存在確認
+        Assert.NotNull(targetInstance);
+
+        // 分岐構造の確認
+        checkIf(targetInstance, "true", 2);
+
+        var elseConditions = new List<string>()
+        {
+          "1==1",
+          "",
+        };
+        var elseConditionIndex = 0;
+        foreach (var elseItem in targetInstance.FalseBlocks){
+          checkElse(elseItem as IItemElseClause, elseConditions[elseConditionIndex]);
+          elseConditionIndex++;
+        }
+        Assert.True(targetInstance.FalseBlocks.Count == elseConditionIndex);
       });
 
       // 解析実行

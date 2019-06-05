@@ -17,6 +17,7 @@ namespace CSharpAnalyzeTest
     private enum CreatePattern
     {
       Standard,
+      ExistsElse,
     }
 
     /// <summary>
@@ -36,6 +37,17 @@ namespace CSharpAnalyzeTest
           filePath = "Standard.cs";
 
           source.Add("if(true)");
+          source.Add("{");
+          source.Add("}");
+          break;
+
+        case CreatePattern.ExistsElse:
+          filePath = "ExistsElse.cs";
+
+          source.Add("if(true)");
+          source.Add("{");
+          source.Add("}");
+          source.Add("else");
           source.Add("{");
           source.Add("}");
           break;
@@ -94,6 +106,46 @@ namespace CSharpAnalyzeTest
 
         // 分岐構造の確認
         checkIf(targetInstance, "true", 0);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// Else付き：条件なし
+    /// </summary>
+    [Fact(DisplayName = "ExistsElse")]
+    public void ExistsElseTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.ExistsElse), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "ExistsElse.cs");
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).FirstOrDefault() as IItemIf;
+
+        // 対象インスタンスの存在確認
+        Assert.NotNull(targetInstance);
+
+        // 分岐構造の確認
+        checkIf(targetInstance, "true", 1);
+
+        Assert.Single(targetInstance.FalseBlocks);
+        checkElse(targetInstance.FalseBlocks.First() as IItemElseClause, "");
+
       });
 
       // 解析実行

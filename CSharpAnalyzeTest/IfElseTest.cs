@@ -68,7 +68,7 @@ namespace CSharpAnalyzeTest
     /// 基本的なテスト
     /// </summary>
     [Fact(DisplayName = "Standard")]
-    public void StandardArgsTest()
+    public void StandardTest()
     {
       // テストコードを追加
       CreateFileData(CreateSource(CreatePattern.Standard), (ev) =>

@@ -20,6 +20,7 @@ namespace CSharpAnalyzeTest
       ExistsElse,
       ExistsManyElse,
       NestIfElse,
+      RefLocalField,
     }
 
     /// <summary>
@@ -79,6 +80,15 @@ namespace CSharpAnalyzeTest
           source.Add("  else");
           source.Add("  {");
           source.Add("  }");
+          source.Add("}");
+          break;
+
+        case CreatePattern.RefLocalField:
+          filePath = "RefLocalField.cs";
+
+          source.Add("var val=true;");
+          source.Add("if(val)");
+          source.Add("{");
           source.Add("}");
           break;
       }
@@ -268,6 +278,42 @@ namespace CSharpAnalyzeTest
 
         Assert.NotEmpty(innerItemIf.FalseBlocks);
         checkElse(innerItemIf.FalseBlocks.First() as IItemElseClause, "");
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// ローカルフィールド参照
+    /// </summary>
+    [Fact(DisplayName = "RefLocalField")]
+    public void RefLocalFieldTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.RefLocalField), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "RefLocalField.cs");
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).FirstOrDefault() as IItemIf;
+
+        // 対象インスタンスの存在確認
+        Assert.NotNull(targetInstance);
+
+        // 分岐構造の確認
+        checkIf(targetInstance, "val", 0);
       });
 
       // 解析実行

@@ -17,6 +17,7 @@ namespace CSharpAnalyzeTest
     private enum CreatePattern
     {
       Standard,
+      CaseDefault,
     }
 
     /// <summary>
@@ -39,6 +40,19 @@ namespace CSharpAnalyzeTest
           source.Add("switch(val)");
           source.Add("{");
           source.Add("  case 1:");
+          source.Add("  break;");
+          source.Add("}");
+          break;
+
+        case CreatePattern.CaseDefault:
+          filePath = "CaseDefault.cs";
+
+          source.Add("var val=1;");
+          source.Add("switch(val)");
+          source.Add("{");
+          source.Add("  case 1:");
+          source.Add("  break;");
+          source.Add("  default:");
           source.Add("  break;");
           source.Add("}");
           break;
@@ -100,6 +114,49 @@ namespace CSharpAnalyzeTest
           "1",
         };
         checkSwitchCase(targetInstance.Cases.First() as IItemSwitchCase, caseLables);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// defaultありテスト
+    /// </summary>
+    [Fact(DisplayName = "CaseDefault")]
+    public void CaseDefaultTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.CaseDefault), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "CaseDefault.cs");
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemSwitch;
+
+        // 分岐構造の確認
+        checkSwitch(targetInstance, "val", 2);
+
+        var caseLablesList = new List<List<string>>()
+        {
+          new List<string>(){"1" },
+          new List<string>(){"default" },
+        };
+        var caseIndex = 0;
+        foreach(IItemSwitchCase itemCase in targetInstance.Cases){
+          checkSwitchCase(itemCase, caseLablesList[caseIndex++]);
+        }
       });
 
       // 解析実行

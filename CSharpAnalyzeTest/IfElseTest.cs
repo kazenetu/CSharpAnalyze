@@ -371,34 +371,6 @@ namespace CSharpAnalyzeTest
 
       return true;
     }
-
-    ///// <summary>
-    ///// メンバー数を取得
-    ///// </summary>
-    ///// <param name="targetInstance">対象のインスタンス</param>
-    ///// <param name="expectedArgs">パラメータの期待値</param>
-    ///// <returns>条件が一致するメンバー数</returns>
-    //private int GetMemberCount(IAnalyzeItem targetInstance, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)
-    //{
-    //  // パラメータ数の確認
-    //  Assert.Equal(expectedArgs.Count, targetInstance.Args.Count);
-
-    //  // パラメータの確認
-    //  var argCount = 0;
-    //  foreach (var (name, expressions, refType, defaultValue) in expectedArgs)
-    //  {
-    //    var actualArgs = targetInstance.Args
-    //                    .Where(arg => arg.name == name)
-    //                    .Where(arg => GetExpressionsToString(arg.expressions) == expressions)
-    //                    .Where(arg => string.Concat(arg.modifiers) == refType)
-    //                    .Where(arg => GetExpressionsToString(arg.defaultValues) == defaultValue);
-    //    if (actualArgs.Any())
-    //    {
-    //      argCount++;
-    //    }
-    //  }
-    //  return argCount;
-    //}
     #endregion
 
   }

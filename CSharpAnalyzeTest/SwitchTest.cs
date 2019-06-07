@@ -8,7 +8,6 @@ using Xunit;
 
 namespace CSharpAnalyzeTest
 {
-  // HACK テスト実装
   [Trait("Switchのテスト", nameof(SwitchTest))]
   public class SwitchTest : TestBase
   {
@@ -36,8 +35,11 @@ namespace CSharpAnalyzeTest
         case CreatePattern.Standard:
           filePath = "Standard.cs";
 
-          source.Add("void target()");
+          source.Add("var val=1;");
+          source.Add("switch(val)");
           source.Add("{");
+          source.Add("  case 1:");
+          source.Add("  break;");
           source.Add("}");
           break;
       }
@@ -68,14 +70,17 @@ namespace CSharpAnalyzeTest
     /// <summary>
     /// 基本的なテスト
     /// </summary>
-    //[Fact(DisplayName = "Standard")]
-    public void StandardArgsTest()
+    [Fact(DisplayName = "Standard")]
+    public void StandardTest()
     {
       // テストコードを追加
       CreateFileData(CreateSource(CreatePattern.Standard), (ev) =>
       {
         // IItemClassインスタンスを取得
         var itemClass = GetClassInstance(ev, "Standard.cs");
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
 
         // 対象インスタンスのリストを取得
         var targetInstances = GetTargetInstances(itemClass);
@@ -85,28 +90,23 @@ namespace CSharpAnalyzeTest
         var targetParentInstance = targetInstances.First() as IItemMethod;
 
         // 対象インスタンスを取得
-        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemLocalFunction;
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemSwitch;
 
-        // 型タイプの確認
-        Assert.Equal("void", GetExpressionsToString(targetInstance.MethodTypes));
+        // 分岐構造の確認
+        checkSwitch(targetInstance, "val", 1);
 
-        // 外部参照の存在確認
-        Assert.Empty(ev.FileRoot.OtherFiles);
-
-        // パラメータの確認
-        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
+        var caseLables = new List<string>()
         {
+          "1",
         };
-        Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedArgs));
-
-        // 内部処理の確認
-        Assert.Empty(targetInstance.Members);
+        checkSwitchCase(targetInstance.Cases.First() as IItemSwitchCase, caseLables);
       });
 
       // 解析実行
       CSAnalyze.Analyze(string.Empty, Files);
     }
 
+    #region ユーティリティメソッド
     /// <summary>
     /// 対象インスタンスの取得
     /// </summary>
@@ -123,39 +123,45 @@ namespace CSharpAnalyzeTest
     /// </summary>
     /// <param name="itemClass">対象のアイテムメソッド</param>
     /// <returns>対象インスタンスリスト</returns>
-    private List<IItemLocalFunction> GetTargetInstances(IItemMethod itemMethod)
+    private List<IItemSwitch> GetTargetInstances(IItemMethod itemMethod)
     {
-      return itemMethod.Members.Where(member => member is IItemLocalFunction).
-              Select(member => member as IItemLocalFunction).ToList();
+      return itemMethod.Members.Where(member => member is IItemSwitch).
+              Select(member => member as IItemSwitch).ToList();
     }
 
     /// <summary>
-    /// メンバー数を取得
+    /// Switchステートメントの確認
     /// </summary>
-    /// <param name="targetInstance">対象のインスタンス</param>
-    /// <param name="expectedArgs">パラメータの期待値</param>
-    /// <returns>条件が一致するメンバー数</returns>
-    private int GetMemberCount(IItemLocalFunction targetInstance, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)
+    /// <param name="target">対象インスタンス</param>
+    /// <param name="condition">条件式</param>
+    /// <param name="caseCount">case数</param>
+    /// <returns></returns>
+    private bool checkSwitch(IItemSwitch target, string condition, int caseCount)
     {
-      // パラメータ数の確認
-      Assert.Equal(expectedArgs.Count, targetInstance.Args.Count);
+      Assert.NotNull(target);
+      Assert.Equal(condition, GetExpressionsToString(target.Conditions));
+      Assert.Equal(caseCount, target.Cases.Count);
 
-      // パラメータの確認
-      var argCount = 0;
-      foreach (var (name, expressions, refType, defaultValue) in expectedArgs)
-      {
-        var actualArgs = targetInstance.Args
-                        .Where(arg => arg.name == name)
-                        .Where(arg => GetExpressionsToString(arg.expressions) == expressions)
-                        .Where(arg => string.Concat(arg.modifiers) == refType)
-                        .Where(arg => GetExpressionsToString(arg.defaultValues) == defaultValue);
-        if (actualArgs.Any())
-        {
-          argCount++;
-        }
-      }
-      return argCount;
+      return true;
     }
+
+    /// <summary>
+    /// SwitchCaseテートメントの確認
+    /// </summary>
+    /// <param name="target">対象インスタンス</param>
+    /// <param name="labels">条件式</param>
+    private bool checkSwitchCase(IItemSwitchCase target, List<string> labels)
+    {
+      Assert.NotNull(target);
+      var actualLables = target.Labels.Select(item => GetExpressionsToString(item));
+      Assert.Equal(labels, actualLables);
+      Assert.Equal(labels.Count, actualLables.Count());
+
+      return true;
+    }
+
+
+    #endregion
 
   }
 }

@@ -18,6 +18,7 @@ namespace CSharpAnalyzeTest
     {
       Standard,
       CaseDefault,
+      MultiCase,
     }
 
     /// <summary>
@@ -53,6 +54,18 @@ namespace CSharpAnalyzeTest
           source.Add("  case 1:");
           source.Add("  break;");
           source.Add("  default:");
+          source.Add("  break;");
+          source.Add("}");
+          break;
+
+        case CreatePattern.MultiCase:
+          filePath = "MultiCase.cs";
+
+          source.Add("var val=1;");
+          source.Add("switch(val)");
+          source.Add("{");
+          source.Add("  case 1:");
+          source.Add("  case 2:");
           source.Add("  break;");
           source.Add("}");
           break;
@@ -155,6 +168,49 @@ namespace CSharpAnalyzeTest
         };
         var caseIndex = 0;
         foreach(IItemSwitchCase itemCase in targetInstance.Cases){
+          checkSwitchCase(itemCase, caseLablesList[caseIndex++]);
+        }
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// Caseまとまりのテスト
+    /// </summary>
+    [Fact(DisplayName = "MultiCase")]
+    public void MultiCaseTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.MultiCase), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "MultiCase.cs");
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemSwitch;
+
+        // 分岐構造の確認
+        checkSwitch(targetInstance, "val", 1);
+
+        var caseLablesList = new List<List<string>>()
+        {
+          new List<string>(){"1" ,"2"},
+        };
+        var caseIndex = 0;
+        foreach (IItemSwitchCase itemCase in targetInstance.Cases)
+        {
           checkSwitchCase(itemCase, caseLablesList[caseIndex++]);
         }
       });

@@ -85,7 +85,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze
           instance = new Literal(param, container);
           break;
 
-        // その他
+        // Switch Case系
         case IDefaultCaseClauseOperation  param:
           instance = new DefalutCase(param, container);
           break;

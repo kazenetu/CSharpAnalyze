@@ -89,6 +89,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze
         case IDefaultCaseClauseOperation  param:
           instance = new DefalutCase(param, container);
           break;
+        case IDeclarationPatternOperation param:
+          instance = new DeclarationPattern(param, container);
+          break;
 
         default:
           Console.Write($" [{operation.Kind} is none] ");

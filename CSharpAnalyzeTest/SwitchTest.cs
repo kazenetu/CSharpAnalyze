@@ -19,6 +19,7 @@ namespace CSharpAnalyzeTest
       Standard,
       CaseDefault,
       MultiCase,
+      TypeCase,
     }
 
     /// <summary>
@@ -31,7 +32,7 @@ namespace CSharpAnalyzeTest
       var usingList = new StringBuilder();
       var source = new List<string>();
       var filePath = string.Empty;
-
+    
       switch (pattern)
       {
         case CreatePattern.Standard:
@@ -66,6 +67,19 @@ namespace CSharpAnalyzeTest
           source.Add("{");
           source.Add("  case 1:");
           source.Add("  case 2:");
+          source.Add("  break;");
+          source.Add("}");
+          break;
+
+        case CreatePattern.TypeCase:
+          filePath = "TypeCase.cs";
+
+          source.Add("object val = 1;");
+          source.Add("switch(val)");
+          source.Add("{");
+          source.Add("  case int b:");
+          source.Add("  break;");
+          source.Add("  case string b:");
           source.Add("  break;");
           source.Add("}");
           break;
@@ -207,6 +221,50 @@ namespace CSharpAnalyzeTest
         var caseLablesList = new List<List<string>>()
         {
           new List<string>(){"1" ,"2"},
+        };
+        var caseIndex = 0;
+        foreach (IItemSwitchCase itemCase in targetInstance.Cases)
+        {
+          checkSwitchCase(itemCase, caseLablesList[caseIndex++]);
+        }
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 型による分岐のテスト
+    /// </summary>
+    [Fact(DisplayName = "TypeCase")]
+    public void TypeCaseTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.TypeCase), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "TypeCase.cs");
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemSwitch;
+
+        // 分岐構造の確認
+        checkSwitch(targetInstance, "val", 2);
+
+        var caseLablesList = new List<List<string>>()
+        {
+          new List<string>(){"int b"},
+          new List<string>(){"string b"},
         };
         var caseIndex = 0;
         foreach (IItemSwitchCase itemCase in targetInstance.Cases)

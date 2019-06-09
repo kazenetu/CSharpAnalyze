@@ -93,6 +93,11 @@ namespace CSharpAnalyze.Domain.Model.Analyze
           instance = new DeclarationPattern(param, container);
           break;
 
+        //If系
+        case IIsPatternOperation param:
+        instance = new IsPattern(param, container);
+          break;
+
         default:
           Console.Write($" [{operation.Kind} is none] ");
           break;

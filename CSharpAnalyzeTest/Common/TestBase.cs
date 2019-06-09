@@ -131,6 +131,7 @@ namespace CSharpAnalyzeTest.Common
       // 単語の最後にスペースを入れるか確認し返す
       string spacer(string src)
       {
+        bool addPrefixSpace = false;
         bool addSuffixSpace = false;
 
         switch (src)
@@ -138,11 +139,19 @@ namespace CSharpAnalyzeTest.Common
           case "new":
             addSuffixSpace = true;
             break;
+          case "is":
+            addPrefixSpace = true;
+            addSuffixSpace = true;
+            break;
+        }
+
+        if (addPrefixSpace){
+          src = " " + src;
         }
 
         if (addSuffixSpace)
         {
-          return src + " ";
+          src += " ";
         }
 
         return src;

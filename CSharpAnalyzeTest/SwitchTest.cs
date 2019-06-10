@@ -20,6 +20,7 @@ namespace CSharpAnalyzeTest
       CaseDefault,
       MultiCase,
       TypeCase,
+      NestSwitch,
     }
 
     /// <summary>
@@ -80,6 +81,22 @@ namespace CSharpAnalyzeTest
           source.Add("  case int b:");
           source.Add("  break;");
           source.Add("  case string b:");
+          source.Add("  break;");
+          source.Add("}");
+          break;
+
+        case CreatePattern.NestSwitch:
+          filePath = "NestSwitch.cs";
+
+          source.Add("object val = 1;");
+          source.Add("switch(val)");
+          source.Add("{");
+          source.Add("  case int b:");
+          source.Add("    switch(b)");
+          source.Add("    {");
+          source.Add("      case 1:");
+          source.Add("      break;");
+          source.Add(    "}");
           source.Add("  break;");
           source.Add("}");
           break;
@@ -271,6 +288,63 @@ namespace CSharpAnalyzeTest
         {
           checkSwitchCase(itemCase, caseLablesList[caseIndex++]);
         }
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 分岐のネストのテスト
+    /// </summary>
+    [Fact(DisplayName = "NestSwitch")]
+    public void NestSwitchTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.NestSwitch), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "NestSwitch.cs");
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemSwitch;
+
+        // 分岐構造の確認
+        checkSwitch(targetInstance, "val", 1);
+
+        var caseLablesList = new List<List<string>>()
+        {
+          new List<string>(){"int b"},
+        };
+        var caseIndex = 0;
+        foreach (IItemSwitchCase itemCase in targetInstance.Cases)
+        {
+          checkSwitchCase(itemCase, caseLablesList[caseIndex++]);
+        }
+
+        // caseのメンバーの確認
+        var caseBlockMembers = targetInstance.Cases.First().Members;
+        Assert.Equal(2, caseBlockMembers.Count);
+
+        // ネスト内の分岐構造の確認
+        var innerSwitch = caseBlockMembers.First() as IItemSwitch;
+        Assert.NotNull(innerSwitch);
+        checkSwitch(innerSwitch, "b", 1);
+
+        Assert.NotEmpty(innerSwitch.Cases);
+        checkSwitchCase(innerSwitch.Cases.First() as IItemSwitchCase, 
+                        new List<string>() { "1" });
+
       });
 
       // 解析実行

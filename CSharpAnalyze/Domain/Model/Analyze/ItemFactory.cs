@@ -3,6 +3,7 @@ using CSharpAnalyze.Domain.Model.Analyze.Items;
 using CSharpAnalyze.Domain.PublicInterfaces;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Linq;
 
 namespace CSharpAnalyze.Domain.Model.Analyze
@@ -107,6 +108,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze
         // ループ処理
         case WhileStatementSyntax targetNode:
           result = new ItemWhile(targetNode, semanticModel, parent, container);
+          break;
+        case DoStatementSyntax targetNode:
+          result = new ItemDo(targetNode, semanticModel, parent, container);
           break;
         case ForEachStatementSyntax targetNode:
           result = new ItemForEach(targetNode, semanticModel, parent, container);

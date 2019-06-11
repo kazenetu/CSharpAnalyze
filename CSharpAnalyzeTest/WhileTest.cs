@@ -18,6 +18,7 @@ namespace CSharpAnalyzeTest
     {
       Standard,
       DoWhile,
+      Increment,
     }
 
     /// <summary>
@@ -51,6 +52,15 @@ namespace CSharpAnalyzeTest
           source.Add("  val++;");
           source.Add("}");
           source.Add("while(val < 10)");
+          break;
+
+        case CreatePattern.Increment:
+          filePath = "Increment.cs";
+
+          source.Add("var val=0;");
+          source.Add("while(val++ < 10)");
+          source.Add("{");
+          source.Add("}");
           break;
       }
 
@@ -137,6 +147,39 @@ namespace CSharpAnalyzeTest
 
         // 条件の確認
         Assert.Equal("val<10", GetExpressionsToString(targetInstance.Conditions));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 条件：インクリメントのテスト
+    /// </summary>
+    [Fact(DisplayName = "Increment")]
+    public void IncrementTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.Increment), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "Increment.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances<IItemWhile>(targetParentInstance).First();
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 条件の確認
+        Assert.Equal("val++<10", GetExpressionsToString(targetInstance.Conditions));
       });
 
       // 解析実行

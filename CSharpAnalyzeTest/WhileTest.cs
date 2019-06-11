@@ -17,6 +17,7 @@ namespace CSharpAnalyzeTest
     private enum CreatePattern
     {
       Standard,
+      DoWhile,
     }
 
     /// <summary>
@@ -40,6 +41,16 @@ namespace CSharpAnalyzeTest
           source.Add("{");
           source.Add("  val++;");
           source.Add("}");
+          break;
+
+        case CreatePattern.DoWhile:
+          filePath = "DoWhile.cs";
+
+          source.Add("var val=0;");
+          source.Add("do{");
+          source.Add("  val++;");
+          source.Add("}");
+          source.Add("while(val < 10)");
           break;
       }
 
@@ -86,7 +97,40 @@ namespace CSharpAnalyzeTest
         var targetParentInstance = targetInstances.First() as IItemMethod;
 
         // 対象インスタンスを取得
-        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemWhile;
+        var targetInstance = GetTargetInstances<IItemWhile>(targetParentInstance).First();
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 条件の確認
+        Assert.Equal("val<10", GetExpressionsToString(targetInstance.Conditions));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// do-whileテスト
+    /// </summary>
+    [Fact(DisplayName = "DoWhile")]
+    public void DoWhileTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.DoWhile), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "DoWhile.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances<IItenDo>(targetParentInstance).First();
 
         // 外部参照の存在確認
         Assert.Empty(ev.FileRoot.OtherFiles);
@@ -116,10 +160,10 @@ namespace CSharpAnalyzeTest
     /// </summary>
     /// <param name="itemClass">対象のアイテムメソッド</param>
     /// <returns>対象インスタンスリスト</returns>
-    private List<IItemWhile> GetTargetInstances(IItemMethod itemMethod)
+    private List<T> GetTargetInstances<T>(IItemMethod itemMethod) where T:class
     {
-      return itemMethod.Members.Where(member => member is IItemWhile).
-              Select(member => member as IItemWhile).ToList();
+      return itemMethod.Members.Where(member => member is T).
+              Select(member => member as T).ToList();
     }
 
     #endregion

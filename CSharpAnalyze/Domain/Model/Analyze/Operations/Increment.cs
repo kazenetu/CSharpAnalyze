@@ -15,11 +15,21 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
     /// <param name="container">イベントコンテナ</param>
     public Increment(IIncrementOrDecrementOperation operation, EventContainer container) : base(container)
     {
+      var incrementOrDecrement = Expression.GetOperationKindExpression(operation);
+
+      if(!operation.IsPostfix){
+        // インクリメント・デクリメント
+        Expressions.AddRange(incrementOrDecrement);
+      }
+
       // インクリメント・デクリメント対象インスタンス
       Expressions.AddRange(OperationFactory.GetExpressionList(operation.Target, container));
 
-      // インクリメント・デクリメント
-      Expressions.AddRange(Expression.GetOperationKindExpression(operation));
+      if (operation.IsPostfix)
+      {
+        // インクリメント・デクリメント
+        Expressions.AddRange(incrementOrDecrement);
+      }
     }
   }
 }

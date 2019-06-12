@@ -150,7 +150,7 @@ namespace CSharpAnalyzeTest
         var targetParentInstance = targetInstances.First() as IItemMethod;
 
         // 対象インスタンスを取得
-        var targetInstance = GetTargetInstances<IItenDo>(targetParentInstance).First();
+        var targetInstance = GetTargetInstances<IItemDo>(targetParentInstance).First();
 
         // 外部参照の存在確認
         Assert.Empty(ev.FileRoot.OtherFiles);
@@ -216,7 +216,7 @@ namespace CSharpAnalyzeTest
         var targetParentInstance = targetInstances.First() as IItemMethod;
 
         // 対象インスタンスを取得
-        var targetInstance = GetTargetInstances<IItenDo>(targetParentInstance).First();
+        var targetInstance = GetTargetInstances<IItemDo>(targetParentInstance).First();
 
         // 外部参照の存在確認
         Assert.Empty(ev.FileRoot.OtherFiles);

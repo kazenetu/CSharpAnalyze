@@ -12,7 +12,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
   /// <summary>
   /// アイテム：繰り返し:do while
   /// </summary>
-  internal class ItemDo : AbstractItem, IItenDo
+  internal class ItemDo : AbstractItem, IItemDo
   {
     /// <summary>
     /// 条件

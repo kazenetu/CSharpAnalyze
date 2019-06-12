@@ -19,6 +19,7 @@ namespace CSharpAnalyzeTest
       Standard,
       DoWhile,
       Increment,
+      Decrement,
     }
 
     /// <summary>
@@ -61,6 +62,15 @@ namespace CSharpAnalyzeTest
           source.Add("while(val++ < 10)");
           source.Add("{");
           source.Add("}");
+          break;
+
+        case CreatePattern.Decrement:
+          filePath = "Decrement.cs";
+
+          source.Add("var val=10;");
+          source.Add("do{");
+          source.Add("}");
+          source.Add("while(--val >= 0)");
           break;
       }
 
@@ -180,6 +190,39 @@ namespace CSharpAnalyzeTest
 
         // 条件の確認
         Assert.Equal("val++<10", GetExpressionsToString(targetInstance.Conditions));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 条件：デクリメントのテスト
+    /// </summary>
+    [Fact(DisplayName = "Decrement")]
+    public void DecrementTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.Decrement), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "Decrement.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances<IItenDo>(targetParentInstance).First();
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 条件の確認
+        Assert.Equal("--val>=0", GetExpressionsToString(targetInstance.Conditions));
       });
 
       // 解析実行

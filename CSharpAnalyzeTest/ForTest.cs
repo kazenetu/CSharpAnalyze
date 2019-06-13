@@ -194,18 +194,24 @@ namespace CSharpAnalyzeTest
     /// <param name="expectedList">パラメータの期待値<</param>
     private void CheckDeclarationsCount(IItemFor targetInstance, List<(string type, string declaration)> expectedList)
     {
-      // 型とローカルフィールドの数が同じか確認
-      Assert.Equal(targetInstance.Types.Count, targetInstance.Declarations.Count);
+      // 期待値とローカルフィールドの数が同じか確認
+      Assert.Equal(expectedList.Count, targetInstance.Declarations.Count);
 
       // ローカルフィールドの数を取得
       var existsCount = 0;
 
       for (var index = 0; index < targetInstance.Declarations.Count; index++)
       {
-        expectedList.Where(item => item.type == targetInstance.Types[index].Name).
-                     Where(item => item.declaration == GetExpressionsToString(targetInstance.Declarations[index]));
+        var actualType = string.Empty;
+        if(targetInstance.Types.Count > index){
+          actualType = targetInstance.Types[index].Name;
+        }
 
-        if (expectedList.Any())
+        var expectedTargets = 
+              expectedList.Where(item => item.type == actualType).
+                           Where(item => item.declaration == GetExpressionsToString(targetInstance.Declarations[index]));
+
+        if (expectedTargets.Any())
         {
           existsCount++;
         }

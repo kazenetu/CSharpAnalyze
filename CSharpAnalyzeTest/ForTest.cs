@@ -8,7 +8,6 @@ using Xunit;
 
 namespace CSharpAnalyzeTest
 {
-  // HACK テスト実装
   [Trait("Forのテスト", nameof(ForTest))]
   public class ForTest : TestBase
   {
@@ -36,7 +35,7 @@ namespace CSharpAnalyzeTest
         case CreatePattern.Standard:
           filePath = "Standard.cs";
 
-          source.Add("void target()");
+          source.Add("for(var index = 0;index < 10;index++)");
           source.Add("{");
           source.Add("}");
           break;
@@ -68,8 +67,8 @@ namespace CSharpAnalyzeTest
     /// <summary>
     /// 基本的なテスト
     /// </summary>
-    //[Fact(DisplayName = "Standard")]
-    public void StandardArgsTest()
+    [Fact(DisplayName = "Standard")]
+    public void StandardTest()
     {
       // テストコードを追加
       CreateFileData(CreateSource(CreatePattern.Standard), (ev) =>
@@ -85,28 +84,32 @@ namespace CSharpAnalyzeTest
         var targetParentInstance = targetInstances.First() as IItemMethod;
 
         // 対象インスタンスを取得
-        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemLocalFunction;
-
-        // 型タイプの確認
-        Assert.Equal("void", GetExpressionsToString(targetInstance.MethodTypes));
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemFor;
 
         // 外部参照の存在確認
         Assert.Empty(ev.FileRoot.OtherFiles);
 
-        // パラメータの確認
-        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
-        {
+        // 宣言部の確認
+        var expectedList = new List<(string type, string declaration)>() {
+          ("int","index"),
         };
-        Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedArgs));
+        CheckDeclarationsCount(targetInstance, expectedList);
 
-        // 内部処理の確認
-        Assert.Empty(targetInstance.Members);
+        // 条件の確認
+        Assert.Equal("index<10", GetExpressionsToString(targetInstance.Conditions));
+
+        // 計算部の確認
+        CheckIncrementorsCount(targetInstance, 
+          new List<string>() {
+            "index++" 
+          });
       });
 
       // 解析実行
       CSAnalyze.Analyze(string.Empty, Files);
     }
 
+    #region メソッドユーティリティ
     /// <summary>
     /// 対象インスタンスの取得
     /// </summary>
@@ -123,39 +126,55 @@ namespace CSharpAnalyzeTest
     /// </summary>
     /// <param name="itemClass">対象のアイテムメソッド</param>
     /// <returns>対象インスタンスリスト</returns>
-    private List<IItemLocalFunction> GetTargetInstances(IItemMethod itemMethod)
+    private List<IItemFor> GetTargetInstances(IItemMethod itemMethod)
     {
-      return itemMethod.Members.Where(member => member is IItemLocalFunction).
-              Select(member => member as IItemLocalFunction).ToList();
+      return itemMethod.Members.Where(member => member is IItemFor).
+              Select(member => member as IItemFor).ToList();
     }
 
     /// <summary>
-    /// メンバー数を取得
+    /// 宣言部の確認
     /// </summary>
     /// <param name="targetInstance">対象のインスタンス</param>
-    /// <param name="expectedArgs">パラメータの期待値</param>
-    /// <returns>条件が一致するメンバー数</returns>
-    private int GetMemberCount(IItemLocalFunction targetInstance, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)
+    /// <param name="expectedList">パラメータの期待値<</param>
+    private void CheckDeclarationsCount(IItemFor targetInstance, List<(string type, string declaration)> expectedList)
     {
-      // パラメータ数の確認
-      Assert.Equal(expectedArgs.Count, targetInstance.Args.Count);
+      // 型とローカルフィールドの数が同じか確認
+      Assert.Equal(targetInstance.Types.Count, targetInstance.Declarations.Count);
 
-      // パラメータの確認
-      var argCount = 0;
-      foreach (var (name, expressions, refType, defaultValue) in expectedArgs)
+      // ローカルフィールドの数を取得
+      var existsCount = 0;
+
+      for (var index = 0; index < targetInstance.Declarations.Count; index++)
       {
-        var actualArgs = targetInstance.Args
-                        .Where(arg => arg.name == name)
-                        .Where(arg => GetExpressionsToString(arg.expressions) == expressions)
-                        .Where(arg => string.Concat(arg.modifiers) == refType)
-                        .Where(arg => GetExpressionsToString(arg.defaultValues) == defaultValue);
-        if (actualArgs.Any())
+        expectedList.Where(item => item.type == targetInstance.Types[index].Name).
+                     Where(item => item.declaration == GetExpressionsToString(targetInstance.Declarations[index]));
+
+        if (expectedList.Any())
         {
-          argCount++;
+          existsCount++;
         }
       }
-      return argCount;
+      Assert.Equal(existsCount, targetInstance.Declarations.Count);
     }
+
+    /// <summary>
+    /// 計算部の確認
+    /// </summary>
+    /// <param name="targetInstance">対象のインスタンス</param>
+    /// <param name="expectedList">パラメータの期待値<</param>
+    private void CheckIncrementorsCount(IItemFor targetInstance, List<string> expectedList)
+    {
+      // 数が同じか確認
+      Assert.Equal(expectedList.Count, targetInstance.Incrementors.Count);
+
+      // 対象を文字列に変換
+      var actualList = targetInstance.Incrementors.Select(item => GetExpressionsToString(item));
+
+      // 同じリストか確認
+      Assert.Equal(expectedList, actualList);
+    }
+    #endregion
 
   }
 }

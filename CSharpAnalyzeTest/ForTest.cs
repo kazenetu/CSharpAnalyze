@@ -17,6 +17,7 @@ namespace CSharpAnalyzeTest
     private enum CreatePattern
     {
       Standard,
+      LocalField,
     }
 
     /// <summary>
@@ -36,6 +37,15 @@ namespace CSharpAnalyzeTest
           filePath = "Standard.cs";
 
           source.Add("for(var index = 0;index < 10;index++)");
+          source.Add("{");
+          source.Add("}");
+          break;
+
+        case CreatePattern.LocalField:
+          filePath = "LocalField.cs";
+
+          source.Add("var index;");
+          source.Add("for(index = 0;index < 10;index++)");
           source.Add("{");
           source.Add("}");
           break;
@@ -102,6 +112,51 @@ namespace CSharpAnalyzeTest
         CheckIncrementorsCount(targetInstance, 
           new List<string>() {
             "index++" 
+          });
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// ローカルフィールド参照
+    /// </summary>
+    [Fact(DisplayName = "LocalField")]
+    public void LocalFieldTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.LocalField), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "LocalField.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemFor;
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 宣言部の確認
+        var expectedList = new List<(string type, string declaration)>() {
+          ("int","index"),
+        };
+        CheckDeclarationsCount(targetInstance, expectedList);
+
+        // 条件の確認
+        Assert.Equal("index<10", GetExpressionsToString(targetInstance.Conditions));
+
+        // 計算部の確認
+        CheckIncrementorsCount(targetInstance,
+          new List<string>() {
+            "index++"
           });
       });
 

@@ -101,7 +101,7 @@ namespace CSharpAnalyzeTest
 
         // 宣言部の確認
         var expectedList = new List<(string type, string declaration)>() {
-          ("int","index"),
+          ("int","index=0"),
         };
         CheckDeclarationsCount(targetInstance, expectedList);
 
@@ -146,7 +146,7 @@ namespace CSharpAnalyzeTest
 
         // 宣言部の確認
         var expectedList = new List<(string type, string declaration)>() {
-          ("int","index"),
+          ("","index=0"),
         };
         CheckDeclarationsCount(targetInstance, expectedList);
 

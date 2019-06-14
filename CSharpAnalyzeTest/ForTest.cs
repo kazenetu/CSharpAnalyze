@@ -19,6 +19,7 @@ namespace CSharpAnalyzeTest
       Standard,
       LocalField,
       MultiDeclarations,
+      MultiIncrementors,
     }
 
     /// <summary>
@@ -55,6 +56,15 @@ namespace CSharpAnalyzeTest
           filePath = "MultiDeclarations.cs";
 
           source.Add("for(int a=0,b=0;a<10;a++,b++)");
+          source.Add("{");
+          source.Add("}");
+          break;
+
+        case CreatePattern.MultiIncrementors:
+          filePath = "MultiIncrementors.cs";
+
+          source.Add("var b=1D;");
+          source.Add("for(int a=0;a<10;a++,b+=1D)");
           source.Add("{");
           source.Add("}");
           break;
@@ -213,6 +223,53 @@ namespace CSharpAnalyzeTest
           new List<string>() {
             "a++",
             "b++",
+          });
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+
+    /// <summary>
+    /// 複数計算テスト
+    /// </summary>
+    [Fact(DisplayName = "MultiIncrementors")]
+    public void MultiIncrementorsTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.MultiIncrementors), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "MultiIncrementors.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemFor;
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 宣言部の確認
+        var expectedList = new List<(string type, string declaration)>() {
+          ("int","a=0")
+        };
+        CheckDeclarationsCount(targetInstance, expectedList);
+
+        // 条件の確認
+        Assert.Equal("a<10", GetExpressionsToString(targetInstance.Conditions));
+
+        // 計算部の確認
+        CheckIncrementorsCount(targetInstance,
+          new List<string>() {
+            "a++",
+            "b+=1",
           });
       });
 

@@ -119,10 +119,10 @@ namespace CSharpAnalyzeTest
         Assert.Empty(ev.FileRoot.OtherFiles);
 
         // 宣言部の確認
-        var expectedList = new List<(string type, string declaration)>() {
-          ("int","index=0"),
-        };
-        CheckDeclarationsCount(targetInstance, expectedList);
+        CheckDeclarationsCount(targetInstance, "int", 
+          new List<string>() {
+            "index=0",
+          });
 
         // 条件の確認
         Assert.Equal("index<10", GetExpressionsToString(targetInstance.Conditions));
@@ -164,10 +164,10 @@ namespace CSharpAnalyzeTest
         Assert.Empty(ev.FileRoot.OtherFiles);
 
         // 宣言部の確認
-        var expectedList = new List<(string type, string declaration)>() {
-          ("","index=0"),
-        };
-        CheckDeclarationsCount(targetInstance, expectedList);
+        CheckDeclarationsCount(targetInstance,string.Empty, 
+          new List<string>() {
+            "index=0",
+          });
 
         // 条件の確認
         Assert.Equal("index<10", GetExpressionsToString(targetInstance.Conditions));
@@ -209,11 +209,11 @@ namespace CSharpAnalyzeTest
         Assert.Empty(ev.FileRoot.OtherFiles);
 
         // 宣言部の確認
-        var expectedList = new List<(string type, string declaration)>() {
-          ("int","a=0"),
-          ("","b=0"),
-        };
-        CheckDeclarationsCount(targetInstance, expectedList);
+        CheckDeclarationsCount(targetInstance,"int", 
+          new List<string>() {
+            "a=0",
+            "b=0",
+          });
 
         // 条件の確認
         Assert.Equal("a<10", GetExpressionsToString(targetInstance.Conditions));
@@ -229,7 +229,6 @@ namespace CSharpAnalyzeTest
       // 解析実行
       CSAnalyze.Analyze(string.Empty, Files);
     }
-
 
     /// <summary>
     /// 複数計算テスト
@@ -257,10 +256,10 @@ namespace CSharpAnalyzeTest
         Assert.Empty(ev.FileRoot.OtherFiles);
 
         // 宣言部の確認
-        var expectedList = new List<(string type, string declaration)>() {
-          ("int","a=0")
-        };
-        CheckDeclarationsCount(targetInstance, expectedList);
+        CheckDeclarationsCount(targetInstance, "int",
+          new List<string>() {
+            "a=0",
+          });
 
         // 条件の確認
         Assert.Equal("a<10", GetExpressionsToString(targetInstance.Conditions));
@@ -305,24 +304,25 @@ namespace CSharpAnalyzeTest
     /// </summary>
     /// <param name="targetInstance">対象のインスタンス</param>
     /// <param name="expectedList">パラメータの期待値<</param>
-    private void CheckDeclarationsCount(IItemFor targetInstance, List<(string type, string declaration)> expectedList)
+    private void CheckDeclarationsCount(IItemFor targetInstance, string expectedType, List<string> expectedList)
     {
       // 期待値とローカルフィールドの数が同じか確認
       Assert.Equal(expectedList.Count, targetInstance.Declarations.Count);
 
+      // 宣言部の型の確認
+      var actualType = string.Empty;
+      if (targetInstance.Types.Any()){
+        Assert.Single(targetInstance.Types);
+        actualType = targetInstance.Types.Single().Name;
+      }
+      Assert.Equal(expectedType, actualType);
+
       // ローカルフィールドの数を取得
       var existsCount = 0;
-
       for (var index = 0; index < targetInstance.Declarations.Count; index++)
       {
-        var actualType = string.Empty;
-        if(targetInstance.Types.Count > index){
-          actualType = targetInstance.Types[index].Name;
-        }
-
         var expectedTargets = 
-              expectedList.Where(item => item.type == actualType).
-                           Where(item => item.declaration == GetExpressionsToString(targetInstance.Declarations[index]));
+              expectedList.Where(item => item == GetExpressionsToString(targetInstance.Declarations[index]));
 
         if (expectedTargets.Any())
         {

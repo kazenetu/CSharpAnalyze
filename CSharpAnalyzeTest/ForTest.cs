@@ -129,7 +129,7 @@ namespace CSharpAnalyzeTest
     }
 
     /// <summary>
-    /// ローカルフィールド参照
+    /// ローカルフィールド参照テスト
     /// </summary>
     [Fact(DisplayName = "LocalField")]
     public void LocalFieldTest()

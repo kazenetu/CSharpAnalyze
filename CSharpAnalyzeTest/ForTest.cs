@@ -18,6 +18,7 @@ namespace CSharpAnalyzeTest
     {
       Standard,
       LocalField,
+      MultiDeclarations,
     }
 
     /// <summary>
@@ -46,6 +47,14 @@ namespace CSharpAnalyzeTest
 
           source.Add("var index;");
           source.Add("for(index = 0;index < 10;index++)");
+          source.Add("{");
+          source.Add("}");
+          break;
+
+        case CreatePattern.MultiDeclarations:
+          filePath = "MultiDeclarations.cs";
+
+          source.Add("for(int a=0,b=0;a<10;a++,b++)");
           source.Add("{");
           source.Add("}");
           break;
@@ -157,6 +166,53 @@ namespace CSharpAnalyzeTest
         CheckIncrementorsCount(targetInstance,
           new List<string>() {
             "index++"
+          });
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 複数宣言テスト
+    /// </summary>
+    [Fact(DisplayName = "MultiDeclarations")]
+    public void MultiDeclarationsTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.MultiDeclarations), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "MultiDeclarations.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemFor;
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 宣言部の確認
+        var expectedList = new List<(string type, string declaration)>() {
+          ("int","a=0"),
+          ("","b=0"),
+        };
+        CheckDeclarationsCount(targetInstance, expectedList);
+
+        // 条件の確認
+        Assert.Equal("a<10", GetExpressionsToString(targetInstance.Conditions));
+
+        // 計算部の確認
+        CheckIncrementorsCount(targetInstance,
+          new List<string>() {
+            "a++",
+            "b++",
           });
       });
 

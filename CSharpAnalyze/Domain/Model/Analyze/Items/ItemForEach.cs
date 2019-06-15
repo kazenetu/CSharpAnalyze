@@ -21,9 +21,24 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     public List<IExpression> Local { get; } = new List<IExpression>();
 
     /// <summary>
+    /// ローカルが型推論か否か
+    /// </summary>
+    public bool IsVar { get; }
+
+    /// <summary>
+    /// ローカルの型リスト
+    /// </summary>
+    public List<IExpression> LocalTypes { get; } = new List<IExpression>();
+
+    /// <summary>
     /// コレクション
     /// </summary>
     public List<IExpression> Collection { get; } = new List<IExpression>();
+
+    /// <summary>
+    /// コレクションの型リスト
+    /// </summary>
+    public List<IExpression> CollectionTypes { get; } = new List<IExpression>();
 
     /// <summary>
     /// コンストラクタ
@@ -37,10 +52,20 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       ItemType = ItemTypes.MethodStatement;
 
       var oparetion = semanticModel.GetOperation(node) as IForEachLoopOperation;
+      var localSymbol = oparetion.Locals.First();
+
+      // ローカルの型設定
+      IsVar = node.Type.IsVar;
+      LocalTypes.AddRange(GetTypes(localSymbol.Type, semanticModel, node));
 
       // ローカル設定
-      var localSymbol = oparetion.Locals.First();
       Local.Add(new Expression(localSymbol.Name, Expression.GetSymbolTypeName(localSymbol)));
+
+      // コレクションの型設定
+      var conversionOperation = oparetion.Collection as IConversionOperation;
+      if(!(conversionOperation is null)){
+        CollectionTypes.AddRange(GetTypes(conversionOperation.Operand.Type, semanticModel, node));
+      }
 
       //コレクション
       Collection.AddRange(OperationFactory.GetExpressionList(oparetion.Collection.Children.First(), container));
@@ -52,6 +77,41 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         Members.Add(ItemFactory.Create(statement, semanticModel, container, this));
       }
     }
+
+    /// <summary>
+    /// 型リストを取得する
+    /// </summary>
+    /// <param name="symbol">対象インスタンス</param>
+    /// <param name="semanticModel">対象ソースのsemanticModel</param>
+    /// <param name="node">対象Node</param>
+    /// <returns>型リスト</returns>
+    private List<IExpression> GetTypes(ISymbol symbol, SemanticModel semanticModel, SyntaxNode node)
+    {
+      var result = new List<IExpression>();
+
+      var parts = symbol.ToDisplayParts(SymbolDisplayFormat.MinimallyQualifiedFormat);
+      foreach (var part in parts)
+      {
+        // スペースの場合は型設定に含めない
+        if (part.Kind == SymbolDisplayPartKind.Space)
+        {
+          continue;
+        }
+
+        var name = $"{part}";
+        var type = Expression.GetSymbolTypeName(part.Symbol);
+        if (part.Kind == SymbolDisplayPartKind.ClassName)
+        {
+          // 外部ファイル参照イベント発行
+          RaiseOtherFileReferenced(node, part.Symbol);
+        }
+
+        result.Add(new Expression(name, type));
+      }
+
+      return result;
+    }
+
 
     #region 基本インターフェース実装：メソッド
 

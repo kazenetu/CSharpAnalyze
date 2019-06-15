@@ -8,7 +8,6 @@ using Xunit;
 
 namespace CSharpAnalyzeTest
 {
-  // HACK テスト実装
   [Trait("ForEachのテスト", nameof(ForEachTest))]
   public class ForEachTest : TestBase
   {
@@ -36,7 +35,8 @@ namespace CSharpAnalyzeTest
         case CreatePattern.Standard:
           filePath = "Standard.cs";
 
-          source.Add("void target()");
+          source.Add("var values = new int[]{1,2,3 };");
+          source.Add("foreach(var value in values){");
           source.Add("{");
           source.Add("}");
           break;
@@ -68,8 +68,8 @@ namespace CSharpAnalyzeTest
     /// <summary>
     /// 基本的なテスト
     /// </summary>
-    //[Fact(DisplayName = "Standard")]
-    public void StandardArgsTest()
+    [Fact(DisplayName = "Standard")]
+    public void StandardTest()
     {
       // テストコードを追加
       CreateFileData(CreateSource(CreatePattern.Standard), (ev) =>
@@ -85,28 +85,24 @@ namespace CSharpAnalyzeTest
         var targetParentInstance = targetInstances.First() as IItemMethod;
 
         // 対象インスタンスを取得
-        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemLocalFunction;
-
-        // 型タイプの確認
-        Assert.Equal("void", GetExpressionsToString(targetInstance.MethodTypes));
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemForEach;
 
         // 外部参照の存在確認
         Assert.Empty(ev.FileRoot.OtherFiles);
 
-        // パラメータの確認
-        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
-        {
-        };
-        Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedArgs));
+        // ローカル部の確認
+        Assert.Equal("value", GetExpressionsToString(targetInstance.Local));
 
-        // 内部処理の確認
-        Assert.Empty(targetInstance.Members);
+        // コレクション部部の確認
+        Assert.Equal("values", GetExpressionsToString(targetInstance.Collection));
+
       });
 
       // 解析実行
       CSAnalyze.Analyze(string.Empty, Files);
     }
 
+    #region ユーティリティメソッド
     /// <summary>
     /// 対象インスタンスの取得
     /// </summary>
@@ -123,39 +119,11 @@ namespace CSharpAnalyzeTest
     /// </summary>
     /// <param name="itemClass">対象のアイテムメソッド</param>
     /// <returns>対象インスタンスリスト</returns>
-    private List<IItemLocalFunction> GetTargetInstances(IItemMethod itemMethod)
+    private List<IItemForEach> GetTargetInstances(IItemMethod itemMethod)
     {
-      return itemMethod.Members.Where(member => member is IItemLocalFunction).
-              Select(member => member as IItemLocalFunction).ToList();
+      return itemMethod.Members.Where(member => member is IItemForEach).
+              Select(member => member as IItemForEach).ToList();
     }
-
-    /// <summary>
-    /// メンバー数を取得
-    /// </summary>
-    /// <param name="targetInstance">対象のインスタンス</param>
-    /// <param name="expectedArgs">パラメータの期待値</param>
-    /// <returns>条件が一致するメンバー数</returns>
-    private int GetMemberCount(IItemLocalFunction targetInstance, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)
-    {
-      // パラメータ数の確認
-      Assert.Equal(expectedArgs.Count, targetInstance.Args.Count);
-
-      // パラメータの確認
-      var argCount = 0;
-      foreach (var (name, expressions, refType, defaultValue) in expectedArgs)
-      {
-        var actualArgs = targetInstance.Args
-                        .Where(arg => arg.name == name)
-                        .Where(arg => GetExpressionsToString(arg.expressions) == expressions)
-                        .Where(arg => string.Concat(arg.modifiers) == refType)
-                        .Where(arg => GetExpressionsToString(arg.defaultValues) == defaultValue);
-        if (actualArgs.Any())
-        {
-          argCount++;
-        }
-      }
-      return argCount;
-    }
-
+    #endregion
   }
 }

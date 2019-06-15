@@ -20,6 +20,7 @@ namespace CSharpAnalyzeTest
       LocalField,
       MultiDeclarations,
       MultiIncrementors,
+      UseMethods,
     }
 
     /// <summary>
@@ -67,6 +68,17 @@ namespace CSharpAnalyzeTest
           source.Add("for(int a=0;a<10;a++,b+=1D)");
           source.Add("{");
           source.Add("}");
+          break;
+
+        case CreatePattern.UseMethods:
+          filePath = "UseMethods.cs";
+
+          source.Add("for(var index = ini();condition(index);index+=incrementor())");
+          source.Add("{");
+          source.Add("}");
+          source.Add("int ini()=>0;");
+          source.Add("bool condition(int value)=> value < 10;");
+          source.Add("int incrementor()=>1;");
           break;
       }
 
@@ -269,6 +281,51 @@ namespace CSharpAnalyzeTest
           new List<string>() {
             "a++",
             "b+=1",
+          });
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// メソッド使用のテスト
+    /// </summary>
+    [Fact(DisplayName = "UseMethods")]
+    public void UseMethodsTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.UseMethods), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "UseMethods.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemFor;
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 宣言部の確認
+        CheckDeclarationsCount(targetInstance, "int",
+          new List<string>() {
+            "index=ini()",
+          });
+
+        // 条件の確認
+        Assert.Equal("condition(index)", GetExpressionsToString(targetInstance.Conditions));
+
+        // 計算部の確認
+        CheckIncrementorsCount(targetInstance,
+          new List<string>() {
+            "index+=incrementor()"
           });
       });
 

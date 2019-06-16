@@ -90,8 +90,14 @@ namespace CSharpAnalyzeTest
         // 外部参照の存在確認
         Assert.Empty(ev.FileRoot.OtherFiles);
 
+        // ローカル部の型の確認
+        Assert.Equal("int", GetExpressionsToString(targetInstance.LocalTypes));
+
         // ローカル部の確認
         Assert.Equal("value", GetExpressionsToString(targetInstance.Local));
+
+        // コレクション部の型の確認
+        Assert.Equal("int[]", GetExpressionsToString(targetInstance.CollectionTypes));
 
         // コレクション部部の確認
         Assert.Equal("values", GetExpressionsToString(targetInstance.Collection));

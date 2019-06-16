@@ -17,6 +17,7 @@ namespace CSharpAnalyzeTest
     private enum CreatePattern
     {
       Standard,
+      ListStrings,
     }
 
     /// <summary>
@@ -36,6 +37,15 @@ namespace CSharpAnalyzeTest
           filePath = "Standard.cs";
 
           source.Add("var values = new int[]{1,2,3 };");
+          source.Add("foreach(var value in values){");
+          source.Add("{");
+          source.Add("}");
+          break;
+
+        case CreatePattern.ListStrings:
+          filePath = "ListStrings.cs";
+
+          source.Add("var values = new List<string>{\"1\",\"2\", \"3\" };");
           source.Add("foreach(var value in values){");
           source.Add("{");
           source.Add("}");
@@ -98,6 +108,50 @@ namespace CSharpAnalyzeTest
 
         // コレクション部の型の確認
         Assert.Equal("int[]", GetExpressionsToString(targetInstance.CollectionTypes));
+
+        // コレクション部部の確認
+        Assert.Equal("values", GetExpressionsToString(targetInstance.Collection));
+
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// Listジェネリクスのテスト
+    /// </summary>
+    [Fact(DisplayName = "ListStrings")]
+    public void ListStringsTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.ListStrings), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "ListStrings.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemForEach;
+
+        // 外部参照の存在確認
+        Assert.Single(ev.FileRoot.OtherFiles);
+        Assert.Equal("List",ev.FileRoot.OtherFiles.First().Key);
+
+        // ローカル部の型の確認
+        Assert.Equal("string", GetExpressionsToString(targetInstance.LocalTypes));
+
+        // ローカル部の確認
+        Assert.Equal("value", GetExpressionsToString(targetInstance.Local));
+
+        // コレクション部の型の確認
+        Assert.Equal("List<string>", GetExpressionsToString(targetInstance.CollectionTypes));
 
         // コレクション部部の確認
         Assert.Equal("values", GetExpressionsToString(targetInstance.Collection));

@@ -214,7 +214,7 @@ namespace CSharpAnalyzeTest
         Assert.Equal("value", GetExpressionsToString(targetInstance.Local));
 
         // コレクション部の型の確認
-        Assert.Equal("Dictionary<int,string>", GetExpressionsToString(targetInstance.CollectionTypes));
+        Assert.Equal("Dictionary<int,string>.Keys", GetExpressionsToString(targetInstance.CollectionTypes));
 
         // コレクション部部の確認
         Assert.Equal("values", GetExpressionsToString(targetInstance.Collection));

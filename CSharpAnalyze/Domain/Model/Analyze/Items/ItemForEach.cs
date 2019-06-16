@@ -64,10 +64,11 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       // コレクションの型設定
       var conversionOperation = oparetion.Collection as IConversionOperation;
       if(!(conversionOperation is null)){
-        CollectionTypes.AddRange(GetTypes(conversionOperation.Operand.Type, semanticModel, node));
+        CollectionTypes.AddRange(GetTypes(conversionOperation.Operand.Type, semanticModel, node,SymbolDisplayFormat.CSharpShortErrorMessageFormat));
       }
 
       //コレクション
+      //HACK プロパティ参照でも正しく出力できるようにする
       Collection.AddRange(OperationFactory.GetExpressionList(oparetion.Collection.Children.First(), container));
 
       // 内部処理設定
@@ -85,11 +86,15 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     /// <param name="semanticModel">対象ソースのsemanticModel</param>
     /// <param name="node">対象Node</param>
     /// <returns>型リスト</returns>
-    private List<IExpression> GetTypes(ISymbol symbol, SemanticModel semanticModel, SyntaxNode node)
+    private List<IExpression> GetTypes(ISymbol symbol, SemanticModel semanticModel, SyntaxNode node, SymbolDisplayFormat format = null)
     {
       var result = new List<IExpression>();
 
-      var parts = symbol.ToDisplayParts(SymbolDisplayFormat.MinimallyQualifiedFormat);
+      var symbolDisplayFormat = format;
+      if(symbolDisplayFormat is null){
+        symbolDisplayFormat = SymbolDisplayFormat.MinimallyQualifiedFormat;
+      }
+      var parts = symbol.ToDisplayParts(symbolDisplayFormat);
       foreach (var part in parts)
       {
         // スペースの場合は型設定に含めない

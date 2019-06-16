@@ -167,6 +167,9 @@ namespace CSharpAnalyzeTest
         Assert.Equal("values", GetExpressionsToString(targetInstance.Collection));
 
       });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
     }
 
     /// <summary>

@@ -38,7 +38,7 @@ namespace CSharpAnalyzeTest
           filePath = "Standard.cs";
 
           source.Add("var values = new int[]{1,2,3 };");
-          source.Add("foreach(var value in values){");
+          source.Add("foreach(var value in values)");
           source.Add("{");
           source.Add("}");
           break;
@@ -47,7 +47,7 @@ namespace CSharpAnalyzeTest
           filePath = "ListStrings.cs";
 
           source.Add("var values = new List<string>{\"1\",\"2\", \"3\" };");
-          source.Add("foreach(var value in values){");
+          source.Add("foreach(var value in values)");
           source.Add("{");
           source.Add("}");
           break;
@@ -56,7 +56,7 @@ namespace CSharpAnalyzeTest
           filePath = "DictionaryKey.cs";
 
           source.Add("var values = new Dictionary<int,string>{{10,\"1\"},{20,\"2\"}, {30,\"3\" }};");
-          source.Add("foreach(var value in values.Keys){");
+          source.Add("foreach(var value in values.Keys)");
           source.Add("{");
           source.Add("}");
           break;

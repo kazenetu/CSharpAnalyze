@@ -18,6 +18,7 @@ namespace CSharpAnalyzeTest
     {
       Standard,
       ListStrings,
+      DictionaryKey,
     }
 
     /// <summary>
@@ -47,6 +48,15 @@ namespace CSharpAnalyzeTest
 
           source.Add("var values = new List<string>{\"1\",\"2\", \"3\" };");
           source.Add("foreach(var value in values){");
+          source.Add("{");
+          source.Add("}");
+          break;
+
+        case CreatePattern.DictionaryKey:
+          filePath = "DictionaryKey.cs";
+
+          source.Add("var values = new Dictionary<int,string>{{10,\"1\"},{20,\"2\"}, {30,\"3\" }};");
+          source.Add("foreach(var value in values.Keys){");
           source.Add("{");
           source.Add("}");
           break;
@@ -142,7 +152,7 @@ namespace CSharpAnalyzeTest
 
         // 外部参照の存在確認
         Assert.Single(ev.FileRoot.OtherFiles);
-        Assert.Equal("List",ev.FileRoot.OtherFiles.First().Key);
+        Assert.Equal("List", ev.FileRoot.OtherFiles.First().Key);
 
         // ローカル部の型の確認
         Assert.Equal("string", GetExpressionsToString(targetInstance.LocalTypes));
@@ -152,6 +162,56 @@ namespace CSharpAnalyzeTest
 
         // コレクション部の型の確認
         Assert.Equal("List<string>", GetExpressionsToString(targetInstance.CollectionTypes));
+
+        // コレクション部部の確認
+        Assert.Equal("values", GetExpressionsToString(targetInstance.Collection));
+
+      });
+    }
+
+    /// <summary>
+    /// Dictionaryジェネリクスのテスト:Keys
+    /// </summary>
+    [Fact(DisplayName = "DictionaryKey")]
+    public void DictionaryKeyTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.DictionaryKey), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "DictionaryKey.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemForEach;
+
+        // 外部参照の存在確認
+        var expectedClassName = new List<string> { "KeyCollection", "Dictionary" };
+        foreach (var fileInfo in ev.FileRoot.OtherFiles)
+        {
+          // クラス名が一致する場合は予想クラス名リストから対象クラス名を削除
+          if (expectedClassName.Contains(fileInfo.Key))
+          {
+            expectedClassName.Remove(fileInfo.Key);
+          }
+        }
+        // 予想クラス名リストがすべて削除されていることを確認
+        Assert.Empty(expectedClassName);
+
+        // ローカル部の型の確認
+        Assert.Equal("int", GetExpressionsToString(targetInstance.LocalTypes));
+
+        // ローカル部の確認
+        Assert.Equal("value", GetExpressionsToString(targetInstance.Local));
+
+        // コレクション部の型の確認
+        Assert.Equal("Dictionary<int,string>", GetExpressionsToString(targetInstance.CollectionTypes));
 
         // コレクション部部の確認
         Assert.Equal("values", GetExpressionsToString(targetInstance.Collection));

@@ -114,6 +114,13 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
         }
         else
         {
+          // ローカルの場合はインスタンスを追加する
+          if (prop.Instance is ILocalReferenceOperation)
+          {
+            Expressions.AddRange(OperationFactory.GetExpressionList(prop.Instance, eventContainer));
+            Expressions.Add(new Expression(".", string.Empty));
+          }
+
           // それ以外のプロパティの場合
           Expressions.Add(new Expression(propItem.Name, Expression.GetSymbolTypeName(propItem)));
         }

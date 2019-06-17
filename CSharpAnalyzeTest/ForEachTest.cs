@@ -119,7 +119,7 @@ namespace CSharpAnalyzeTest
         // コレクション部の型の確認
         Assert.Equal("int[]", GetExpressionsToString(targetInstance.CollectionTypes));
 
-        // コレクション部部の確認
+        // コレクション部の確認
         Assert.Equal("values", GetExpressionsToString(targetInstance.Collection));
 
       });
@@ -163,7 +163,7 @@ namespace CSharpAnalyzeTest
         // コレクション部の型の確認
         Assert.Equal("List<string>", GetExpressionsToString(targetInstance.CollectionTypes));
 
-        // コレクション部部の確認
+        // コレクション部の確認
         Assert.Equal("values", GetExpressionsToString(targetInstance.Collection));
 
       });
@@ -216,7 +216,7 @@ namespace CSharpAnalyzeTest
         // コレクション部の型の確認
         Assert.Equal("Dictionary<int,string>.KeyCollection", GetExpressionsToString(targetInstance.CollectionTypes));
 
-        // コレクション部部の確認
+        // コレクション部の確認
         Assert.Equal("values.Keys", GetExpressionsToString(targetInstance.Collection));
 
       });

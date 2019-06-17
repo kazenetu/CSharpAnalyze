@@ -68,7 +68,6 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       }
 
       //コレクション
-      //HACK プロパティ参照でも正しく出力できるようにする
       Collection.AddRange(OperationFactory.GetExpressionList(oparetion.Collection.Children.First(), container));
 
       // 内部処理設定

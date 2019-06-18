@@ -20,6 +20,11 @@ namespace CSharpAnalyzeTest
       ListStrings,
       DictionaryKey,
       DictionaryValue,
+      Dictionary,
+      GenericsNest,
+      Indexer,
+      InstanceProperty,
+      InstanceMethod,
     }
 
     /// <summary>

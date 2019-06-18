@@ -37,6 +37,8 @@ namespace CSharpAnalyzeTest
       var usingList = new StringBuilder();
       var source = new List<string>();
       var filePath = string.Empty;
+      var addMember = new List<string>();
+      var addSource = new StringBuilder();
 
       switch (pattern)
       {
@@ -77,17 +79,17 @@ namespace CSharpAnalyzeTest
           break;
       }
 
-      // ソースコード作成
       var targetSource = new StringBuilder();
       targetSource.AppendLine("public class Standard");
       targetSource.AppendLine("{");
       targetSource.AppendLine("  public void TestMethod()");
       targetSource.AppendLine("  {");
-
       source.ForEach(line => targetSource.AppendLine($"    {line }"));
-
       targetSource.AppendLine("  }");
+
+      addMember.ForEach(line => targetSource.AppendLine($"  {line }"));
       targetSource.AppendLine("}");
+      targetSource.AppendLine(addSource.ToString());
 
       return new FileData(filePath, usingList.ToString(), targetSource.ToString());
     }

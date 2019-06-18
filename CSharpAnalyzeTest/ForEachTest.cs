@@ -86,6 +86,19 @@ namespace CSharpAnalyzeTest
           source.Add("{");
           source.Add("}");
           break;
+
+        case CreatePattern.GenericsNest:
+          filePath = "GenericsNest.cs";
+
+          source.Add("var values = new Dictionary<int,List<string>>");
+          source.Add("{");
+          source.Add("{0,new List{\"a\",\"b\",\"c\",} },");
+          source.Add("{1,new List{\"A\",\"B\",\"C\",} },");
+          source.Add("};");
+          source.Add("foreach(var value in values)");
+          source.Add("{");
+          source.Add("}");
+          break;
       }
 
       var targetSource = new StringBuilder();
@@ -347,6 +360,59 @@ namespace CSharpAnalyzeTest
 
         // コレクション部の型の確認
         Assert.Equal("Dictionary<int,string>", GetExpressionsToString(targetInstance.CollectionTypes));
+
+        // コレクション部の確認
+        Assert.Equal("values", GetExpressionsToString(targetInstance.Collection));
+
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// ジェネリクスのネストのテスト
+    /// </summary>
+    [Fact(DisplayName = "GenericsNest")]
+    public void GenericsNestTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.GenericsNest), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "GenericsNest.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemForEach;
+
+        // 外部参照の存在確認
+        var expectedClassName = new List<string> { "Dictionary", "List" };
+        foreach (var fileInfo in ev.FileRoot.OtherFiles)
+        {
+          // クラス名が一致する場合は予想クラス名リストから対象クラス名を削除
+          if (expectedClassName.Contains(fileInfo.Key))
+          {
+            expectedClassName.Remove(fileInfo.Key);
+          }
+        }
+        // 予想クラス名リストがすべて削除されていることを確認
+        Assert.Empty(expectedClassName);
+
+        // ローカル部の型の確認
+        Assert.Equal("KeyValuePair<int,List<string>>", GetExpressionsToString(targetInstance.LocalTypes));
+
+        // ローカル部の確認
+        Assert.Equal("value", GetExpressionsToString(targetInstance.Local));
+
+        // コレクション部の型の確認
+        Assert.Equal("Dictionary<int,List<string>>", GetExpressionsToString(targetInstance.CollectionTypes));
 
         // コレクション部の確認
         Assert.Equal("values", GetExpressionsToString(targetInstance.Collection));

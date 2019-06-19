@@ -112,6 +112,17 @@ namespace CSharpAnalyzeTest
           source.Add("{");
           source.Add("}");
           break;
+
+        case CreatePattern.InstanceProperty:
+          filePath = "InstanceProperty.cs";
+
+          addMember.Add("private List<int> Values{get;}= new List<int>();");
+
+          source.Add("Values.AddRange(new List<int>{0,1,2,3});");
+          source.Add("foreach(var value in Values)");
+          source.Add("{");
+          source.Add("}");
+          break;
       }
 
       var targetSource = new StringBuilder();
@@ -482,6 +493,50 @@ namespace CSharpAnalyzeTest
 
         // コレクション部の確認
         Assert.Equal("values[0]", GetExpressionsToString(targetInstance.Collection));
+
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// プロパティ参照のテスト
+    /// </summary>
+    [Fact(DisplayName = "InstanceProperty")]
+    public void InstancePropertyTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.InstanceProperty), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "InstanceProperty.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemForEach;
+
+        // 外部参照の存在確認
+        Assert.Single(ev.FileRoot.OtherFiles);
+        Assert.Equal("List", ev.FileRoot.OtherFiles.First().Key);
+
+        // ローカル部の型の確認
+        Assert.Equal("int", GetExpressionsToString(targetInstance.LocalTypes));
+
+        // ローカル部の確認
+        Assert.Equal("value", GetExpressionsToString(targetInstance.Local));
+
+        // コレクション部の型の確認
+        Assert.Equal("List<int>", GetExpressionsToString(targetInstance.CollectionTypes));
+
+        // コレクション部の確認
+        Assert.Equal("this.Values", GetExpressionsToString(targetInstance.Collection));
 
       });
 

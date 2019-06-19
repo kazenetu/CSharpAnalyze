@@ -123,6 +123,19 @@ namespace CSharpAnalyzeTest
           source.Add("{");
           source.Add("}");
           break;
+
+        case CreatePattern.InstanceMethod:
+          filePath = "InstanceMethod.cs";
+
+          addMember.Add("private List<int> GetValues()");
+          addMember.Add("{");
+          addMember.Add("  return new List<int>{0,1,2,3};");
+          addMember.Add("{");
+
+          source.Add("foreach(var value in GetValues())");
+          source.Add("{");
+          source.Add("}");
+          break;
       }
 
       var targetSource = new StringBuilder();
@@ -537,6 +550,50 @@ namespace CSharpAnalyzeTest
 
         // コレクション部の確認
         Assert.Equal("this.Values", GetExpressionsToString(targetInstance.Collection));
+
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// メソッド参照のテスト
+    /// </summary>
+    [Fact(DisplayName = "InstanceMethod")]
+    public void InstanceMethodTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.InstanceMethod), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "InstanceMethod.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Equal(2, targetInstances.Count);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemForEach;
+
+        // 外部参照の存在確認
+        Assert.Single(ev.FileRoot.OtherFiles);
+        Assert.Equal("List", ev.FileRoot.OtherFiles.First().Key);
+
+        // ローカル部の型の確認
+        Assert.Equal("int", GetExpressionsToString(targetInstance.LocalTypes));
+
+        // ローカル部の確認
+        Assert.Equal("value", GetExpressionsToString(targetInstance.Local));
+
+        // コレクション部の型の確認
+        Assert.Equal("List<int>", GetExpressionsToString(targetInstance.CollectionTypes));
+
+        // コレクション部の確認
+        Assert.Equal("this.GetValues()", GetExpressionsToString(targetInstance.Collection));
 
       });
 

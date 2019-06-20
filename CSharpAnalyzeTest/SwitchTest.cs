@@ -21,6 +21,10 @@ namespace CSharpAnalyzeTest
       MultiCase,
       TypeCase,
       NestSwitch,
+
+      // TODO 実装
+      InstanceProperty,
+      InstanceMethod,
     }
 
     /// <summary>

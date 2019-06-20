@@ -20,6 +20,10 @@ namespace CSharpAnalyzeTest
       DoWhile,
       Increment,
       Decrement,
+
+      // TODO 実装
+      InstanceProperty,
+      InstanceMethod,
     }
 
     /// <summary>

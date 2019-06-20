@@ -22,6 +22,10 @@ namespace CSharpAnalyzeTest
       NestIfElse,
       RefLocalField,
       ConditionsType,
+
+      // TODO 実装
+      InstanceProperty,
+      InstanceMethod,
     }
 
     /// <summary>

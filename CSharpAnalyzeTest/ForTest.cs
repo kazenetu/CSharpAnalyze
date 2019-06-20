@@ -21,6 +21,10 @@ namespace CSharpAnalyzeTest
       MultiDeclarations,
       MultiIncrementors,
       UseMethods,
+
+      // TODO 実装
+      InstanceProperty,
+      InstanceMethod,
     }
 
     /// <summary>

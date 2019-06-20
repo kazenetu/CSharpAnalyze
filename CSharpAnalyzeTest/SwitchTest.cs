@@ -21,8 +21,6 @@ namespace CSharpAnalyzeTest
       MultiCase,
       TypeCase,
       NestSwitch,
-
-      // TODO 実装
       InstanceProperty,
       InstanceMethod,
     }
@@ -103,6 +101,33 @@ namespace CSharpAnalyzeTest
           source.Add("      case 1:");
           source.Add("      break;");
           source.Add(    "}");
+          source.Add("  break;");
+          source.Add("}");
+          break;
+
+        case CreatePattern.InstanceProperty:
+          filePath = "InstanceProperty.cs";
+
+          addMember.Add("private int Val{get;}= 1");
+
+          source.Add("switch(Val)");
+          source.Add("{");
+          source.Add("  case 1:");
+          source.Add("  break;");
+          source.Add("}");
+          break;
+
+        case CreatePattern.InstanceMethod:
+          filePath = "InstanceMethod.cs";
+
+          addMember.Add("private int GetValue()");
+          addMember.Add("{");
+          addMember.Add("  return 1;");
+          addMember.Add("{");
+
+          source.Add("switch(GetValue())");
+          source.Add("{");
+          source.Add("  case 1:");
           source.Add("  break;");
           source.Add("}");
           break;
@@ -352,6 +377,84 @@ namespace CSharpAnalyzeTest
         checkSwitchCase(innerSwitch.Cases.First() as IItemSwitchCase, 
                         new List<string>() { "1" });
 
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// プロパティ参照のテスト
+    /// </summary>
+    [Fact(DisplayName = "InstanceProperty")]
+    public void InstancePropertyTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.InstanceProperty), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "InstanceProperty.cs");
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemSwitch;
+
+        // 分岐構造の確認
+        checkSwitch(targetInstance, "this.Val", 1);
+
+        var caseLables = new List<string>()
+        {
+          "1",
+        };
+        checkSwitchCase(targetInstance.Cases.First() as IItemSwitchCase, caseLables);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// メソッド参照のテスト
+    /// </summary>
+    [Fact(DisplayName = "InstanceMethod")]
+    public void InstanceMethodTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.InstanceMethod), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "InstanceMethod.cs");
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Equal(2, targetInstances.Count);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemSwitch;
+
+        // 分岐構造の確認
+        checkSwitch(targetInstance, "this.GetValue()", 1);
+
+        var caseLables = new List<string>()
+        {
+          "1",
+        };
+        checkSwitchCase(targetInstance.Cases.First() as IItemSwitchCase, caseLables);
       });
 
       // 解析実行

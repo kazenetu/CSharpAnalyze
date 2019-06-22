@@ -21,8 +21,6 @@ namespace CSharpAnalyzeTest
       MultiDeclarations,
       MultiIncrementors,
       UseMethods,
-
-      // TODO 実装
       InstanceProperty,
       InstanceMethod,
     }
@@ -85,6 +83,30 @@ namespace CSharpAnalyzeTest
           source.Add("int ini()=>0;");
           source.Add("bool condition(int value)=> value < 10;");
           source.Add("int incrementor()=>1;");
+          break;
+
+        case CreatePattern.InstanceProperty:
+          filePath = "InstanceProperty.cs";
+
+          addMember.Add("private List<int> Values{get;}= new List<int>();");
+
+          source.Add("Values.AddRange(new List<int>{0,1,2,3});");
+          source.Add("for(var index = 0;index < Values.Count;index++)");
+          source.Add("{");
+          source.Add("}");
+          break;
+
+        case CreatePattern.InstanceMethod:
+          filePath = "InstanceMethod.cs";
+
+          addMember.Add("private List<int> GetValues()");
+          addMember.Add("{");
+          addMember.Add("  return new List<int>{0,1,2,3};");
+          addMember.Add("{");
+
+          source.Add("for(var index = 0;index < GetValues().Count;index++)");
+          source.Add("{");
+          source.Add("}");
           break;
       }
 
@@ -333,6 +355,98 @@ namespace CSharpAnalyzeTest
         CheckIncrementorsCount(targetInstance,
           new List<string>() {
             "index+=incrementor()"
+          });
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// プロパティ参照のテスト
+    /// </summary>
+    [Fact(DisplayName = "InstanceProperty")]
+    public void InstancePropertyTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.InstanceProperty), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "InstanceProperty.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemFor;
+
+        // 外部参照の存在確認
+        Assert.Single(ev.FileRoot.OtherFiles);
+        Assert.Equal("List", ev.FileRoot.OtherFiles.First().Key);
+
+        // 宣言部の確認
+        CheckDeclarationsCount(targetInstance, "int",
+          new List<string>() {
+            "index=0",
+          });
+
+        // 条件の確認
+        Assert.Equal("index<this.Values.Count", GetExpressionsToString(targetInstance.Conditions));
+
+        // 計算部の確認
+        CheckIncrementorsCount(targetInstance,
+          new List<string>() {
+            "index++"
+          });
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// メソッド参照のテスト
+    /// </summary>
+    [Fact(DisplayName = "InstanceMethod")]
+    public void InstanceMethodTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.InstanceMethod), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "InstanceMethod.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Equal(2, targetInstances.Count);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemFor;
+
+        // 外部参照の存在確認
+        Assert.Single(ev.FileRoot.OtherFiles);
+        Assert.Equal("List", ev.FileRoot.OtherFiles.First().Key);
+
+        // 宣言部の確認
+        CheckDeclarationsCount(targetInstance, "int",
+          new List<string>() {
+            "index=0",
+          });
+
+        // 条件の確認
+        Assert.Equal("index<this.GetValues().Count", GetExpressionsToString(targetInstance.Conditions));
+
+        // 計算部の確認
+        CheckIncrementorsCount(targetInstance,
+          new List<string>() {
+            "index++"
           });
       });
 

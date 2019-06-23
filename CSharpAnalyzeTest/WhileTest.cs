@@ -20,8 +20,6 @@ namespace CSharpAnalyzeTest
       DoWhile,
       Increment,
       Decrement,
-
-      // TODO 実装
       InstanceProperty,
       InstanceMethod,
     }
@@ -77,6 +75,33 @@ namespace CSharpAnalyzeTest
           source.Add("do{");
           source.Add("}");
           source.Add("while(--val >= 0)");
+          break;
+
+        case CreatePattern.InstanceProperty:
+          filePath = "InstanceProperty.cs";
+
+          addMember.Add("private int MaxCount{get;}= 10");
+
+          source.Add("var val=0;");
+          source.Add("while(val < MaxCount)");
+          source.Add("{");
+          source.Add("  val++;");
+          source.Add("}");
+          break;
+
+        case CreatePattern.InstanceMethod:
+          filePath = "InstanceMethod.cs";
+
+          addMember.Add("private int GetMaxCount()");
+          addMember.Add("{");
+          addMember.Add("  return 10;");
+          addMember.Add("{");
+
+          source.Add("var val=0;");
+          source.Add("while(val < GetMaxCount())");
+          source.Add("{");
+          source.Add("  val++;");
+          source.Add("}");
           break;
       }
 
@@ -230,6 +255,72 @@ namespace CSharpAnalyzeTest
 
         // 条件の確認
         Assert.Equal("--val>=0", GetExpressionsToString(targetInstance.Conditions));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// プロパティ参照テスト
+    /// </summary>
+    [Fact(DisplayName = "InstanceProperty")]
+    public void InstancePropertyTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.InstanceProperty), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "InstanceProperty.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances<IItemWhile>(targetParentInstance).First();
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 条件の確認
+        Assert.Equal("val<this.MaxCount", GetExpressionsToString(targetInstance.Conditions));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// メソッド参照テスト
+    /// </summary>
+    [Fact(DisplayName = "InstanceMethod")]
+    public void InstanceMethodTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.InstanceMethod), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "InstanceMethod.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Equal(2, targetInstances.Count);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances<IItemWhile>(targetParentInstance).First();
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 条件の確認
+        Assert.Equal("val<this.GetMaxCount()", GetExpressionsToString(targetInstance.Conditions));
       });
 
       // 解析実行

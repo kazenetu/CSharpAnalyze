@@ -22,8 +22,6 @@ namespace CSharpAnalyzeTest
       NestIfElse,
       RefLocalField,
       ConditionsType,
-
-      // TODO 実装
       InstanceProperty,
       InstanceMethod,
     }
@@ -104,6 +102,29 @@ namespace CSharpAnalyzeTest
 
           source.Add("var val=1;");
           source.Add("if(val is string b)");
+          source.Add("{");
+          source.Add("}");
+          break;
+
+        case CreatePattern.InstanceProperty:
+          filePath = "InstanceProperty.cs";
+
+          addMember.Add("private int Val{get;}= 1");
+
+          source.Add("if(Val == 1)");
+          source.Add("{");
+          source.Add("}");
+          break;
+
+        case CreatePattern.InstanceMethod:
+          filePath = "InstanceMethod.cs";
+
+          addMember.Add("private bool GetValue()");
+          addMember.Add("{");
+          addMember.Add("  return true;");
+          addMember.Add("{");
+
+          source.Add("if(GetValue())");
           source.Add("{");
           source.Add("}");
           break;
@@ -367,6 +388,78 @@ namespace CSharpAnalyzeTest
 
         // 分岐構造の確認
         checkIf(targetInstance, "val is string b", 0);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// プロパティ参照のテスト
+    /// </summary>
+    [Fact(DisplayName = "InstanceProperty")]
+    public void InstancePropertyTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.InstanceProperty), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "InstanceProperty.cs");
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).FirstOrDefault() as IItemIf;
+
+        // 対象インスタンスの存在確認
+        Assert.NotNull(targetInstance);
+
+        // 分岐構造の確認
+        checkIf(targetInstance, "this.Val==1", 0);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// メソッド参照のテスト
+    /// </summary>
+    [Fact(DisplayName = "InstanceMethod")]
+    public void InstanceMethodTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.InstanceMethod), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "InstanceMethod.cs");
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Equal(2, targetInstances.Count);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).FirstOrDefault() as IItemIf;
+
+        // 対象インスタンスの存在確認
+        Assert.NotNull(targetInstance);
+
+        // 分岐構造の確認
+        checkIf(targetInstance, "this.GetValue()", 0);
       });
 
       // 解析実行

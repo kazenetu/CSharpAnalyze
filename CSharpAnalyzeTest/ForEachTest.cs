@@ -92,8 +92,8 @@ namespace CSharpAnalyzeTest
 
           source.Add("var values = new Dictionary<int,List<string>>");
           source.Add("{");
-          source.Add("{0,new List{\"a\",\"b\",\"c\",} },");
-          source.Add("{1,new List{\"A\",\"B\",\"C\",} },");
+          source.Add("{0,new List<string>{\"a\",\"b\",\"c\",} },");
+          source.Add("{1,new List<string>{\"A\",\"B\",\"C\",} },");
           source.Add("};");
           source.Add("foreach(var value in values)");
           source.Add("{");
@@ -105,8 +105,8 @@ namespace CSharpAnalyzeTest
 
           source.Add("var values = new Dictionary<int,List<string>>");
           source.Add("{");
-          source.Add("{0,new List{\"a\",\"b\",\"c\",} },");
-          source.Add("{1,new List{\"A\",\"B\",\"C\",} },");
+          source.Add("{0,new List<string>{\"a\",\"b\",\"c\",} },");
+          source.Add("{1,new List<string>{\"A\",\"B\",\"C\",} },");
           source.Add("};");
           source.Add("foreach(var value in values[0])");
           source.Add("{");

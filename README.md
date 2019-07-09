@@ -1,5 +1,5 @@
 # CSharpAnalyze
-C#のコード解析：ConvertCStoTSの再設計版
+C#のコード解析ライブラリ
 
 # 実行環境
 * .NET Core SDK 2.1以上

@@ -69,4 +69,36 @@ catch (Exception ex)
     List<IAnalyzeItem> Members { get; }
   }
 ```
-※Membersの具体的なInterfaceは```AnalyzeItems/IItemXxxxx```を参照
+※Membersの具体的なInterfaceは```IAnalyzeItem```を継承した```AnalyzeItems/IItemXxxxx```となる。  
+　詳細は下記参照
+
+### C#とInterfaceの対応表
+```CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems```で定義  
+
+|C#                   | 対応Interface                  | Membersに複数IAnalyzeItemあり |
+|:--------------------|:-------------------------------|:----------------:|
+|interface            | IItemInterface                 |        ○         |
+|class                | IItemClass                     |        ○         |
+|コンストラクタメソッド | IItemConstructor               |        ○         |
+|フィールド            | IItemField                     |        ×         |
+|プロパティ            | IItemProperty                  |        ○         |
+|メソッド              | IItemMethod                    |        ○         |
+|enum                 | IItemEnum                      |        ×         |
+|foreach              | IItemForEach                   |        ○         |
+|for                  | IItemFor                       |        ○         |
+|while                | IItemWhile                     |        ○         |
+|do-while             | IItemDo                        |        ○         |
+|if                   | IItemIf                        |        ○         |
+|else/else if         | IItemElseClause                |        ○         |
+|switch               | IItemSwitch                    |        ○         |
+|case                 | IItemSwitchCase                |        ○         |
+|break                | IItemBreak                     |        ×         |
+|continue             | ItemContinue                   |        ×         |
+|return               | IItemReturn                    |        ×         |
+|ローカルフィールド生成 | IItemStatementLocalDeclaration |        ×         |
+|ローカルメソッド       | IItemLocalFunctio              |        ○         |
+|式                   | IItemStatementExpression       |        ×         |
+
+
+
+

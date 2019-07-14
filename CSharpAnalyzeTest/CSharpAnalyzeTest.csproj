@@ -13,10 +13,4 @@
     <ProjectReference Include="..\CSharpAnalyze\CSharpAnalyze.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <MySourceFiles Include="$(OutDir)CSharpAnalyze.dll" />
-  </ItemGroup>
-  <Target Name="CopyCustomContent" AfterTargets="AfterBuild">
-    <Copy SourceFiles="@(MySourceFiles)" DestinationFolder="../Lib/$(Configuration)" />
-  </Target>
 </Project>

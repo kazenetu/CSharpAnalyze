@@ -107,8 +107,13 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
                 // 外部ファイル参照イベント発行
                 RaiseOtherFileReferenced(node, part.Symbol);
               }
-            }
 
+              // ジェネリックスの場合はパラメータ除去
+              if (part.Symbol is INamedTypeSymbol symbol && symbol.IsGenericType)
+              {
+                name = name.Substring(0, name.LastIndexOf("<", StringComparison.CurrentCulture));
+              }
+            }
             result.Add(new Expression(name, type));
           }
 

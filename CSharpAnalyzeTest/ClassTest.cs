@@ -685,10 +685,17 @@ namespace CSharpAnalyzeTest
         Assert.Contains("T", itemClass.GenericTypes);
 
         // スーパークラスの設定確認
-        Assert.Single(itemClass.SuperClass);
+        var expectedSuperClass = new List<string>(){
+          "GenericClass",
+          "<",
+          "T",
+          ">",
+        };
+        Assert.Equal(expectedSuperClass, itemClass.SuperClass.Select(item=>item.Name));
+
 
         // 親の存在確認
-        Assert.NotNull(itemClass.Parent);
+        Assert.Null(itemClass.Parent);
 
         // スコープ修飾子の件数確認
         Assert.Single(itemClass.Modifiers);

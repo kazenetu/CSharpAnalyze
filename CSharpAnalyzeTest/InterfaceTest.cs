@@ -25,6 +25,7 @@ namespace CSharpAnalyzeTest
       AnyInterface,
       SubInterfaceMethodOverLoad,
       GenericInterface,
+      GenericsSubFixedType,
     }
 
     /// <summary>
@@ -110,6 +111,14 @@ namespace CSharpAnalyzeTest
           filePath = "GenericInterface.cs";
 
           source.AppendLine("public interface Inf<T,U> ");
+          source.AppendLine("{");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.GenericsSubFixedType:
+          filePath = "GenericsSubFixedType.cs";
+
+          source.AppendLine("public interface Sub :Inf<string, int> ");
           source.AppendLine("{");
           source.AppendLine("}");
           break;
@@ -545,6 +554,59 @@ namespace CSharpAnalyzeTest
         var expectedGenericsList = new List<string>
         {
           "T","U"
+        };
+        Assert.Equal(expectedGenericsList.OrderBy(item => item), target.GenericTypes.OrderBy(item => item));
+
+        // インターフェースのメンバ確認
+        var expectedMethodList = new List<(string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>();
+        var expectedPropertyList = new List<(string name, string type, Dictionary<string, List<string>> accessors)>();
+
+        // 期待値数と一致要素数の確認
+        var expectedCount = expectedMethodList.Count + expectedPropertyList.Count;
+        var actualCount = GetMemberCount(target, expectedMethodList) + GetMemberCount(target, expectedPropertyList);
+        Assert.Equal(expectedCount, actualCount);
+
+        // 実際の要素数との一致確認
+        var actualMemberCount = target.Members.Count + target.BaseMethods.Count + target.BaseProperties.Count;
+        Assert.Equal(expectedCount, actualMemberCount);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// インタフェースのジェネリクスの継承テスト
+    /// </summary>
+    [Fact(DisplayName = "GenericsSubFixedType")]
+    public void GenericsSubFixedTypeTest()
+    {
+      // スーパーインタフェースを追加
+      CreateFileData(CreateSource(CreatePattern.GenericInterface), null);
+
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.GenericsSubFixedType), (ev) =>
+      {
+        // ItemInterfaceインスタンスを取得
+        var targets = GetIItemInterfaces(ev, "GenericsSubFixedType.cs");
+
+        // 外部参照の存在確認
+        Assert.Single(ev.FileRoot.OtherFiles);
+
+        // 対象件数の確認
+        Assert.Single(targets);
+
+        // インターフェースの継承確認
+        var target = targets.First();
+        Assert.Single(target.Interfaces);
+
+        // スーパーインターフェイスの確認
+        var actualSuperIntarface = target.Interfaces.First().Select(item=>item.Name).ToList();
+        Assert.Equal("Inf<string,int>", string.Concat(actualSuperIntarface));
+
+        // ジェネリクスの確認
+        var expectedGenericsList = new List<string>
+        {
         };
         Assert.Equal(expectedGenericsList.OrderBy(item => item), target.GenericTypes.OrderBy(item => item));
 

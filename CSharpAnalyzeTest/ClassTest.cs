@@ -25,6 +25,7 @@ namespace CSharpAnalyzeTest
       SubAndInterface,
       SubClassMemberOverLoad,
       GenericSubClass,
+      SubAndMultiInterface,
     }
 
     /// <summary>
@@ -136,6 +137,26 @@ namespace CSharpAnalyzeTest
           source.AppendLine("{");
           source.AppendLine("}");
           source.AppendLine("public class GenericSubClass<T> : GenericClass<T>");
+          source.AppendLine("{");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.SubAndMultiInterface:
+          filePath = "SubAndMultiInterface.cs";
+
+          source.AppendLine("public class SuperClass ");
+          source.AppendLine("{");
+          source.AppendLine("}");
+
+          source.AppendLine("public interface Inf ");
+          source.AppendLine("{");
+          source.AppendLine("}");
+
+          source.AppendLine("public interface Inf2 ");
+          source.AppendLine("{");
+          source.AppendLine("}");
+
+          source.AppendLine("public class SubClass : SuperClass,Inf,Inf2");
           source.AppendLine("{");
           source.AppendLine("}");
           break;
@@ -719,6 +740,71 @@ namespace CSharpAnalyzeTest
         // 実際の要素数との一致確認
         var actualMemberCount = itemClass.Members.Count + itemClass.BaseMethods.Count + itemClass.BaseProperties.Count + itemClass.BaseFields.Count;
         Assert.Equal(expectedCount, actualMemberCount);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// スーパークラス+インターフェースのテスト
+    /// </summary>
+    [Fact(DisplayName = "SubAndMultiInterfaceTest")]
+    public void SubAndMultiInterfaceTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.SubAndMultiInterface), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "SubAndMultiInterface.cs", 3);
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 解析結果の件数確認
+        Assert.True(ev.FileRoot.Members.Count == 4);
+
+        //ジェネリックの確認
+        Assert.Empty(itemClass.GenericTypes);
+
+        // スーパークラスの設定確認
+        Assert.Single(itemClass.SuperClass);
+        Assert.Equal("SuperClass", GetExpressionsToString(itemClass.SuperClass));
+
+        // インターフェースの設定確認
+        Assert.True(itemClass.Interfaces.Count == 2);
+        Assert.Equal("Inf", GetExpressionsToString(itemClass.Interfaces.First()));
+        Assert.Equal("Inf2", GetExpressionsToString(itemClass.Interfaces.Last()));
+
+        // 親の存在確認
+        Assert.Null(itemClass.Parent);
+
+        // クラス名の確認
+        Assert.Equal("SubClass", itemClass.Name);
+
+        // スコープ修飾子の件数確認
+        Assert.Single(itemClass.Modifiers);
+
+        // スコープ修飾子の内容確認
+        Assert.Contains("public", itemClass.Modifiers);
+
+        // ItemTypeの確認
+        Assert.Equal(ItemTypes.Class, itemClass.ItemType);
+
+        // クラス内の要素の存在確認
+        var expectedMethodList = new List<(List<string> modifiers, string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>();
+        var expectedPropertyList = new List<(List<string> modifiers, string name, string type, Dictionary<string, List<string>> accessors, bool isInit, List<string> init)>();
+        var expectedFieldList = new List<(List<string> modifiers, string name, string type, bool isInit, List<string> init)>();
+
+        // 期待値数と一致要素数の確認
+        var expectedCount = expectedMethodList.Count + expectedPropertyList.Count + expectedFieldList.Count;
+        var actualCount = GetMemberCount(itemClass, expectedMethodList) + GetMemberCount(itemClass, expectedPropertyList) + GetMemberCount(itemClass, expectedFieldList);
+        Assert.Equal(expectedCount, actualCount);
+
+        // 実際の要素数との一致確認
+        var actualMemberCount = itemClass.Members.Count + itemClass.BaseMethods.Count + itemClass.BaseProperties.Count + itemClass.BaseFields.Count;
+        Assert.Equal(expectedCount, actualMemberCount);
+
       });
 
       // 解析実行

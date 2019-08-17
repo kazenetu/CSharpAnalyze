@@ -16,5 +16,10 @@ namespace CSharpAnalyze.Domain.PublicInterfaces.AnalyzeItems
     /// パラメーターリスト
     /// </summary>
     List<(string name, List<IExpression> expressions, List<string> modifiers, List<IExpression> defaultValues)> Args { get; }
+
+    /// <summary>
+    /// ジェネリックタイプリスト
+    /// </summary>
+    List<string> GenericTypes { get; }
   }
 }

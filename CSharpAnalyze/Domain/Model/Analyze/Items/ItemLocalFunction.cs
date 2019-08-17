@@ -28,6 +28,11 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
     public List<(string name, List<IExpression> expressions, List<string> modifiers, List<IExpression> defaultValues)> Args { get; } = new List<(string name, List<IExpression> expressions, List<string> modifiers, List<IExpression> defaultValues)>();
 
     /// <summary>
+    /// ジェネリックタイプリスト
+    /// </summary>
+    public List<string> GenericTypes { get; } = new List<string>();
+
+    /// <summary>
     /// コンストラクタ
     /// </summary>
     /// <param name="node">対象Node</param>
@@ -105,6 +110,13 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
         Args.Add((param.Name, arg, modifiers, defaultValues));
 
         paramIndex++;
+      }
+
+      // ジェネリックタイプ
+      if (declaredSymbol.TypeParameters.Any())
+      {
+        var types = declaredSymbol.TypeParameters.Select(item => item.Name);
+        GenericTypes.AddRange(types);
       }
 
       // メンバ

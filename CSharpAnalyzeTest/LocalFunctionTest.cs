@@ -125,7 +125,7 @@ namespace CSharpAnalyzeTest
         case CreatePattern.Generics:
           filePath = "Generics.cs";
 
-          source.Add("void target<T,V>()");
+          source.Add("void target<T,V>(string param1)");
           source.Add("{");
           source.Add("}");
           break;
@@ -611,7 +611,10 @@ namespace CSharpAnalyzeTest
         Assert.Equal("void", GetExpressionsToString(targetInstance.MethodTypes));
 
         // パラメータの確認
-        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>();
+        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
+        {
+          ( "param1","string","",""),
+        };
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedArgs));
 
         // 内部処理の確認

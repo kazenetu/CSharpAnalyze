@@ -26,6 +26,7 @@ namespace CSharpAnalyzeTest
       ReturnValue,
       LambdaReturn,
       LambdaVoid,
+      Generics,
     }
 
     /// <summary>
@@ -120,6 +121,15 @@ namespace CSharpAnalyzeTest
 
           source.Add("void target() => System.Diagnostics.Debug.WriteLine(10);target();");
           break;
+
+        case CreatePattern.Generics:
+          filePath = "Generics.cs";
+
+          source.Add("void target<T,V>()");
+          source.Add("{");
+          source.Add("}");
+          break;
+
       }
 
       // ソースコード作成
@@ -167,6 +177,10 @@ namespace CSharpAnalyzeTest
         // 対象インスタンスを取得
         var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemLocalFunction;
 
+        //ジェネリックの確認
+        var expectedGenericTypes = new List<string>();
+        Assert.Equal(expectedGenericTypes, targetInstance.GenericTypes);
+
         // 型タイプの確認
         Assert.Equal("void", GetExpressionsToString(targetInstance.MethodTypes));
 
@@ -210,6 +224,10 @@ namespace CSharpAnalyzeTest
 
         // 対象インスタンスを取得
         var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemLocalFunction;
+
+        //ジェネリックの確認
+        var expectedGenericTypes = new List<string>();
+        Assert.Equal(expectedGenericTypes, targetInstance.GenericTypes);
 
         // 型タイプの確認
         Assert.Equal("void", GetExpressionsToString(targetInstance.MethodTypes));
@@ -255,6 +273,10 @@ namespace CSharpAnalyzeTest
 
         // 対象インスタンスを取得
         var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemLocalFunction;
+
+        //ジェネリックの確認
+        var expectedGenericTypes = new List<string>();
+        Assert.Equal(expectedGenericTypes, targetInstance.GenericTypes);
 
         // 型タイプの確認
         Assert.Equal("void", GetExpressionsToString(targetInstance.MethodTypes));
@@ -322,6 +344,11 @@ namespace CSharpAnalyzeTest
         var expectedIndex = 0;
         foreach (IItemLocalFunction targetInstance in targetInstances)
         {
+
+          //ジェネリックの確認
+          var expectedGenericTypes = new List<string>();
+          Assert.Equal(expectedGenericTypes, targetInstance.GenericTypes);
+
           // 型タイプの確認
           Assert.Equal("void", GetExpressionsToString(targetInstance.MethodTypes));
 
@@ -361,6 +388,10 @@ namespace CSharpAnalyzeTest
 
         // 対象インスタンスを取得
         var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemLocalFunction;
+
+        //ジェネリックの確認
+        var expectedGenericTypes = new List<string>();
+        Assert.Equal(expectedGenericTypes, targetInstance.GenericTypes);
 
         // 型タイプの確認
         Assert.Equal("void", GetExpressionsToString(targetInstance.MethodTypes));
@@ -404,6 +435,10 @@ namespace CSharpAnalyzeTest
         // 対象インスタンスを取得
         var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemLocalFunction;
 
+        //ジェネリックの確認
+        var expectedGenericTypes = new List<string>();
+        Assert.Equal(expectedGenericTypes, targetInstance.GenericTypes);
+
         // 型タイプの確認
         Assert.Equal("void", GetExpressionsToString(targetInstance.MethodTypes));
 
@@ -445,6 +480,10 @@ namespace CSharpAnalyzeTest
         // 対象インスタンスを取得
         var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemLocalFunction;
 
+        //ジェネリックの確認
+        var expectedGenericTypes = new List<string>();
+        Assert.Equal(expectedGenericTypes, targetInstance.GenericTypes);
+
         // 型タイプの確認
         Assert.Equal("int", GetExpressionsToString(targetInstance.MethodTypes));
 
@@ -481,6 +520,10 @@ namespace CSharpAnalyzeTest
 
         // 対象インスタンスを取得
         var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemLocalFunction;
+
+        //ジェネリックの確認
+        var expectedGenericTypes = new List<string>();
+        Assert.Equal(expectedGenericTypes, targetInstance.GenericTypes);
 
         // 型タイプの確認
         Assert.Equal("int", GetExpressionsToString(targetInstance.MethodTypes));
@@ -519,6 +562,10 @@ namespace CSharpAnalyzeTest
         // 対象インスタンスを取得
         var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemLocalFunction;
 
+        //ジェネリックの確認
+        var expectedGenericTypes = new List<string>();
+        Assert.Equal(expectedGenericTypes, targetInstance.GenericTypes);
+
         // 型タイプの確認
         Assert.Equal("void", GetExpressionsToString(targetInstance.MethodTypes));
 
@@ -528,6 +575,47 @@ namespace CSharpAnalyzeTest
 
         // 内部処理の確認
         Assert.Single(targetInstance.Members);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// ジェネリックテスト
+    /// </summary>
+    [Fact(DisplayName = "Generics")]
+    public void GenericsTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.Generics), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "Generics.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemLocalFunction;
+
+        //ジェネリックの確認
+        var expectedGenericTypes = new List<string>() { "T", "V" };
+        Assert.Equal(expectedGenericTypes, targetInstance.GenericTypes);
+
+        // 型タイプの確認
+        Assert.Equal("void", GetExpressionsToString(targetInstance.MethodTypes));
+
+        // パラメータの確認
+        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>();
+        Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedArgs));
+
+        // 内部処理の確認
+        Assert.Empty(targetInstance.Members);
       });
 
       // 解析実行

@@ -26,6 +26,8 @@ namespace CSharpAnalyzeTest
       SubClassMemberOverLoad,
       GenericSubClass,
       SubAndMultiInterface,
+      CommentCRLF,
+      CommentLF,
     }
 
     /// <summary>
@@ -157,6 +159,28 @@ namespace CSharpAnalyzeTest
           source.AppendLine("}");
 
           source.AppendLine("public class SubClass : SuperClass,Inf,Inf2");
+          source.AppendLine("{");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.CommentCRLF:
+          filePath = "Test.cs";
+
+          source.Append("/// <summary>\r\n");
+          source.Append("/// テスト\r\n");
+          source.Append("/// </summary>\r\n");
+          source.AppendLine("public class ClassTest");
+          source.AppendLine("{");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.CommentLF:
+          filePath = "Test.cs";
+
+          source.Append("/// <summary>\n");
+          source.Append("/// テスト\n");
+          source.Append("/// </summary>\n");
+          source.AppendLine("public class ClassTest");
           source.AppendLine("{");
           source.AppendLine("}");
           break;
@@ -805,6 +829,46 @@ namespace CSharpAnalyzeTest
         var actualMemberCount = itemClass.Members.Count + itemClass.BaseMethods.Count + itemClass.BaseProperties.Count + itemClass.BaseFields.Count;
         Assert.Equal(expectedCount, actualMemberCount);
 
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// コメント改行テスト：CRLF
+    /// </summary>
+    [Fact(DisplayName = "CommentCRLF")]
+    public void CommentCRLFTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.CommentCRLF), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "Test.cs", 0);
+
+        // コメント数の確認
+        Assert.Equal(3, itemClass.Comments.Count);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// コメント改行テスト：LF
+    /// </summary>
+    [Fact(DisplayName = "CommentLF")]
+    public void CommentLFTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.CommentLF), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "Test.cs", 0);
+
+        // コメント数の確認
+        Assert.Equal(3, itemClass.Comments.Count);
       });
 
       // 解析実行

@@ -90,8 +90,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       }
 
       // コメント設定
-      var targerComments = node.GetLeadingTrivia().ToString().Split(Environment.NewLine).
-                            Select(item => item.TrimStart().Replace(Environment.NewLine, string.Empty, StringComparison.CurrentCulture)).
+      var targerComments = node.GetLeadingTrivia().ToString().Split("\n").
+                            Select(item => item.TrimStart().Replace("\n", string.Empty, StringComparison.CurrentCulture)).
+                            Select(item => item.Replace("\r", string.Empty, StringComparison.CurrentCulture)).
                             Where(item => !string.IsNullOrEmpty(item));
       Comments.AddRange(targerComments);
 

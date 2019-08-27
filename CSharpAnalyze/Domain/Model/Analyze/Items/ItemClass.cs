@@ -92,15 +92,11 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
               continue;
             }
 
-            var name = $"{part}";
+            var name = Expression.GetSymbolName(part);
             var type = Expression.GetSymbolTypeName(part.Symbol);
             if (part.Symbol != null)
             {
               type = part.Symbol.GetType().Name;
-              if (!string.IsNullOrEmpty(part.Symbol.ContainingNamespace.Name))
-              {
-                name = $"{part.Symbol}".Replace($"{part.Symbol.ContainingNamespace}.", string.Empty, StringComparison.CurrentCulture);
-              }
 
               if (part.Kind == SymbolDisplayPartKind.ClassName || part.Kind == SymbolDisplayPartKind.InterfaceName)
               {

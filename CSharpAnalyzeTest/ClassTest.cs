@@ -64,7 +64,7 @@ namespace CSharpAnalyzeTest
 
           source.AppendLine("public class ClassTest ");
           source.AppendLine("{");
-          source.AppendLine("  private static class InnerClass ");
+          source.AppendLine("  private class InnerClass ");
           source.AppendLine("  {");
           source.AppendLine("  }");
           source.AppendLine("}");

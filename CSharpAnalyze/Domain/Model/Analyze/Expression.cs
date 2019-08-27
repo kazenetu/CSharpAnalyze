@@ -87,7 +87,17 @@ namespace CSharpAnalyze.Domain.Model.Analyze
         return $"{target}";
       }
 
-      return $"{target.Symbol}".Replace($"{target.Symbol.ContainingNamespace}.", string.Empty, StringComparison.CurrentCulture);
+      return GetSymbolName(target.Symbol);
+    }
+
+    /// <summary>
+    /// シンボル名を返す
+    /// </summary>
+    /// <param name="target">対象シンボルインターフェース</param>
+    /// <returns>シンボル名</returns>
+    internal static string GetSymbolName(ISymbol target)
+    {
+      return $"{target}".Replace($"{target.ContainingNamespace}.", string.Empty, StringComparison.CurrentCulture);
     }
 
     /// <summary>

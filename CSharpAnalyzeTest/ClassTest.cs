@@ -461,11 +461,10 @@ namespace CSharpAnalyzeTest
         Assert.Empty(innerClass.GenericTypes);
 
         // スコープ修飾子の件数確認
-        Assert.Equal(2, innerClass.Modifiers.Count);
+        Assert.Single(innerClass.Modifiers);
 
         // スコープ修飾子の内容確認
         Assert.Contains("private", innerClass.Modifiers);
-        Assert.Contains("static", innerClass.Modifiers);
 
         // ItemTypeの確認
         Assert.Equal(ItemTypes.Class, innerClass.ItemType);

@@ -79,11 +79,15 @@ namespace CSharpAnalyze.Domain.Model.Analyze
     /// <summary>
     /// シンボル名を返す
     /// </summary>
-    /// <param name="target">対象シンボルインターフェース</param>
+    /// <param name="target">対象DisplayPartsインスタンス</param>
     /// <returns>シンボル名</returns>
-    internal static string GetSymbolName(ISymbol target)
+    internal static string GetSymbolName(SymbolDisplayPart target)
     {
-      return $"{target}".Replace($"{target.ContainingNamespace}.", string.Empty, StringComparison.CurrentCulture); ;
+      if(target.Symbol is null){
+        return $"{target}";
+      }
+
+      return $"{target.Symbol}".Replace($"{target.Symbol.ContainingNamespace}.", string.Empty, StringComparison.CurrentCulture);
     }
 
     /// <summary>

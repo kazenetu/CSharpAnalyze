@@ -28,6 +28,7 @@ namespace CSharpAnalyzeTest
       SubAndMultiInterface,
       CommentCRLF,
       CommentLF,
+      InnerClassGenerics,
     }
 
     /// <summary>
@@ -64,7 +65,7 @@ namespace CSharpAnalyzeTest
 
           source.AppendLine("public class ClassTest ");
           source.AppendLine("{");
-          source.AppendLine("  private class InnerClass ");
+          source.AppendLine("  public class InnerClass ");
           source.AppendLine("  {");
           source.AppendLine("  }");
           source.AppendLine("}");
@@ -181,6 +182,14 @@ namespace CSharpAnalyzeTest
           source.Append("/// テスト\n");
           source.Append("/// </summary>\n");
           source.AppendLine("public class ClassTest");
+          source.AppendLine("{");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.InnerClassGenerics:
+          filePath = "InnerClassGenerics.cs";
+
+          source.AppendLine("public class GenericSubClass : GenericClass<ClassTest.InnerClass>");
           source.AppendLine("{");
           source.AppendLine("}");
           break;
@@ -464,7 +473,7 @@ namespace CSharpAnalyzeTest
         Assert.Single(innerClass.Modifiers);
 
         // スコープ修飾子の内容確認
-        Assert.Contains("private", innerClass.Modifiers);
+        Assert.Contains("public", innerClass.Modifiers);
 
         // ItemTypeの確認
         Assert.Equal(ItemTypes.Class, innerClass.ItemType);
@@ -868,6 +877,67 @@ namespace CSharpAnalyzeTest
 
         // コメント数の確認
         Assert.Equal(3, itemClass.Comments.Count);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 内部クラスを含むジェネリッククラスのテスト
+    /// </summary>
+    [Fact(DisplayName = "InnerClassGenerics")]
+    public void InnerClassGenericsTest()
+    {
+      // 内部クラス用テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.InnerClass), null);
+
+      // スーパークラス用テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.GenericClass), null);
+
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.InnerClassGenerics), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "InnerClassGenerics.cs", 0);
+
+        // 外部参照の存在確認
+        Assert.Equal(2,ev.FileRoot.OtherFiles.Count());
+
+        //ジェネリックの確認
+        Assert.Empty(itemClass.GenericTypes);
+
+        // スーパークラスの設定確認
+        var expectedSuperClass = new List<string>(){
+          "GenericClass",
+          "<",
+          "ClassTest.InnerClass",
+          ">",
+        };
+        Assert.Equal(expectedSuperClass, itemClass.SuperClass.Select(item => item.Name));
+
+        // スコープ修飾子の件数確認
+        Assert.Single(itemClass.Modifiers);
+
+        // スコープ修飾子の内容確認
+        Assert.Contains("public", itemClass.Modifiers);
+
+        // ItemTypeの確認
+        Assert.Equal(ItemTypes.Class, itemClass.ItemType);
+
+        // クラス内の要素の存在確認
+        var expectedMethodList = new List<(List<string> modifiers, string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>();
+        var expectedPropertyList = new List<(List<string> modifiers, string name, string type, Dictionary<string, List<string>> accessors, bool isInit, List<string> init)>();
+        var expectedFieldList = new List<(List<string> modifiers, string name, string type, bool isInit, List<string> init)>();
+
+        // 期待値数と一致要素数の確認
+        var expectedCount = expectedMethodList.Count + expectedPropertyList.Count + expectedFieldList.Count;
+        var actualCount = GetMemberCount(itemClass, expectedMethodList) + GetMemberCount(itemClass, expectedPropertyList) + GetMemberCount(itemClass, expectedFieldList);
+        Assert.Equal(expectedCount, actualCount);
+
+        // 実際の要素数との一致確認
+        var actualMemberCount = itemClass.Members.Count + itemClass.BaseMethods.Count + itemClass.BaseProperties.Count + itemClass.BaseFields.Count;
+        Assert.Equal(expectedCount, actualMemberCount);
       });
 
       // 解析実行

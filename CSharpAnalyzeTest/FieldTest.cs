@@ -18,7 +18,9 @@ namespace CSharpAnalyzeTest
     {
       Standard,
       ClassField,
-      ListField
+      ListField,
+      TempInnerClass,
+      InnerClassField,
     }
 
     /// <summary>
@@ -63,6 +65,26 @@ namespace CSharpAnalyzeTest
           source.AppendLine("{");
           source.AppendLine("  private List<string> field1;");
           source.AppendLine("  private List<string> field2 = new List<string>();");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.TempInnerClass:
+          filePath = "TempInnerClass.cs";
+
+          source.AppendLine("public class TempInnerClass");
+          source.AppendLine("{");
+          source.AppendLine("  public class InnerClass");
+          source.AppendLine("  {");
+          source.AppendLine("  }");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.InnerClassField:
+          filePath = "InnerClassField.cs";
+
+          source.AppendLine("public class InnerClassField");
+          source.AppendLine("{");
+          source.AppendLine("  public TempInnerClass.InnerClass field1 = new TempInnerClass.InnerClass()");
           source.AppendLine("}");
           break;
       }
@@ -172,6 +194,41 @@ namespace CSharpAnalyzeTest
            // 実際の要素数との一致確認
            Assert.Equal(expectedList.Count, itemClass.Members.Count);
          });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 内部クラス型フィールドのテスト
+    /// </summary>
+    [Fact(DisplayName = "InnerClassField")]
+    public void InnerClassFieldTest()
+    {
+      // 内部クラステストコードを追加
+      CreateFileData(CreateSource(CreatePattern.TempInnerClass), null);
+
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.InnerClassField), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "InnerClassField.cs");
+
+        // 外部参照の存在確認
+        Assert.Single(ev.FileRoot.OtherFiles);
+        Assert.Equal("TempInnerClass.InnerClass", ev.FileRoot.OtherFiles.First().Key);
+        Assert.Equal("TempInnerClass.cs", ev.FileRoot.OtherFiles.First().Value);
+
+        // クラス内の要素の存在確認
+        var expectedList = new List<(List<string> modifiers, string name, string type, bool isInit, List<string> init)>
+           {
+             (new List<string>() { "public" }, "field1", "TempInnerClass.InnerClass", true, new List<string>() { "new", "TempInnerClass.InnerClass", "(", ")" }),
+           };
+        // 期待値数と一致要素数の確認
+        Assert.Equal(expectedList.Count, GetMemberCount(itemClass, expectedList));
+        // 実際の要素数との一致確認
+        Assert.Equal(expectedList.Count, itemClass.Members.Count);
+      });
 
       // 解析実行
       CSAnalyze.Analyze(string.Empty, Files);

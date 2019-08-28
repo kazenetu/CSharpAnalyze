@@ -25,6 +25,7 @@ namespace CSharpAnalyzeTest
       Indexer,
       InstanceProperty,
       InstanceMethod,
+      InnerClassMethod,
     }
 
     /// <summary>
@@ -130,6 +131,22 @@ namespace CSharpAnalyzeTest
           addMember.Add("private List<int> GetValues()");
           addMember.Add("{");
           addMember.Add("  return new List<int>{0,1,2,3};");
+          addMember.Add("{");
+
+          source.Add("foreach(var value in GetValues())");
+          source.Add("{");
+          source.Add("}");
+          break;
+
+        case CreatePattern.InnerClassMethod:
+          filePath = "InnerClassMethod.cs";
+
+          addMember.Add("public class InnerClass");
+          addMember.Add("{");
+          addMember.Add("}");
+          addMember.Add("private List<Standard.InnerClass> GetValues()");
+          addMember.Add("{");
+          addMember.Add("  return new List<Standard.InnerClass>();");
           addMember.Add("{");
 
           source.Add("foreach(var value in GetValues())");
@@ -591,6 +608,50 @@ namespace CSharpAnalyzeTest
 
         // コレクション部の型の確認
         Assert.Equal("List<int>", GetExpressionsToString(targetInstance.CollectionTypes));
+
+        // コレクション部の確認
+        Assert.Equal("this.GetValues()", GetExpressionsToString(targetInstance.Collection));
+
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 内部クラスのメソッド参照のテスト
+    /// </summary>
+    [Fact(DisplayName = "InnerClassMethod")]
+    public void InnerClassMethodTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.InnerClassMethod), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "InnerClassMethod.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Equal(2, targetInstances.Count);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemForEach;
+
+        // 外部参照の存在確認
+        Assert.Single(ev.FileRoot.OtherFiles);
+        Assert.Equal("List", ev.FileRoot.OtherFiles.First().Key);
+
+        // ローカル部の型の確認
+        Assert.Equal("Standard.InnerClass", GetExpressionsToString(targetInstance.LocalTypes));
+
+        // ローカル部の確認
+        Assert.Equal("value", GetExpressionsToString(targetInstance.Local));
+
+        // コレクション部の型の確認
+        Assert.Equal("List<Standard.InnerClass>", GetExpressionsToString(targetInstance.CollectionTypes));
 
         // コレクション部の確認
         Assert.Equal("this.GetValues()", GetExpressionsToString(targetInstance.Collection));

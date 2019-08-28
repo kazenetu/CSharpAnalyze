@@ -23,6 +23,7 @@ namespace CSharpAnalyzeTest
       UseMethods,
       InstanceProperty,
       InstanceMethod,
+      InnerClassMethod,
     }
 
     /// <summary>
@@ -105,6 +106,22 @@ namespace CSharpAnalyzeTest
           addMember.Add("{");
 
           source.Add("for(var index = 0;index < GetValues().Count;index++)");
+          source.Add("{");
+          source.Add("}");
+          break;
+
+        case CreatePattern.InnerClassMethod:
+          filePath = "InnerClassMethod.cs";
+
+          addMember.Add("public class InnerClass");
+          addMember.Add("{");
+          addMember.Add("  public static List<int> GetValues()");
+          addMember.Add("  {");
+          addMember.Add("    return new List<int>{0,1,2,3};");
+          addMember.Add("  {");
+          addMember.Add("}");
+
+          source.Add("for(var index = 0;index < Standard.InnerClass.GetValues().Count;index++)");
           source.Add("{");
           source.Add("}");
           break;
@@ -442,6 +459,52 @@ namespace CSharpAnalyzeTest
 
         // 条件の確認
         Assert.Equal("index<this.GetValues().Count", GetExpressionsToString(targetInstance.Conditions));
+
+        // 計算部の確認
+        CheckIncrementorsCount(targetInstance,
+          new List<string>() {
+            "index++"
+          });
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 内部クラスのメソッド参照のテスト
+    /// </summary>
+    [Fact(DisplayName = "InnerClassMethod")]
+    public void InnerClassMethodTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.InnerClassMethod), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "InnerClassMethod.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemFor;
+
+        // 外部参照の存在確認
+        Assert.Single(ev.FileRoot.OtherFiles);
+        Assert.Equal("List", ev.FileRoot.OtherFiles.First().Key);
+
+        // 宣言部の確認
+        CheckDeclarationsCount(targetInstance, "int",
+          new List<string>() {
+            "index=0",
+          });
+
+        // 条件の確認
+        Assert.Equal("index<Standard.InnerClass.GetValues().Count", GetExpressionsToString(targetInstance.Conditions));
 
         // 計算部の確認
         CheckIncrementorsCount(targetInstance,

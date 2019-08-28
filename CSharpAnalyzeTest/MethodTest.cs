@@ -27,6 +27,8 @@ namespace CSharpAnalyzeTest
       LambdaReturn,
       LambdaVoid,
       Generics,
+      TempInnerClass,
+      InnerClassArgs,
     }
 
     /// <summary>
@@ -159,6 +161,29 @@ namespace CSharpAnalyzeTest
           source.AppendLine("{");
           source.AppendLine("  public void TestMethod<T,V>()");
           source.AppendLine("  {");
+          source.AppendLine("  }");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.TempInnerClass:
+          filePath = "TempInnerClass.cs";
+
+          source.AppendLine("public class TempInnerClass");
+          source.AppendLine("{");
+          source.AppendLine("  public class InnerClass");
+          source.AppendLine("  {");
+          source.AppendLine("  }");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.InnerClassArgs:
+          filePath = "InnerClassArgs.cs";
+
+          source.AppendLine("public class InnnerClassArgs");
+          source.AppendLine("{");
+          source.AppendLine("  public TempInnerClass.InnerClass TestMethod(TempInnerClass.InnerClass instance = new TempInnerClass.InnerClass())");
+          source.AppendLine("  {");
+          source.AppendLine("    return instance;");
           source.AppendLine("  }");
           source.AppendLine("}");
           break;
@@ -642,6 +667,59 @@ namespace CSharpAnalyzeTest
         // パラメータの確認
         var expectedModifiers = new List<string>() { "public" };
         var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>();
+        // 期待値数と一致要素数の確認
+        Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedModifiers, expectedArgs));
+        // 実際の要素数との一致確認
+        Assert.Equal(expectedArgs.Count, targetInstance.Args.Count);
+
+        // 内部処理の確認
+        Assert.Empty(targetInstance.Members);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 内部クラスインスタンスのパラメータのテスト
+    /// </summary>
+    [Fact(DisplayName = "InnerClassArgs")]
+    public void InnerClassArgsTest()
+    {
+      // 内部クラステストコードを追加
+      CreateFileData(CreateSource(CreatePattern.TempInnerClass), null);
+
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.InnerClassArgs), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "InnerClassArgs.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetInstance = targetInstances.First() as IItemMethod;
+
+        //ジェネリックの確認
+        var expectedGenericTypes = new List<string>();
+        Assert.Equal(expectedGenericTypes, targetInstance.GenericTypes);
+
+        // 型タイプの確認
+        Assert.Equal("TempInnerClass.InnerClass", GetExpressionsToString(targetInstance.MethodTypes));
+
+        // 外部参照の存在確認
+        Assert.Single(ev.FileRoot.OtherFiles);
+        Assert.Equal("TempInnerClass.InnerClass", ev.FileRoot.OtherFiles.First().Key);
+        Assert.Equal("TempInnerClass.cs", ev.FileRoot.OtherFiles.First().Value);
+
+        // パラメータの確認
+        var expectedModifiers = new List<string>() { "public" };
+        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
+        {
+          ( "instance","TempInnerClass.InnerClass","","new TempInnerClass.InnerClass()"),
+        };
         // 期待値数と一致要素数の確認
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedModifiers, expectedArgs));
         // 実際の要素数との一致確認

@@ -19,6 +19,8 @@ namespace CSharpAnalyzeTest
       Standard,
       TypeInference,
       Generics,
+      TempInnerClass,
+      InnerClass,
     }
 
     /// <summary>
@@ -28,6 +30,7 @@ namespace CSharpAnalyzeTest
     /// <returns>ファイルパスとソースコード</returns>
     private FileData CreateSource(CreatePattern pattern)
     {
+      var isCreateDummyClass = true;
       var usingList = new StringBuilder();
       var source = new List<string>();
       var filePath = string.Empty;
@@ -56,19 +59,48 @@ namespace CSharpAnalyzeTest
           source.Add("var targetIntDef = new List<int>(){1,2,3};");
           source.Add("var targetDictionary = new Dictionary<int,int>(){{1,2},{3,4}};");
           break;
+
+        case CreatePattern.TempInnerClass:
+          isCreateDummyClass = false;
+
+          filePath = "TempInnerClass.cs";
+
+          source.Add("public class TempInnerClass");
+          source.Add("{");
+          source.Add("  public class InnerClass");
+          source.Add("  {");
+          source.Add("  }");
+          source.Add("}");
+          break;
+
+        case CreatePattern.InnerClass:
+          filePath = "InnerClass.cs";
+
+          source.Add("var targetClass = new TempInnerClass();");
+          source.Add("var targetInnerClass = new TempInnerClass.InnerClass();");
+          source.Add("var targetList = new List<TempInnerClass.InnerClass>();");
+          source.Add("TempInnerClass.InnerClass[] targetArray = new TempInnerClass.InnerClass[10];");
+          break;
       }
 
       // ソースコード作成
       var targetSource = new StringBuilder();
-      targetSource.AppendLine("public class Standard");
-      targetSource.AppendLine("{");
-      targetSource.AppendLine("  public void TestMethod()");
-      targetSource.AppendLine("  {");
+      if (isCreateDummyClass)
+      {
+        targetSource.AppendLine("public class Standard");
+        targetSource.AppendLine("{");
+        targetSource.AppendLine("  public void TestMethod()");
+        targetSource.AppendLine("  {");
 
-      source.ForEach(line => targetSource.AppendLine($"    {line }"));
+        source.ForEach(line => targetSource.AppendLine($"    {line}"));
 
-      targetSource.AppendLine("  }");
-      targetSource.AppendLine("}");
+        targetSource.AppendLine("  }");
+        targetSource.AppendLine("}");
+      }
+      else
+      {
+        source.ForEach(line => targetSource.AppendLine($"{line}"));
+      }
 
       return new FileData(filePath, usingList.ToString(), targetSource.ToString());
     }
@@ -190,6 +222,56 @@ namespace CSharpAnalyzeTest
           ("List<int>", "targetInt", "new List<int>()"),
           ("List<int>", "targetIntDef", "new List<int>(){1,2,3}"),
           ("Dictionary<int,int>", "targetDictionary", "new Dictionary<int,int>(){{1,2},{3,4}}"),
+        };
+        Assert.Equal(expectedArgs.Count, GetMemberCount(targetParentInstance, expectedArgs));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 内部クラスインスタンス生成のテスト
+    /// </summary>
+    [Fact(DisplayName = "InnerClass")]
+    public void InnerClassTest()
+    {
+      // 内部クラステストコードを追加
+      CreateFileData(CreateSource(CreatePattern.TempInnerClass), null);
+
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.InnerClass), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "InnerClass.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 外部参照の存在確認
+        var expectedClassName = new List<string> { "List", "TempInnerClass.InnerClass", "TempInnerClass" };
+        foreach (var fileInfo in ev.FileRoot.OtherFiles)
+        {
+          // クラス名が一致する場合は予想クラス名リストから対象クラス名を削除
+          if (expectedClassName.Contains(fileInfo.Key))
+          {
+            expectedClassName.Remove(fileInfo.Key);
+          }
+        }
+        // 予想クラス名リストがすべて削除されていることを確認
+        Assert.Empty(expectedClassName);
+
+        // パラメータの確認
+        var expectedArgs = new List<(string type, string name, string defaultValue)>()
+        {
+          ("TempInnerClass", "targetClass", "new TempInnerClass()"),
+          ("TempInnerClass.InnerClass", "targetInnerClass", "new TempInnerClass.InnerClass()"),
+          ("List<TempInnerClass.InnerClass>", "targetList", "new List<TempInnerClass.InnerClass>()"),
+          ("TempInnerClass.InnerClass[]", "targetArray", "new TempInnerClass.InnerClass[10]"),
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetParentInstance, expectedArgs));
       });

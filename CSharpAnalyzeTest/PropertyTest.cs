@@ -23,6 +23,8 @@ namespace CSharpAnalyzeTest
       Generic,
       LamdaGet,
       LamdaSetGet,
+      TempInnerClass,
+      InnerClassProperty,
     }
 
     /// <summary>
@@ -110,6 +112,26 @@ namespace CSharpAnalyzeTest
           source.AppendLine("{");
           source.AppendLine("  private string s;");
           source.AppendLine("  public string S { get => s; set => s = value; }");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.TempInnerClass:
+          filePath = "TempInnerClass.cs";
+
+          source.AppendLine("public class TempInnerClass");
+          source.AppendLine("{");
+          source.AppendLine("  public class InnerClass");
+          source.AppendLine("  {");
+          source.AppendLine("  }");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.InnerClassProperty:
+          filePath = "InnerClassProperty.cs";
+
+          source.AppendLine("public class InnerClassField");
+          source.AppendLine("{");
+          source.AppendLine("  public TempInnerClass.InnerClass Property1 {get;} = new TempInnerClass.InnerClass()");
           source.AppendLine("}");
           break;
       }
@@ -306,6 +328,38 @@ namespace CSharpAnalyzeTest
         var expectedList = new List<(List<string> modifiers, string name, string type, Dictionary<string, List<string>> accessors, bool isInit, List<string> init)>
            {
              (new List<string>() { "public" }, "S", "string",new Dictionary<string,List<string>>(){ { "set",new List<string>() { "this.s = value;" } },{ "get", new List<string>() { "return this.s;" } } } , false, null),
+           };
+        Assert.Equal(expectedList.Count, GetMemberCount(itemClass, expectedList));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 内部クラス型プロパティのテスト
+    /// </summary>
+    [Fact(DisplayName = "InnerClassProperty")]
+    public void InnerClassPropertyTest()
+    {
+      // 内部クラステストコードを追加
+      CreateFileData(CreateSource(CreatePattern.TempInnerClass), null);
+
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.InnerClassProperty), (ev) =>
+      {
+        // 外部参照の存在確認
+        Assert.Single(ev.FileRoot.OtherFiles);
+        Assert.Equal("TempInnerClass.InnerClass", ev.FileRoot.OtherFiles.First().Key);
+        Assert.Equal("TempInnerClass.cs", ev.FileRoot.OtherFiles.First().Value);
+
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "InnerClassProperty.cs");
+
+        // クラス内の要素の存在確認
+        var expectedList = new List<(List<string> modifiers, string name, string type, Dictionary<string, List<string>> accessors, bool isInit, List<string> init)>
+           {
+             (new List<string>() { "public" }, "PropertyString", "TempInnerClass.InnerClass",new Dictionary<string,List<string>>(){{ "get", new List<string>() } } , true, new List<string>() { "new", "TempInnerClass.InnerClass", "(", ")" }),
            };
         Assert.Equal(expectedList.Count, GetMemberCount(itemClass, expectedList));
       });

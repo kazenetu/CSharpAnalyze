@@ -27,6 +27,8 @@ namespace CSharpAnalyzeTest
       LambdaReturn,
       LambdaVoid,
       Generics,
+      TempInnerClass,
+      InnerClassArgs,
     }
 
     /// <summary>
@@ -36,6 +38,7 @@ namespace CSharpAnalyzeTest
     /// <returns>ファイルパスとソースコード</returns>
     private FileData CreateSource(CreatePattern pattern)
     {
+      var isCreateDummyClass = true;
       var usingList = new StringBuilder();
       var source = new List<string>();
       var filePath = string.Empty;
@@ -130,19 +133,47 @@ namespace CSharpAnalyzeTest
           source.Add("}");
           break;
 
+        case CreatePattern.TempInnerClass:
+          isCreateDummyClass = false;
+
+          filePath = "TempInnerClass.cs";
+
+          source.Add("public class TempInnerClass");
+          source.Add("{");
+          source.Add("  public class InnerClass");
+          source.Add("  {");
+          source.Add("  }");
+          source.Add("}");
+          break;
+
+        case CreatePattern.InnerClassArgs:
+          filePath = "InnerClassArgs.cs";
+
+          source.Add("TempInnerClass.InnerClass TestMethod(TempInnerClass.InnerClass instance = new TempInnerClass.InnerClass())");
+          source.Add("{");
+          source.Add("  return instance;");
+          source.Add("}");
+          break;
       }
 
       // ソースコード作成
       var targetSource = new StringBuilder();
-      targetSource.AppendLine("public class Standard");
-      targetSource.AppendLine("{");
-      targetSource.AppendLine("  public void TestMethod()");
-      targetSource.AppendLine("  {");
+      if (isCreateDummyClass)
+      {
+        targetSource.AppendLine("public class Standard");
+        targetSource.AppendLine("{");
+        targetSource.AppendLine("  public void TestMethod()");
+        targetSource.AppendLine("  {");
 
-      source.ForEach(line => targetSource.AppendLine($"    {line }"));
+        source.ForEach(line => targetSource.AppendLine($"    {line}"));
 
-      targetSource.AppendLine("  }");
-      targetSource.AppendLine("}");
+        targetSource.AppendLine("  }");
+        targetSource.AppendLine("}");
+      }
+      else
+      {
+        source.ForEach(line => targetSource.AppendLine($"{line}"));
+      }
 
       return new FileData(filePath, usingList.ToString(), targetSource.ToString());
     }
@@ -614,6 +645,58 @@ namespace CSharpAnalyzeTest
         var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
         {
           ( "param1","string","",""),
+        };
+        Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedArgs));
+
+        // 内部処理の確認
+        Assert.Empty(targetInstance.Members);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// クラスインスタンスのパラメータのテスト
+    /// </summary>
+    [Fact(DisplayName = "InnerClassArgs")]
+    public void InnerClassArgsTest()
+    {
+      // 内部クラステストコードを追加
+      CreateFileData(CreateSource(CreatePattern.TempInnerClass), null);
+
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.InnerClassArgs), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "InnerClassArgs.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemLocalFunction;
+
+        //ジェネリックの確認
+        var expectedGenericTypes = new List<string>();
+        Assert.Equal(expectedGenericTypes, targetInstance.GenericTypes);
+
+        // 型タイプの確認
+        Assert.Equal("TempInnerClass.InnerClass", GetExpressionsToString(targetInstance.MethodTypes));
+
+        // 外部参照の存在確認
+        Assert.Single(ev.FileRoot.OtherFiles);
+        Assert.Equal("TempInnerClass.InnerClass", ev.FileRoot.OtherFiles.First().Key);
+        Assert.Equal("TempInnerClass.cs", ev.FileRoot.OtherFiles.First().Value);
+
+        // パラメータの確認
+        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
+        {
+          ( "instance","TempInnerClass.InnerClass","","new TempInnerClass.InnerClass()"),
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedArgs));
 

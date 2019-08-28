@@ -27,6 +27,8 @@ namespace CSharpAnalyzeTest
       GenericInterface,
       GenericsSubFixedType,
       GenericsSubFixedTypeMulti,
+      TempInnerClass,
+      InnerClassGenericInterface,
     }
 
     /// <summary>
@@ -132,6 +134,30 @@ namespace CSharpAnalyzeTest
           source.AppendLine("}");
 
           source.AppendLine("public interface Sub :Inf<string, int>,Inf2<decimal> ");
+          source.AppendLine("{");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.TempInnerClass:
+          filePath = "TempInnerClass.cs";
+
+          source.AppendLine("public class TempInnerClass");
+          source.AppendLine("{");
+          source.AppendLine("  public class InnerClass");
+          source.AppendLine("  {");
+          source.AppendLine("  }");
+          source.AppendLine("}");
+
+          source.AppendLine("public interface Inf2<T> ");
+          source.AppendLine("{");
+          source.AppendLine("}");
+
+          break;
+
+        case CreatePattern.InnerClassGenericInterface:
+          filePath = "InnerClassGenericInterface.cs";
+
+          source.AppendLine("public interface InnerClassGenericInterface:Inf2<TempInnerClass.InnerClass>");
           source.AppendLine("{");
           source.AppendLine("}");
           break;
@@ -683,6 +709,76 @@ namespace CSharpAnalyzeTest
         {
         };
         Assert.Equal(expectedGenericsList.OrderBy(item => item), target.GenericTypes.OrderBy(item => item));
+
+        // インターフェースのメンバ確認
+        var expectedMethodList = new List<(string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>();
+        var expectedPropertyList = new List<(string name, string type, Dictionary<string, List<string>> accessors)>();
+
+        // 期待値数と一致要素数の確認
+        var expectedCount = expectedMethodList.Count + expectedPropertyList.Count;
+        var actualCount = GetMemberCount(target, expectedMethodList) + GetMemberCount(target, expectedPropertyList);
+        Assert.Equal(expectedCount, actualCount);
+
+        // 実際の要素数との一致確認
+        var actualMemberCount = target.Members.Count + target.BaseMethods.Count + target.BaseProperties.Count;
+        Assert.Equal(expectedCount, actualMemberCount);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// インタフェースの継承テスト：ジェネリックス要素に内部クラス
+    /// </summary>
+    [Fact(DisplayName = "InnerClassGenericInterface")]
+    public void InnerClassGenericInterfaceTest()
+    {
+      // スーパーインタフェース、ジェネリックス要素の内部クラスを追加
+      CreateFileData(CreateSource(CreatePattern.TempInnerClass), null);
+
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.InnerClassGenericInterface), (ev) =>
+      {
+        // ItemInterfaceインスタンスを取得
+        var targets = GetIItemInterfaces(ev, "InnerClassGenericInterface.cs");
+
+        // 外部参照の存在確認
+        Assert.True(ev.FileRoot.OtherFiles.Count == 2);
+        var expectedOtherFileNames = new List<string>
+        {
+          "Inf2<T>","TempInnerClass.InnerClass"
+        };
+        Assert.Equal(expectedOtherFileNames.OrderBy(item => item), ev.FileRoot.OtherFiles.Select(item => item.Key).OrderBy(item => item));
+
+
+        // 対象件数の確認
+        Assert.Single(targets);
+
+        // インターフェースの継承確認
+        var target = targets.Where(item => item.Name == "InnerClassGenericInterface").First();
+        Assert.Single(target.Interfaces);
+        var expectedInterfaceNames = new List<string>
+        {
+          "Inf2"
+        };
+        var actualInterfaceNames = target.Interfaces.Select(item => GetExpressionsToString(item));
+        Assert.Equal(expectedInterfaceNames.OrderBy(item => item), actualInterfaceNames.OrderBy(item => item));
+
+        // スーパーインターフェイスの確認
+        var expectedSuperIntarfaceIndex = 0;
+        var expectedSuperIntarfaces = new List<string>()
+        {
+          "Inf2<TempInnerClass.InnerClass>",
+        };
+        foreach (var actual in target.Interfaces)
+        {
+          Assert.Equal(expectedSuperIntarfaces[expectedSuperIntarfaceIndex++],
+                       string.Concat(actual.Select(item => item.Name)));
+        }
+
+        // ジェネリクスの確認
+        Assert.Empty(target.GenericTypes);
 
         // インターフェースのメンバ確認
         var expectedMethodList = new List<(string methodName, string methodTypes, List<(string name, string expressions, string refType, string defaultValue)> expectedArgs)>();

@@ -94,10 +94,20 @@ namespace CSharpAnalyze.Domain.Model.Analyze
     /// シンボル名を返す
     /// </summary>
     /// <param name="target">対象シンボルインターフェース</param>
+    /// <param name="outputGenericsType">ジェネリックスの場合は型引数を出力するか</param>
     /// <returns>シンボル名</returns>
-    internal static string GetSymbolName(ISymbol target)
+    internal static string GetSymbolName(ISymbol target, bool outputGenericsType = false)
     {
-      return $"{target}".Replace($"{target.ContainingNamespace}.", string.Empty, StringComparison.CurrentCulture);
+      var name = $"{target}";
+
+      // 型引数を出力する判定
+      if (outputGenericsType && target is INamedTypeSymbol namedSymbol && namedSymbol.IsGenericType)
+      {
+        // 型引数付きを設定
+        name = $"{namedSymbol.ConstructedFrom}";
+      }
+
+      return name.Replace($"{target.ContainingNamespace}.", string.Empty, StringComparison.CurrentCulture);
     }
 
     /// <summary>

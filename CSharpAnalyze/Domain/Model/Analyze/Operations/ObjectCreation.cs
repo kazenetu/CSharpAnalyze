@@ -42,7 +42,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
           continue;
         }
 
-        var name = $"{part}";
+        var name = Expression.GetSymbolName(part, true);
         var type = Expression.GetSymbolTypeName(part.Symbol);
         if (part.Kind == SymbolDisplayPartKind.ClassName)
         {

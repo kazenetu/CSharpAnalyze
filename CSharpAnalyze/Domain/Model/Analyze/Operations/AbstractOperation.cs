@@ -51,7 +51,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
       foreach (var referenceFilePath in ReferenceFilePaths)
       {
         // ファイルパスありでイベント送信
-        eventContainer.Raise(new OtherFileReferenced(referenceFilePath, targetSymbol.Name));
+        eventContainer.Raise(new OtherFileReferenced(referenceFilePath, Expression.GetSymbolName(targetSymbol, true)));
       }
     }
   }

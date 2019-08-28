@@ -80,14 +80,24 @@ namespace CSharpAnalyze.Domain.Model.Analyze
     /// シンボル名を返す
     /// </summary>
     /// <param name="target">対象DisplayPartsインスタンス</param>
+    /// <param name="exclusionGenericElements">ジェネリックス要素の除外</param>
     /// <returns>シンボル名</returns>
-    internal static string GetSymbolName(SymbolDisplayPart target)
+    internal static string GetSymbolName(SymbolDisplayPart target, bool exclusionGenericElements = false)
     {
-      if(target.Symbol is null){
+      if (target.Symbol is null)
+      {
         return $"{target}";
       }
 
-      return GetSymbolName(target.Symbol);
+      var name = GetSymbolName(target.Symbol);
+
+      // ジェネリックスの場合はパラメータ除去
+      if (exclusionGenericElements && target.Symbol is INamedTypeSymbol symbol && symbol.IsGenericType)
+      {
+        name = name.Substring(0, name.LastIndexOf("<", StringComparison.CurrentCulture));
+      }
+
+      return name;
     }
 
     /// <summary>

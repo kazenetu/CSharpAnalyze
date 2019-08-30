@@ -701,7 +701,7 @@ namespace CSharpAnalyzeTest
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedArgs));
 
         // 内部処理の確認
-        Assert.Empty(targetInstance.Members);
+        Assert.Single(targetInstance.Members);
       });
 
       // 解析実行

@@ -359,7 +359,7 @@ namespace CSharpAnalyzeTest
         // クラス内の要素の存在確認
         var expectedList = new List<(List<string> modifiers, string name, string type, Dictionary<string, List<string>> accessors, bool isInit, List<string> init)>
            {
-             (new List<string>() { "public" }, "PropertyString", "TempInnerClass.InnerClass",new Dictionary<string,List<string>>(){{ "get", new List<string>() } } , true, new List<string>() { "new", "TempInnerClass.InnerClass", "(", ")" }),
+             (new List<string>() { "public" }, "Property1", "TempInnerClass.InnerClass",new Dictionary<string,List<string>>(){{ "get", new List<string>() } } , true, new List<string>() { "new", "TempInnerClass.InnerClass", "(", ")" }),
            };
         Assert.Equal(expectedList.Count, GetMemberCount(itemClass, expectedList));
       });

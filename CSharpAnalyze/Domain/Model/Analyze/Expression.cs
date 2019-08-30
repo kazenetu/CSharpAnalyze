@@ -94,7 +94,14 @@ namespace CSharpAnalyze.Domain.Model.Analyze
       // ジェネリックスの場合はパラメータ除去
       if (exclusionGenericElements && target.Symbol is INamedTypeSymbol symbol && symbol.IsGenericType)
       {
-        name = name.Substring(0, name.LastIndexOf("<", StringComparison.CurrentCulture));
+        if (name.EndsWith(">", StringComparison.CurrentCulture))
+        {
+          name = name.Substring(0, name.IndexOf("<", StringComparison.CurrentCulture));
+        }
+        else
+        {
+          name = $"{target}";
+        }
       }
 
       return name;
@@ -109,12 +116,20 @@ namespace CSharpAnalyze.Domain.Model.Analyze
     internal static string GetSymbolName(ISymbol target, bool outputGenericsType = false)
     {
       var name = $"{target}";
-
-      // 型引数を出力する判定
-      if (outputGenericsType && target is INamedTypeSymbol namedSymbol && namedSymbol.IsGenericType)
+      
+      // ジェネリックスの場合
+      if (target is INamedTypeSymbol namedSymbol && namedSymbol.IsGenericType)
       {
-        // 型引数付きを設定
-        name = $"{namedSymbol.ConstructedFrom}";
+        // 型引数を出力する判定
+        if (outputGenericsType)
+        {
+          // 外部ファイル取得用：型引数付きを設定
+          name = $"{namedSymbol.ConstructedFrom}";
+        }
+        else
+        {
+          name = name.Replace($"{target.ContainingSymbol}.", string.Empty, StringComparison.CurrentCulture);
+        }
       }
 
       return name.Replace($"{target.ContainingNamespace}.", string.Empty, StringComparison.CurrentCulture);

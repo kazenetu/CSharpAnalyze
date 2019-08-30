@@ -760,7 +760,7 @@ namespace CSharpAnalyzeTest
         Assert.Single(target.Interfaces);
         var expectedInterfaceNames = new List<string>
         {
-          "Inf2"
+          "Inf2<TempInnerClass.InnerClass>"
         };
         var actualInterfaceNames = target.Interfaces.Select(item => GetExpressionsToString(item));
         Assert.Equal(expectedInterfaceNames.OrderBy(item => item), actualInterfaceNames.OrderBy(item => item));

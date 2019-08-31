@@ -64,7 +64,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       // コレクションの型設定
       var conversionOperation = oparetion.Collection as IConversionOperation;
       if(!(conversionOperation is null)){
-        CollectionTypes.AddRange(GetTypes(conversionOperation.Operand.Type, semanticModel, node,SymbolDisplayFormat.CSharpShortErrorMessageFormat));
+        CollectionTypes.AddRange(GetTypes(conversionOperation.Operand.Type, semanticModel, node));
       }
 
       //コレクション
@@ -92,7 +92,10 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
       var symbolDisplayFormat = format;
       if(symbolDisplayFormat is null){
         symbolDisplayFormat = SymbolDisplayFormat.MinimallyQualifiedFormat;
+        symbolDisplayFormat = SymbolDisplayFormat.CSharpErrorMessageFormat;
       }
+
+      var existsNamespace = false;
       var parts = symbol.ToDisplayParts(symbolDisplayFormat);
       foreach (var part in parts)
       {
@@ -102,12 +105,33 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
           continue;
         }
 
-        var name = $"{part}";
+        // Namespaceの場合は型設定に含めない
+        if (part.Kind == SymbolDisplayPartKind.NamespaceName)
+        {
+          existsNamespace = true;
+          continue;
+        }
+
+        // ピリオドが初回の場合はキャンセル
+        if(existsNamespace && $"{part}" == ".")
+        {
+          existsNamespace = false;
+          continue;
+        }
+
+        var name = Expression.GetSymbolName(part, true);
         var type = Expression.GetSymbolTypeName(part.Symbol);
         if (part.Kind == SymbolDisplayPartKind.ClassName)
         {
           // 外部ファイル参照イベント発行
           RaiseOtherFileReferenced(node, part.Symbol);
+
+          // 親がクラスの場合は内部クラス
+          if(part.Symbol.ContainingSymbol is INamedTypeSymbol parentSymbol && parentSymbol.TypeKind==TypeKind.Class)
+          {
+            // 内部クラス名を設定
+            name = $"{part}";
+          }
         }
 
         result.Add(new Expression(name, type));

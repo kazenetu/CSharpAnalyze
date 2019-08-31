@@ -67,7 +67,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Items
             continue;
           }
 
-          var name = $"{part}";
+          var name = Expression.GetSymbolName(part, true);
           var type = Expression.GetSymbolTypeName(part.Symbol);
           if (part.Kind == SymbolDisplayPartKind.ClassName)
           {

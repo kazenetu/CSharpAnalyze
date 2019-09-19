@@ -29,6 +29,7 @@ namespace CSharpAnalyzeTest
       ReturnInnerClassMethod,
       ReturnExpression,
       ReturnIntTostring,
+      ReturnAddIntTostring,
     }
 
     /// <summary>
@@ -224,6 +225,18 @@ namespace CSharpAnalyzeTest
           source.AppendLine("  public string TestMethod()");
           source.AppendLine("  {");
           source.AppendLine("    return (10).ToString();");
+          source.AppendLine("  }");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.ReturnAddIntTostring:
+          filePath = "ReturnAddIntTostring.cs";
+
+          source.AppendLine("public class ReturnValue");
+          source.AppendLine("{");
+          source.AppendLine("  public string TestMethod()");
+          source.AppendLine("  {");
+          source.AppendLine("    return (10+100).ToString();");
           source.AppendLine("  }");
           source.AppendLine("}");
           break;
@@ -678,6 +691,40 @@ namespace CSharpAnalyzeTest
 
         // 戻り値の確認
         Assert.Equal("(10).ToString()", GetExpressionsToString(targetInstance.ReturnValue));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// int型のToStringを返すテスト(計算)
+    /// </summary>
+    [Fact(DisplayName = "ReturnAddIntTostring")]
+    public void ReturnAddIntTostringTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.ReturnAddIntTostring), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "ReturnAddIntTostring.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).FirstOrDefault();
+        Assert.NotNull(targetInstance);
+
+        // 戻り値の確認
+        Assert.Equal("(10+100).ToString()", GetExpressionsToString(targetInstance.ReturnValue));
       });
 
       // 解析実行

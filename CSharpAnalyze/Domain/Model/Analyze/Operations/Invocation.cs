@@ -1,6 +1,7 @@
 ﻿using CSharpAnalyze.Domain.Event;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Operations;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CSharpAnalyze.Domain.Model.Analyze.Operations
 {
@@ -26,7 +27,23 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
       else
       {
         // インスタンス
+        var isLiteralOrBinary = false;
+        if (operation.Instance is ILiteralOperation || operation.Instance is IBinaryOperation)
+        {
+          isLiteralOrBinary = true;
+        }
+
+        var syntax = operation.Syntax as InvocationExpressionSyntax;
+        if(isLiteralOrBinary && syntax.ArgumentList != null){
+          Expressions.Add(new Expression(syntax.ArgumentList.OpenParenToken.Text, string.Empty));
+        }
+
         Expressions.AddRange(OperationFactory.GetExpressionList(operation.Instance, container));
+
+        if (isLiteralOrBinary && syntax.ArgumentList != null)
+        {
+            Expressions.Add(new Expression(syntax.ArgumentList.CloseParenToken.Text, string.Empty));
+        }
       }
       Expressions.Add(new Expression(".", string.Empty));
 

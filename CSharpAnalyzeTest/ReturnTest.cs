@@ -29,6 +29,7 @@ namespace CSharpAnalyzeTest
       ReturnInnerClassMethod,
       ReturnExpression,
       ReturnExpressionChangedPriority,
+      ReturnExpressionChangedPriority2,
       ReturnIntTostring,
       ReturnAddIntTostring,
     }
@@ -226,6 +227,18 @@ namespace CSharpAnalyzeTest
           source.AppendLine("  public int TestMethod()");
           source.AppendLine("  {");
           source.AppendLine("    return (1+2)*3;");
+          source.AppendLine("  }");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.ReturnExpressionChangedPriority2:
+          filePath = "ReturnExpressionChangedPriority2.cs";
+
+          source.AppendLine("public class ReturnValue");
+          source.AppendLine("{");
+          source.AppendLine("  public int TestMethod()");
+          source.AppendLine("  {");
+          source.AppendLine("    return 1+(2*3);");
           source.AppendLine("  }");
           source.AppendLine("}");
           break;
@@ -704,6 +717,40 @@ namespace CSharpAnalyzeTest
 
         // 戻り値の確認
         Assert.Equal("(1+2)*3", GetExpressionsToString(targetInstance.ReturnValue));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// かっこを利用した式を返すテストその2
+    /// </summary>
+    [Fact(DisplayName = "ReturnExpressionChangedPriority2")]
+    public void ReturnExpressionChangedPriority2Test()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.ReturnExpressionChangedPriority2), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "ReturnExpressionChangedPriority2.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).FirstOrDefault();
+        Assert.NotNull(targetInstance);
+
+        // 戻り値の確認
+        Assert.Equal("1+(2*3)", GetExpressionsToString(targetInstance.ReturnValue));
       });
 
       // 解析実行

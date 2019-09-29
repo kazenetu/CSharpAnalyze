@@ -1,6 +1,7 @@
 ﻿using CSharpAnalyze.Domain.Event;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Operations;
+using System;
 
 namespace CSharpAnalyze.Domain.Model.Analyze.Operations
 {
@@ -18,7 +19,8 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
     {
       if (operation.Field.IsStatic)
       {
-        Expressions.Add(new Expression(operation.Field.ContainingSymbol.Name,
+        var name = $"{operation.Field.ContainingSymbol}".Replace($"{operation.Field.ContainingNamespace}.", string.Empty, StringComparison.CurrentCulture);
+        Expressions.Add(new Expression(name,
                     Expression.GetSymbolTypeName(operation.Field.ContainingSymbol)));
         Expressions.Add(new Expression(".", string.Empty));
 

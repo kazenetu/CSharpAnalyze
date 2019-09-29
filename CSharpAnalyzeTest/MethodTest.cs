@@ -29,6 +29,7 @@ namespace CSharpAnalyzeTest
       Generics,
       TempInnerClass,
       InnerClassArgs,
+      EnumArgs,
     }
 
     /// <summary>
@@ -184,6 +185,22 @@ namespace CSharpAnalyzeTest
           source.AppendLine("  public TempInnerClass.InnerClass TestMethod(TempInnerClass.InnerClass instance = new TempInnerClass.InnerClass())");
           source.AppendLine("  {");
           source.AppendLine("    return instance;");
+          source.AppendLine("  }");
+          source.AppendLine("}");
+          break;
+
+        case CreatePattern.EnumArgs:
+          filePath = "EnumArgs.cs";
+
+          source.AppendLine("public class Standard");
+          source.AppendLine("{");
+          source.AppendLine("  prvate enum EnumTest");
+          source.AppendLine("  {");
+          source.AppendLine("    Test");
+          source.AppendLine("  }");
+          source.AppendLine("  public EnumTest TestMethod(EnumTest enumArg = Standard.EnumTest.Test)");
+          source.AppendLine("  {");
+          source.AppendLine("    return Enum.Test;");
           source.AppendLine("  }");
           source.AppendLine("}");
           break;
@@ -719,6 +736,54 @@ namespace CSharpAnalyzeTest
         var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
         {
           ( "instance","TempInnerClass.InnerClass","","new TempInnerClass.InnerClass()"),
+        };
+        // 期待値数と一致要素数の確認
+        Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedModifiers, expectedArgs));
+        // 実際の要素数との一致確認
+        Assert.Equal(expectedArgs.Count, targetInstance.Args.Count);
+
+        // 内部処理の確認
+        Assert.Single(targetInstance.Members);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 内部クラスインスタンスのパラメータのテスト
+    /// </summary>
+    [Fact(DisplayName = "EnumArgsTest")]
+    public void EnumArgsTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.EnumArgs), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "EnumArgs.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetInstance = targetInstances.First() as IItemMethod;
+
+        //ジェネリックの確認
+        var expectedGenericTypes = new List<string>();
+        Assert.Equal(expectedGenericTypes, targetInstance.GenericTypes);
+
+        // 型タイプの確認
+        Assert.Equal("Standard.EnumTest", GetExpressionsToString(targetInstance.MethodTypes));
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // パラメータの確認
+        var expectedModifiers = new List<string>() { "public" };
+        var expectedArgs = new List<(string name, string expressions, string refType, string defaultValue)>()
+        {
+          ( "enumArg","Standard.EnumTest","","Standard.EnumTest.Test"),
         };
         // 期待値数と一致要素数の確認
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetInstance, expectedModifiers, expectedArgs));

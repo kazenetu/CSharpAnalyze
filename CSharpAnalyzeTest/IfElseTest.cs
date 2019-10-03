@@ -22,6 +22,7 @@ namespace CSharpAnalyzeTest
       NestIfElse,
       RefLocalField,
       ConditionsType,
+      ConditionsIsType,
       InstanceProperty,
       InstanceMethod,
     }
@@ -102,6 +103,15 @@ namespace CSharpAnalyzeTest
 
           source.Add("var val=1;");
           source.Add("if(val is string b)");
+          source.Add("{");
+          source.Add("}");
+          break;
+
+        case CreatePattern.ConditionsIsType:
+          filePath = "ConditionsIsType.cs";
+
+          source.Add("var val=1;");
+          source.Add("if(val is string)");
           source.Add("{");
           source.Add("}");
           break;
@@ -388,6 +398,42 @@ namespace CSharpAnalyzeTest
 
         // 分岐構造の確認
         checkIf(targetInstance, "val is string b", 0);
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 型による分岐
+    /// </summary>
+    [Fact(DisplayName = "ConditionsIsTypeTest")]
+    public void ConditionsIsTypeTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.ConditionsIsType), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "ConditionsIsType.cs");
+
+        // 外部参照の存在確認
+        Assert.Single(ev.FileRoot.OtherFiles);
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 対象インスタンスを取得
+        var targetInstance = GetTargetInstances(targetParentInstance).FirstOrDefault() as IItemIf;
+
+        // 対象インスタンスの存在確認
+        Assert.NotNull(targetInstance);
+
+        // 分岐構造の確認
+        checkIf(targetInstance, "val is string", 0);
       });
 
       // 解析実行

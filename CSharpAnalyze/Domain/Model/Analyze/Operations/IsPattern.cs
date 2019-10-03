@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.Operations;
 namespace CSharpAnalyze.Domain.Model.Analyze.Operations
 {
   /// <summary>
-  /// Operation:DeclarationPattern
+  /// Operation:IsPattern
   /// </summary>
   internal class IsPattern : AbstractOperation
   {

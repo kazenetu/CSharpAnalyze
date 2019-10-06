@@ -1,5 +1,6 @@
 ﻿using CSharpAnalyze.Domain.Event;
 using Microsoft.CodeAnalysis.Operations;
+using Microsoft.CodeAnalysis;
 
 namespace CSharpAnalyze.Domain.Model.Analyze.Operations
 {
@@ -15,9 +16,16 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
     /// <param name="container">イベントコンテナ</param>
     public DeclarationPattern(IDeclarationPatternOperation operation, EventContainer container) : base(container)
     {
-      Expressions.Add(new Expression(operation.MatchedType.Name, operation.MatchedType.TypeKind.ToString()));
+      var localType = (operation.DeclaredSymbol as ILocalSymbol).Type;
+      var typeName = localType.Name;
+      if (localType.SpecialType == SpecialType.None)
+      {
+        typeName = localType.TypeKind.ToString();
+      }
+
+      Expressions.Add(new Expression(operation.MatchedType.Name, typeName));
       Expressions.Add(new Expression(" ", ""));
-      Expressions.Add(new Expression(operation.DeclaredSymbol.Name, operation.DeclaredSymbol.Kind.ToString()));
+      Expressions.Add(new Expression(operation.DeclaredSymbol.Name, typeName));
     }
   }
 }

@@ -79,12 +79,19 @@ namespace CSharpAnalyzeTest
         case CreatePattern.TypeCase:
           filePath = "TypeCase.cs";
 
+          addMember.Add("private enum EnumTest");
+          addMember.Add("{");
+          addMember.Add("  Test;");
+          addMember.Add("}");
+
           source.Add("object val = 1;");
           source.Add("switch(val)");
           source.Add("{");
           source.Add("  case int b:");
           source.Add("  break;");
           source.Add("  case string b:");
+          source.Add("  break;");
+          source.Add("  case EnumTest e:");
           source.Add("  break;");
           source.Add("}");
           break;
@@ -308,12 +315,13 @@ namespace CSharpAnalyzeTest
         var targetInstance = GetTargetInstances(targetParentInstance).First() as IItemSwitch;
 
         // 分岐構造の確認
-        checkSwitch(targetInstance, "val", 2);
+        checkSwitch(targetInstance, "val", 3);
 
         var caseLablesList = new List<List<string>>()
         {
           new List<string>(){"int b"},
           new List<string>(){"string b"},
+          new List<string>(){"EnumTest e"},
         };
         var caseIndex = 0;
         foreach (IItemSwitchCase itemCase in targetInstance.Cases)

@@ -15,7 +15,7 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
     /// <param name="container">イベントコンテナ</param>
     public DeclarationPattern(IDeclarationPatternOperation operation, EventContainer container) : base(container)
     {
-      Expressions.Add(new Expression(operation.MatchedType.Name, operation.MatchedType.Name));
+      Expressions.Add(new Expression(operation.MatchedType.Name, operation.MatchedType.TypeKind.ToString()));
       Expressions.Add(new Expression(" ", ""));
       Expressions.Add(new Expression(operation.DeclaredSymbol.Name, operation.DeclaredSymbol.Kind.ToString()));
     }

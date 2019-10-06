@@ -321,7 +321,7 @@ namespace CSharpAnalyzeTest
         {
           new List<string>(){"int b"},
           new List<string>(){"string b"},
-          new List<string>(){"EnumTest e"},
+          new List<string>(){"Standard.EnumTest e"},
         };
         var caseIndex = 0;
         foreach (IItemSwitchCase itemCase in targetInstance.Cases)

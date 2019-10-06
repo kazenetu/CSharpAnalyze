@@ -1,6 +1,7 @@
 ﻿using CSharpAnalyze.Domain.Event;
-using Microsoft.CodeAnalysis.Operations;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Operations;
+using System.Text;
 
 namespace CSharpAnalyze.Domain.Model.Analyze.Operations
 {
@@ -16,16 +17,52 @@ namespace CSharpAnalyze.Domain.Model.Analyze.Operations
     /// <param name="container">イベントコンテナ</param>
     public DeclarationPattern(IDeclarationPatternOperation operation, EventContainer container) : base(container)
     {
+      // ローカルの型を取得
       var localType = (operation.DeclaredSymbol as ILocalSymbol).Type;
+
+      // 型情報
       var typeName = localType.Name;
       if (localType.SpecialType == SpecialType.None)
       {
         typeName = localType.TypeKind.ToString();
       }
 
-      Expressions.Add(new Expression(operation.MatchedType.Name, typeName));
+      // ローカルフィールドの型情報
+      var localTypeName = GetLocalTypes(localType);
+
+      // 型情報
+      Expressions.Add(new Expression(localTypeName, typeName));
+
       Expressions.Add(new Expression(" ", ""));
-      Expressions.Add(new Expression(operation.DeclaredSymbol.Name, typeName));
+
+      // ローカルフィールド
+      Expressions.Add(new Expression(operation.DeclaredSymbol.Name, localTypeName));
+    }
+
+    /// <summary>
+    /// ローカルの型を取得する
+    /// </summary>
+    /// <param name="target">ローカルのType</param>
+    /// <returns>型情報</returns>
+    private string GetLocalTypes(ITypeSymbol target)
+    {
+      var result = new StringBuilder();
+
+      // 型設定
+      var parts = target.ToDisplayParts(SymbolDisplayFormat.MinimallyQualifiedFormat);
+      foreach (var part in parts)
+      {
+        // スペースの場合は型設定に含めない
+        if (part.Kind == SymbolDisplayPartKind.Space)
+        {
+          continue;
+        }
+
+        var name = Expression.GetSymbolName(part, true);
+        result.Append(name);
+      }
+
+      return result.ToString();
     }
   }
 }

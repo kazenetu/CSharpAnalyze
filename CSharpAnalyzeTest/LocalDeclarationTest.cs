@@ -21,6 +21,7 @@ namespace CSharpAnalyzeTest
       Generics,
       TempInnerClass,
       InnerClass,
+      Array,
     }
 
     /// <summary>
@@ -80,6 +81,12 @@ namespace CSharpAnalyzeTest
           source.Add("var targetInnerClass = new TempInnerClass.InnerClass();");
           source.Add("var targetList = new List<TempInnerClass.InnerClass>();");
           source.Add("TempInnerClass.InnerClass[] targetArray = new TempInnerClass.InnerClass[10];");
+          break;
+
+        case CreatePattern.Array:
+          filePath = "Array.cs";
+
+          source.Add("int[] list = { 1, 2, 3 };");
           break;
       }
 
@@ -272,6 +279,40 @@ namespace CSharpAnalyzeTest
           ("TempInnerClass.InnerClass", "targetInnerClass", "new TempInnerClass.InnerClass()"),
           ("List<TempInnerClass.InnerClass>", "targetList", "new List<TempInnerClass.InnerClass>()"),
           ("TempInnerClass.InnerClass[]", "targetArray", "new TempInnerClass.InnerClass[10]"),
+        };
+        Assert.Equal(expectedArgs.Count, GetMemberCount(targetParentInstance, expectedArgs));
+      });
+
+      // 解析実行
+      CSAnalyze.Analyze(string.Empty, Files);
+    }
+
+    /// <summary>
+    /// 配列テスト
+    /// </summary>
+    [Fact(DisplayName = "ArrayTest")]
+    public void ArrayTest()
+    {
+      // テストコードを追加
+      CreateFileData(CreateSource(CreatePattern.Array), (ev) =>
+      {
+        // IItemClassインスタンスを取得
+        var itemClass = GetClassInstance(ev, "Array.cs");
+
+        // 対象インスタンスのリストを取得
+        var targetInstances = GetTargetInstances(itemClass);
+
+        // 対象の親インスタンスを取得
+        Assert.Single(targetInstances);
+        var targetParentInstance = targetInstances.First() as IItemMethod;
+
+        // 外部参照の存在確認
+        Assert.Empty(ev.FileRoot.OtherFiles);
+
+        // パラメータの確認
+        var expectedArgs = new List<(string type, string name, string defaultValue)>()
+        {
+          ("int[]", "list", "[1,2,3]")
         };
         Assert.Equal(expectedArgs.Count, GetMemberCount(targetParentInstance, expectedArgs));
       });

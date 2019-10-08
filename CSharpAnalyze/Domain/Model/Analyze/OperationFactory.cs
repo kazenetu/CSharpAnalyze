@@ -76,6 +76,9 @@ namespace CSharpAnalyze.Domain.Model.Analyze
         case IArrayCreationOperation param:
           instance = new ArrayCreation(param, container);
           break;
+        case IArrayInitializerOperation param:
+          instance = new ArrayInitializer(param, container);
+          break;
         case IVariableDeclaratorOperation param:
           instance = new VariableDeclarator(param, container);
           break;

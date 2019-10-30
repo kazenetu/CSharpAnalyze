@@ -13,9 +13,6 @@ C#のコード解析ライブラリ
 # 前提
 * submoduleなどで他のリポジトリから参照する。
 
-# テスト(ルートで実行)
-## ```dotnet test CSharpAnalyzeTest```  
-
 # 実装方法
 下記手順で実装する。
 1. AnalyzeApplicationのインスタンス作成
@@ -105,10 +102,20 @@ catch (Exception ex)
 |ローカルメソッド       | IItemLocalFunction             |        ○         |
 |式                   | IItemStatementExpression       |        ×         |
 
-## ライセンス
+# テスト方法
+* VisualStudio(2017以上)を利用する場合  
+  ```CSharpAnalyze.sln```を開いてテストを行う
+
+* dotnetコマンドを利用する場合
+  ```sh
+  #CSharpAnalyzeTest/CSharpAnalyzeTest.csprojのテストを実施
+  dotnet test ./CSharpAnalyzeTest/CSharpAnalyzeTest.csproj
+  ```
+
+# ライセンス
 [MIT ライセンス](LICENSE)
 
-## 使用パッケージ
+# 使用パッケージ
 * [Microsoft.CodeAnalysis.CSharp](https://www.nuget.org/packages/Microsoft.CodeAnalysis.CSharp/) ([Apache-2.0](https://github.com/dotnet/roslyn/blob/master/License.txt))
 * [Microsoft.NetCore.Analyzers](https://www.nuget.org/packages/Microsoft.NetCore.Analyzers/) ([Apache-2.0](https://github.com/dotnet/roslyn-analyzers/blob/master/License.txt))
 

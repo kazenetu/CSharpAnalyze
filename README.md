@@ -101,9 +101,15 @@ catch (Exception ex)
 |continue             | ItemContinue                   |        ×         |
 |return               | IItemReturn                    |        ×         |
 |ローカルフィールド生成 | IItemStatementLocalDeclaration |        ×         |
-|ローカルメソッド       | IItemLocalFunctio              |        ○         |
+|ローカルメソッド       | IItemLocalFunction             |        ○         |
 |式                   | IItemStatementExpression       |        ×         |
 
+## ライセンス
+[MIT ライセンス](LICENSE)
+
+## 使用パッケージ
+* [Microsoft.CodeAnalysis.CSharp](https://www.nuget.org/packages/Microsoft.CodeAnalysis.CSharp/) ([Apache-2.0](https://github.com/dotnet/roslyn/blob/master/License.txt))
+* [Microsoft.NetCore.Analyzers](https://www.nuget.org/packages/Microsoft.NetCore.Analyzers/) ([Apache-2.0](https://github.com/dotnet/roslyn-analyzers/blob/master/License.txt))
 
 
 

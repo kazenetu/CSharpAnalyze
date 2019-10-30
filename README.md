@@ -5,7 +5,8 @@ C#のコード解析ライブラリ
 * .NET Core SDK 2.1以上
 
 # 本ライブラリの利用例
-* 他プログラム言語に変換
+* 他プログラム言語に変換  
+   [C#からTypeScriptへの変換ツール(CStoTS)](https://github.com/kazenetu/CStoTS)
 * ドキュメント作成
 * C#のソース解析の足掛かり
 
